@@ -34,7 +34,7 @@ import com.segnities007.stylish_mycars.presentation.theme.StylishMyCarsTheme
 @Composable
 fun StylishConnectedCard(
     title: String,
-    supportingText: String,
+    supportingText: String = "",
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -74,14 +74,16 @@ fun StylishConnectedCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    supportingText,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                if (supportingText.isNotBlank()) {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        supportingText,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
             Spacer(Modifier.width(12.dp))
             trailingContent()

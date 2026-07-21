@@ -1,21 +1,20 @@
 package com.segnities007.stylish_mycars.presentation.screen.vehiclepager
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -25,6 +24,7 @@ import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocalGasStation
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -35,9 +35,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -53,6 +55,7 @@ import com.segnities007.stylish_mycars.presentation.components.molecules.models.
 import com.segnities007.stylish_mycars.presentation.components.organisms.BarChartSection
 import com.segnities007.stylish_mycars.presentation.components.organisms.PieChartSection
 import com.segnities007.stylish_mycars.presentation.components.organisms.StylishHeader
+import com.segnities007.stylish_mycars.presentation.components.organisms.StylishBottomBar
 import com.segnities007.stylish_mycars.presentation.components.organisms.StylishPageContent
 import com.segnities007.stylish_mycars.presentation.components.organisms.StylishScaffold
 import com.segnities007.stylish_mycars.presentation.components.organisms.StylishSectionTitle
@@ -69,6 +72,7 @@ fun VehiclePagerScreen(
     onNavigateToMaintenance: (Long) -> Unit,
     onNavigateToCost: (Long) -> Unit,
     onNavigateToVehicleDetail: (Long) -> Unit,
+    onNavigateToNotifications: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -88,6 +92,8 @@ fun VehiclePagerScreen(
 
     val pageCount = state.vehicles.size + 1
     val pagerState = rememberPagerState(pageCount = { pageCount })
+    val pageListStates = remember(pageCount) { List(pageCount) { LazyListState() } }
+    var showAddDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(pagerState.currentPage) {
         viewModel.accept(VehiclePagerIntent.PageChanged(pagerState.currentPage))
@@ -105,6 +111,7 @@ fun VehiclePagerScreen(
                         vehicle = vehicle,
                         dashboard = state.dashboardFor(vehicle.id),
                         onIntent = viewModel::accept,
+                        listState = pageListStates[page],
                     )
                 }
                 else {
@@ -112,30 +119,75 @@ fun VehiclePagerScreen(
                 }
             }
 
-            if (pageCount > 1) {
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter)
-                        .navigationBarsPadding(),
-                    horizontalArrangement = Arrangement.Center,
-                ) {
-                    repeat(pageCount) { index ->
-                        val isSelected = index == pagerState.currentPage
-                        Box(
-                            Modifier
-                                .padding(horizontal = 3.dp)
-                                .size(if (isSelected) 8.dp else 6.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    if (isSelected) MaterialTheme.colorScheme.onSurface
-                                    else MaterialTheme.colorScheme.outlineVariant
-                                ),
-                        )
-                    }
-                }
-            }
+            StylishBottomBar(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(bottom = 32.dp),
+                onNavigateToHome = {},
+                onAddRecord = { showAddDialog = true },
+                onNavigateToNotifications = onNavigateToNotifications,
+                scrollState = pageListStates[pagerState.currentPage],
+            )
         }
+    }
+
+    if (showAddDialog) {
+        val currentVehicle = state.vehicles.getOrNull(pagerState.currentPage)
+        AlertDialog(
+            onDismissRequest = { showAddDialog = false },
+            text = {
+                StylishConnectedCardGrid(
+                    columns = 2,
+                    spacing = 4.dp,
+                    items = listOf(
+                        StylishConnectedCardItem(
+                            title = "給油",
+                            onClick = {
+                                showAddDialog = false
+                                if (currentVehicle != null) onNavigateToFuel(currentVehicle.id)
+                            },
+                            trailingContent = {
+                                Icon(
+                                    Icons.Default.LocalGasStation,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            },
+                        ),
+                        StylishConnectedCardItem(
+                            title = "整備",
+                            onClick = {
+                                showAddDialog = false
+                                if (currentVehicle != null) onNavigateToMaintenance(currentVehicle.id)
+                            },
+                            trailingContent = {
+                                Icon(
+                                    Icons.Default.Build,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            },
+                        ),
+                        StylishConnectedCardItem(
+                            title = "費用",
+                            onClick = {
+                                showAddDialog = false
+                                if (currentVehicle != null) onNavigateToCost(currentVehicle.id)
+                            },
+                            trailingContent = {
+                                Icon(
+                                    Icons.Default.AttachMoney,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            },
+                        ),
+                    ),
+                )
+            },
+            confirmButton = {},
+        )
     }
 }
 
@@ -243,8 +295,10 @@ private fun VehiclePage(
     vehicle: Vehicle,
     dashboard: VehicleDashboard,
     onIntent: (VehiclePagerIntent) -> Unit,
+    listState: LazyListState = LazyListState(),
 ) {
     StylishPageContent(
+        listState = listState,
         header = {
             StylishHeader(
                 title = { Text(vehicle.name) },
@@ -262,88 +316,89 @@ private fun VehiclePage(
                 },
             )
         },
-    ) {
-        item {
-            UrgentAlertCard(vehicle, dashboard)
-            Spacer(Modifier.height(16.dp))
-        }
+        content = {
+            item {
+                UrgentAlertCard(vehicle, dashboard)
+                Spacer(Modifier.height(16.dp))
+            }
 
-        item {
-            PieChartSection(
-                title = "費用カテゴリ",
-                data = dashboard.costByCategory.map { (category, total) ->
-                    PieChartData(
-                        category.label,
-                        total.toFloat(),
-                        costCategoryColor(category.ordinal)
-                    )
-                },
-            )
-            Spacer(Modifier.height(16.dp))
-            BarChartSection(
-                title = "月次費用",
-                data = dashboard.monthlyCostTrend.map { BarChartData(it.first, it.second) },
-            )
-            Spacer(Modifier.height(16.dp))
-        }
-
-        item {
-            StylishSectionTitle("記録")
-            StylishConnectedCardGrid(
-                columns = 2,
-                items = listOf(
-                    StylishConnectedCardItem(
-                        title = "給油",
-                        supportingText = "記録・燃費",
-                        onClick = { onIntent(VehiclePagerIntent.OpenFuel(vehicle.id)) },
-                    ) {
-                        Icon(
-                            Icons.Default.LocalGasStation,
-                            null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+            item {
+                PieChartSection(
+                    title = "費用カテゴリ",
+                    data = dashboard.costByCategory.map { (category, total) ->
+                        PieChartData(
+                            category.label,
+                            total.toFloat(),
+                            costCategoryColor(category.ordinal)
                         )
                     },
-                    StylishConnectedCardItem(
-                        title = "整備",
-                        supportingText = "記録・目安",
-                        onClick = { onIntent(VehiclePagerIntent.OpenMaintenance(vehicle.id)) },
-                    ) {
-                        Icon(
-                            Icons.Default.Build,
-                            null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    },
-                    StylishConnectedCardItem(
-                        title = "費用",
-                        supportingText = "一覧・グラフ",
-                        onClick = { onIntent(VehiclePagerIntent.OpenCost(vehicle.id)) },
-                    ) {
-                        Icon(
-                            Icons.Default.AttachMoney,
-                            null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    },
-                ),
-            )
-        }
+                )
+                Spacer(Modifier.height(16.dp))
+                BarChartSection(
+                    title = "月次費用",
+                    data = dashboard.monthlyCostTrend.map { BarChartData(it.first, it.second) },
+                )
+                Spacer(Modifier.height(16.dp))
+            }
 
-        item {
-            Spacer(Modifier.height(16.dp))
-            StylishConnectedCardGrid(
-                columns = 2,
-                items = listOf(
-                    StylishConnectedCardItem(
-                        title = "車両情報",
-                        supportingText = "車検・諸元・保険",
-                        onClick = { onIntent(VehiclePagerIntent.OpenVehicleDetail(vehicle.id)) },
+            item {
+                StylishSectionTitle("記録")
+                StylishConnectedCardGrid(
+                    columns = 2,
+                    items = listOf(
+                        StylishConnectedCardItem(
+                            title = "給油",
+                            supportingText = "記録・燃費",
+                            onClick = { onIntent(VehiclePagerIntent.OpenFuel(vehicle.id)) },
+                        ) {
+                            Icon(
+                                Icons.Default.LocalGasStation,
+                                null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        },
+                        StylishConnectedCardItem(
+                            title = "整備",
+                            supportingText = "記録・目安",
+                            onClick = { onIntent(VehiclePagerIntent.OpenMaintenance(vehicle.id)) },
+                        ) {
+                            Icon(
+                                Icons.Default.Build,
+                                null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        },
+                        StylishConnectedCardItem(
+                            title = "費用",
+                            supportingText = "一覧・グラフ",
+                            onClick = { onIntent(VehiclePagerIntent.OpenCost(vehicle.id)) },
+                        ) {
+                            Icon(
+                                Icons.Default.AttachMoney,
+                                null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        },
                     ),
-                ),
-            )
-            Spacer(Modifier.height(40.dp))
-        }
-    }
+                )
+            }
+
+            item {
+                Spacer(Modifier.height(16.dp))
+                StylishConnectedCardGrid(
+                    columns = 2,
+                    items = listOf(
+                        StylishConnectedCardItem(
+                            title = "車両情報",
+                            supportingText = "車検・諸元・保険",
+                            onClick = { onIntent(VehiclePagerIntent.OpenVehicleDetail(vehicle.id)) },
+                        ),
+                    ),
+                )
+                Spacer(Modifier.height(40.dp))
+            }
+        },
+    )
 }
 
 @Composable

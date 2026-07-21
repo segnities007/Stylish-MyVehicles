@@ -13,3 +13,4 @@ internal data class MaintenanceRecordDestination(val vehicleId: Long) : AppDesti
 internal data class CostListDestination(val vehicleId: Long) : AppDestination
 internal data object SettingsDestination : AppDestination
 internal data object LicensesDestination : AppDestination
+internal data object NotificationDestination : AppDestination

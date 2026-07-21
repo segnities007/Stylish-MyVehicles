@@ -6,7 +6,7 @@ import androidx.compose.runtime.Immutable
 @Immutable
 data class StylishConnectedCardItem(
     val title: String,
-    val supportingText: String,
+    val supportingText: String = "",
     val onClick: () -> Unit = {},
     val onLongClick: () -> Unit = {},
     val trailingContent: @Composable () -> Unit = {},

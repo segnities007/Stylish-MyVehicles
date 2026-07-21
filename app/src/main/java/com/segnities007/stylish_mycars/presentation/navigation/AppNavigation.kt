@@ -30,6 +30,7 @@ import com.segnities007.stylish_mycars.presentation.screen.fuel.FuelRecordViewMo
 import com.segnities007.stylish_mycars.presentation.screen.licenses.LicensesScreen
 import com.segnities007.stylish_mycars.presentation.screen.maintenance.MaintenanceRecordScreen
 import com.segnities007.stylish_mycars.presentation.screen.maintenance.MaintenanceRecordViewModel
+import com.segnities007.stylish_mycars.presentation.screen.notification.NotificationScreen
 import com.segnities007.stylish_mycars.presentation.screen.onboarding.OnboardingScreen
 import com.segnities007.stylish_mycars.presentation.screen.records.RecordsScreen
 import com.segnities007.stylish_mycars.presentation.screen.records.RecordsViewModel
@@ -106,6 +107,7 @@ fun AppNavigation(
                         onNavigateToMaintenance = { backStack.add(RecordsDestination(it)) },
                         onNavigateToCost = { backStack.add(RecordsDestination(it)) },
                         onNavigateToVehicleDetail = { backStack.add(VehicleDetailDestination(it)) },
+                        onNavigateToNotifications = { backStack.add(NotificationDestination) },
                     )
                 }
                 entry<RecordsDestination> { dest ->
@@ -186,6 +188,13 @@ fun AppNavigation(
                 entry<LicensesDestination> {
                     LicensesScreen(
                         onNavigateBack = { popBack() },
+                    )
+                }
+                entry<NotificationDestination> {
+                    NotificationScreen(
+                        onNavigateBack = { popBack() },
+                        onAddRecord = { /* TODO: show add record dialog */ },
+                        onNavigateToHome = { popBack() },
                     )
                 }
             },
