@@ -28,10 +28,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.segnities007.stylish_mycars.presentation.theme.StylishMyCarsTheme
 import com.segnities007.stylish_mycars.presentation.components.atoms.utils.stylishConnectedRowCorners
 import com.segnities007.stylish_mycars.presentation.components.atoms.utils.stylishConnectedShape
 import com.segnities007.stylish_mycars.presentation.components.molecules.models.StylishConnectedButtonItem
+import com.segnities007.stylish_mycars.presentation.theme.StylishMyCarsTheme
 
 @Composable
 fun StylishConnectedButtonRow(
@@ -55,7 +55,10 @@ fun StylishConnectedButtonRow(
             Button(
                 onClick = item.onClick,
                 enabled = item.enabled,
-                modifier = Modifier.weight(1f).fillMaxHeight().heightIn(min = 52.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .heightIn(min = 52.dp),
                 shape = stylishConnectedShape(
                     stylishConnectedRowCorners(index, items.size),
                     cornerRadius = cornerRadius,

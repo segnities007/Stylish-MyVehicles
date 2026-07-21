@@ -1,16 +1,12 @@
 package com.segnities007.stylish_mycars.presentation.screen.cost.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -21,13 +17,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_mycars.domain.model.CostCategory
 import com.segnities007.stylish_mycars.domain.model.CostRecord
-import com.segnities007.stylish_mycars.presentation.components.charts.BarChartData
-import com.segnities007.stylish_mycars.presentation.components.charts.PieChartData
-import com.segnities007.stylish_mycars.presentation.components.charts.SimpleBarChart
-import com.segnities007.stylish_mycars.presentation.components.charts.SimplePieChart
-import com.segnities007.stylish_mycars.presentation.components.charts.costCategoryColor
+import com.segnities007.stylish_mycars.presentation.components.molecules.BarChartData
+import com.segnities007.stylish_mycars.presentation.components.molecules.PieChartData
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedChipRow
+import com.segnities007.stylish_mycars.presentation.components.molecules.costCategoryColor
 import com.segnities007.stylish_mycars.presentation.components.molecules.models.StylishConnectedChipItem
+import com.segnities007.stylish_mycars.presentation.components.organisms.BarChartSection
+import com.segnities007.stylish_mycars.presentation.components.organisms.PieChartSection
 import com.segnities007.stylish_mycars.presentation.screen.cost.CostListIntent
 import com.segnities007.stylish_mycars.presentation.screen.cost.CostListUiState
 import com.segnities007.stylish_mycars.presentation.theme.StylishMyCarsTheme
@@ -41,6 +37,28 @@ fun CostSummarySection(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
+        StylishConnectedChipRow(
+            items = buildList {
+                add(
+                    StylishConnectedChipItem(
+                        label = "すべて",
+                        onClick = { onIntent(CostListIntent.SelectCategory(null)) },
+                        selected = state.selectedCategory == null,
+                    )
+                )
+                CostCategory.entries.forEach { category ->
+                    add(
+                        StylishConnectedChipItem(
+                            label = category.label,
+                            onClick = { onIntent(CostListIntent.SelectCategory(category)) },
+                            selected = state.selectedCategory == category,
+                        )
+                    )
+                }
+            },
+        )
+        Spacer(Modifier.height(16.dp))
+
         Row(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -70,24 +88,6 @@ fun CostSummarySection(
         }
         Spacer(Modifier.height(16.dp))
 
-        StylishConnectedChipRow(
-            items = buildList {
-                add(StylishConnectedChipItem(
-                    label = "すべて",
-                    onClick = { onIntent(CostListIntent.SelectCategory(null)) },
-                    selected = state.selectedCategory == null,
-                ))
-                CostCategory.entries.forEach { category ->
-                    add(StylishConnectedChipItem(
-                        label = category.label,
-                        onClick = { onIntent(CostListIntent.SelectCategory(category)) },
-                        selected = state.selectedCategory == category,
-                    ))
-                }
-            },
-        )
-        Spacer(Modifier.height(16.dp))
-
         val categoryTotals = CostCategory.entries.mapNotNull { cat ->
             val total = state.records
                 .filter { it.category == cat }
@@ -95,30 +95,11 @@ fun CostSummarySection(
             if (total > 0) PieChartData(cat.label, total.toFloat(), costCategoryColor(cat.ordinal))
             else null
         }
-        if (categoryTotals.size >= 2) {
-            Row(
-                Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly,
-            ) {
-                SimplePieChart(data = categoryTotals)
-                Column {
-                    categoryTotals.forEach { slice ->
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                Modifier.padding(end = 6.dp).size(10.dp)
-                                    .background(slice.color, CircleShape),
-                            )
-                            Text(
-                                "${slice.label}: ${String.format("%,d", slice.value.toInt())}円",
-                                style = MaterialTheme.typography.labelSmall,
-                            )
-                        }
-                    }
-                }
-            }
-            Spacer(Modifier.height(16.dp))
-        }
+        PieChartSection(
+            title = "費用カテゴリ",
+            data = categoryTotals,
+        )
+        Spacer(Modifier.height(16.dp))
 
         val now = LocalDate.now()
         val monthlyData = (5 downTo 0).map { monthsAgo ->
@@ -128,16 +109,10 @@ fun CostSummarySection(
                 .sumOf { it.amount }
             BarChartData("${month.monthValue}月", total.toFloat())
         }
-        if (monthlyData.any { it.value > 0 }) {
-            Text(
-                "月次費用",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Spacer(Modifier.height(8.dp))
-            SimpleBarChart(data = monthlyData)
-            Spacer(Modifier.height(16.dp))
-        }
+        BarChartSection(
+            title = "月次費用",
+            data = monthlyData,
+        )
     }
 }
 
@@ -149,9 +124,27 @@ private fun CostSummarySectionPreview() {
             CostSummarySection(
                 state = CostListUiState(
                     records = listOf(
-                        CostRecord(vehicleId = 1, date = LocalDate.now(), category = CostCategory.FUEL, title = "給油", amount = 50000),
-                        CostRecord(vehicleId = 1, date = LocalDate.now(), category = CostCategory.INSURANCE, title = "保険", amount = 30000),
-                        CostRecord(vehicleId = 1, date = LocalDate.now(), category = CostCategory.TAX, title = "税金", amount = 45000),
+                        CostRecord(
+                            vehicleId = 1,
+                            date = LocalDate.now(),
+                            category = CostCategory.FUEL,
+                            title = "給油",
+                            amount = 50000
+                        ),
+                        CostRecord(
+                            vehicleId = 1,
+                            date = LocalDate.now(),
+                            category = CostCategory.INSURANCE,
+                            title = "保険",
+                            amount = 30000
+                        ),
+                        CostRecord(
+                            vehicleId = 1,
+                            date = LocalDate.now(),
+                            category = CostCategory.TAX,
+                            title = "税金",
+                            amount = 45000
+                        ),
                     ),
                 ),
                 onIntent = {},

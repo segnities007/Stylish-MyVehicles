@@ -15,13 +15,25 @@ object NotificationHelper {
     fun createChannels(context: Context) {
         val manager = context.getSystemService(NotificationManager::class.java)
         val channels = listOf(
-            NotificationChannel(CHANNEL_INSPECTION, "車検・自賠責", NotificationManager.IMPORTANCE_HIGH)
+            NotificationChannel(
+                CHANNEL_INSPECTION,
+                "車検・自賠責",
+                NotificationManager.IMPORTANCE_HIGH
+            )
                 .apply { description = "車検・自賠責保険の期限通知" },
-            NotificationChannel(CHANNEL_INSURANCE, "任意保険", NotificationManager.IMPORTANCE_DEFAULT)
+            NotificationChannel(
+                CHANNEL_INSURANCE,
+                "任意保険",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
                 .apply { description = "任意保険の満期通知" },
             NotificationChannel(CHANNEL_TAX, "税金", NotificationManager.IMPORTANCE_DEFAULT)
                 .apply { description = "自動車税の納付通知" },
-            NotificationChannel(CHANNEL_MAINTENANCE, "メンテナンス", NotificationManager.IMPORTANCE_LOW)
+            NotificationChannel(
+                CHANNEL_MAINTENANCE,
+                "メンテナンス",
+                NotificationManager.IMPORTANCE_LOW
+            )
                 .apply { description = "整備の目安通知" },
         )
         channels.forEach { manager.createNotificationChannel(it) }
@@ -39,7 +51,10 @@ object NotificationHelper {
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(title)
             .setContentText(text)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .bigText(text)
+            )
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
             .build()

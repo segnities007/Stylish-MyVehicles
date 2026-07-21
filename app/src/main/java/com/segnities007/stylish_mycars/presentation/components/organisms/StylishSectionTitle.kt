@@ -20,7 +20,7 @@ fun StylishSectionTitle(
         title,
         style = MaterialTheme.typography.titleMedium,
         color = MaterialTheme.colorScheme.primary,
-        modifier = modifier.padding(bottom = 8.dp),
+        modifier = modifier.padding(vertical = 20.dp),
     )
 }
 

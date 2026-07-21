@@ -6,6 +6,7 @@ import java.time.LocalDate
 sealed interface VehicleEditIntent {
     // 種別
     data class CategoryChanged(val value: VehicleCategory) : VehicleEditIntent
+
     // 基本情報
     data class MakerChanged(val value: String) : VehicleEditIntent
     data class NameChanged(val value: String) : VehicleEditIntent
@@ -17,6 +18,7 @@ sealed interface VehicleEditIntent {
     data class WeightChanged(val value: String) : VehicleEditIntent
     data class MaxLoadKgChanged(val value: String) : VehicleEditIntent
     data class ColorChanged(val value: String) : VehicleEditIntent
+
     // 期限・保険
     data class FirstRegistrationDateChanged(val value: LocalDate?) : VehicleEditIntent
     data class JibaiExpiryChanged(val value: LocalDate?) : VehicleEditIntent
@@ -24,9 +26,7 @@ sealed interface VehicleEditIntent {
     data class InsuranceCompanyChanged(val value: String) : VehicleEditIntent
     data class InsuranceRankChanged(val value: String) : VehicleEditIntent
     data class TaxPaidChanged(val value: Boolean) : VehicleEditIntent
-    data class PhotoUriChanged(val value: String?) : VehicleEditIntent
-    // メモ
-    data class MemoChanged(val value: String) : VehicleEditIntent
+
     // アクション
     data object Save : VehicleEditIntent
     data object RequestDelete : VehicleEditIntent

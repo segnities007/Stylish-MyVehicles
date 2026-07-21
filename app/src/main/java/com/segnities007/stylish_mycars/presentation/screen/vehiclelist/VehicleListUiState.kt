@@ -11,9 +11,13 @@ data class VehicleListUiState(
         get() = if (searchQuery.isBlank()) vehicles
         else vehicles.filter { vehicle ->
             val q = searchQuery.lowercase()
-            vehicle.maker.lowercase().contains(q)
-                || vehicle.name.lowercase().contains(q)
-                || vehicle.plateNumber.lowercase().contains(q)
-                || vehicle.grade.lowercase().contains(q)
+            vehicle.maker.lowercase()
+                .contains(q)
+                    || vehicle.name.lowercase()
+                .contains(q)
+                    || vehicle.plateNumber.lowercase()
+                .contains(q)
+                    || vehicle.grade.lowercase()
+                .contains(q)
         }
 }

@@ -1,0 +1,28 @@
+package com.segnities007.stylish_mycars.presentation.components.organisms
+
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun StylishPageContent(
+    header: @Composable () -> Unit,
+    content: LazyListScope.() -> Unit,
+) {
+    LazyColumn(
+        Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = 20.dp),
+    ) {
+        item {
+            header()
+            Spacer(Modifier.height(8.dp))
+        }
+        content()
+    }
+}

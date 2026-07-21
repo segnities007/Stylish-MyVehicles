@@ -5,10 +5,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -16,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mikepenz.aboutlibraries.entity.Library
 import com.mikepenz.aboutlibraries.ui.compose.android.rememberLibraries
@@ -25,6 +28,8 @@ import com.segnities007.stylish_mycars.presentation.components.molecules.Stylish
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishDialogSurface
 import com.segnities007.stylish_mycars.presentation.components.molecules.models.StylishConnectedListItem
 import com.segnities007.stylish_mycars.presentation.components.organisms.StylishHeader
+import com.segnities007.stylish_mycars.presentation.components.organisms.StylishScaffold
+import com.segnities007.stylish_mycars.presentation.theme.StylishMyCarsTheme
 
 /**
  * オープンソースライセンス画面。
@@ -41,11 +46,14 @@ fun LicensesScreen(
         libs?.libraries?.sortedBy { it.name.lowercase() } ?: emptyList()
     }
 
-    Scaffold(
+    StylishScaffold(
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.background,
-    ) { innerPadding ->
-        Column(Modifier.fillMaxSize().padding(innerPadding)) {
+    ) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
             StylishHeader(
                 modifier = Modifier.padding(horizontal = 20.dp),
                 title = { Text("オープンソースライセンス") },
@@ -93,7 +101,8 @@ private fun buildSupportingText(library: Library): String {
 }
 
 private fun licenseLabel(library: Library): String? =
-    library.licenses.firstOrNull()?.let { it.spdxId ?: it.name }
+    library.licenses.firstOrNull()
+        ?.let { it.spdxId ?: it.name }
 
 @Composable
 private fun LicenseDetailDialog(
@@ -121,10 +130,11 @@ private fun LicenseDetailDialog(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            library.description.takeIf { !it.isNullOrBlank() }?.let { desc ->
-                Spacer(Modifier.height(12.dp))
-                Text(desc, style = MaterialTheme.typography.bodyMedium)
-            }
+            library.description.takeIf { !it.isNullOrBlank() }
+                ?.let { desc ->
+                    Spacer(Modifier.height(12.dp))
+                    Text(desc, style = MaterialTheme.typography.bodyMedium)
+                }
             val license = library.licenses.firstOrNull()
             license?.let {
                 Spacer(Modifier.height(12.dp))
@@ -134,14 +144,15 @@ private fun LicenseDetailDialog(
                     color = MaterialTheme.colorScheme.primary,
                 )
             }
-            library.website.takeIf { !it.isNullOrBlank() }?.let { site ->
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    site,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            library.website.takeIf { !it.isNullOrBlank() }
+                ?.let { site ->
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        site,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             Spacer(Modifier.height(24.dp))
             StylishDialogActions(
                 confirmLabel = "閉じる",
@@ -149,6 +160,16 @@ private fun LicenseDetailDialog(
                 onConfirm = onDismiss,
                 onCancel = onDismiss,
             )
+        }
+    }
+}
+
+@Preview(name = "LicensesScreen", showBackground = true, widthDp = 393)
+@Composable
+private fun LicensesScreenPreview() {
+    StylishMyCarsTheme {
+        Surface(Modifier.padding(20.dp)) {
+            LicensesScreen(onNavigateBack = {})
         }
     }
 }

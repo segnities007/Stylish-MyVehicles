@@ -12,7 +12,8 @@ class MaintenanceRecordRepositoryImpl(
     private val dao: MaintenanceRecordDao,
 ) : MaintenanceRecordRepository {
     override fun getByVehicleId(vehicleId: Long): Flow<List<MaintenanceRecord>> =
-        dao.getByVehicleId(vehicleId).map { entities -> entities.map { it.toDomain() } }
+        dao.getByVehicleId(vehicleId)
+            .map { entities -> entities.map { it.toDomain() } }
 
     override suspend fun insert(record: MaintenanceRecord): Long =
         dao.insert(record.toEntity())

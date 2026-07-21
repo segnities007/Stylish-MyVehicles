@@ -7,9 +7,9 @@ import com.segnities007.stylish_mycars.data.local.AppDatabase
 import com.segnities007.stylish_mycars.data.local.entity.VehicleEntity
 import com.segnities007.stylish_mycars.data.notification.NotificationHelper
 import com.segnities007.stylish_mycars.domain.model.MaintenanceCategory
+import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
-import kotlinx.coroutines.flow.first
 
 class DeadlineCheckWorker(
     context: Context,
@@ -21,13 +21,18 @@ class DeadlineCheckWorker(
         val today = LocalDate.now()
         var notificationId = 1000
 
-        val vehicleList: List<VehicleEntity> = db.vehicleDao().getAll().first()
+        val vehicleList: List<VehicleEntity> = db.vehicleDao()
+            .getAll()
+            .first()
 
         for (vehicle in vehicleList) {
             val name = "${vehicle.maker} ${vehicle.name}"
 
             val inspectionExpiry = vehicle.firstRegistrationDate?.let {
-                com.segnities007.stylish_mycars.domain.service.InspectionCalculator.calculateCurrentExpiry(it, today)
+                com.segnities007.stylish_mycars.domain.service.InspectionCalculator.calculateCurrentExpiry(
+                    it,
+                    today
+                )
             } ?: vehicle.inspectionExpiry
             inspectionExpiry?.let { expiry ->
                 val days = ChronoUnit.DAYS.between(today, expiry)
@@ -75,10 +80,14 @@ class DeadlineCheckWorker(
         }
 
         // 整備スケジュールチェック
-        val schedules = db.maintenanceScheduleDao().getAll()
+        val schedules = db.maintenanceScheduleDao()
+            .getAll()
         val latestOdometers = mutableMapOf<Long, Int>()
         for (vehicle in vehicleList) {
-            val latestFuel = db.fuelRecordDao().getByVehicleId(vehicle.id).first().firstOrNull()
+            val latestFuel = db.fuelRecordDao()
+                .getByVehicleId(vehicle.id)
+                .first()
+                .firstOrNull()
             latestOdometers[vehicle.id] = latestFuel?.odometer ?: 0
         }
 
@@ -88,7 +97,9 @@ class DeadlineCheckWorker(
             val currentOdo = latestOdometers[schedule.vehicleId] ?: 0
             val categoryLabel = try {
                 MaintenanceCategory.valueOf(schedule.category).label
-            } catch (_: Exception) { schedule.category }
+            } catch (_: Exception) {
+                schedule.category
+            }
 
             schedule.intervalMonths?.let { interval ->
                 schedule.lastDoneDate?.let { lastDone ->
@@ -110,9 +121,20 @@ class DeadlineCheckWorker(
                     val remaining = (lastOdo + interval) - currentOdo
                     if (remaining <= 500) {
                         val text = if (remaining <= 0) {
-                            "$name の$categoryLabel の距離を超えています（${String.format("%,d", currentOdo)}km）"
-                        } else {
-                            "$name の$categoryLabel まであと${String.format("%,d", remaining)}kmです"
+                            "$name の$categoryLabel の距離を超えています（${
+                                String.format(
+                                    "%,d",
+                                    currentOdo
+                                )
+                            }km）"
+                        }
+                        else {
+                            "$name の$categoryLabel まであと${
+                                String.format(
+                                    "%,d",
+                                    remaining
+                                )
+                            }kmです"
                         }
                         NotificationHelper.showNotification(
                             applicationContext, NotificationHelper.CHANNEL_MAINTENANCE,

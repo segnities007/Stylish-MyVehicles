@@ -12,10 +12,12 @@ class VehicleRepositoryImpl(
     private val dao: VehicleDao,
 ) : VehicleRepository {
     override fun getAll(): Flow<List<Vehicle>> =
-        dao.getAll().map { entities -> entities.map { it.toDomain() } }
+        dao.getAll()
+            .map { entities -> entities.map { it.toDomain() } }
 
     override fun getById(id: Long): Flow<Vehicle?> =
-        dao.getById(id).map { it?.toDomain() }
+        dao.getById(id)
+            .map { it?.toDomain() }
 
     override suspend fun insert(vehicle: Vehicle): Long =
         dao.insert(vehicle.toEntity())

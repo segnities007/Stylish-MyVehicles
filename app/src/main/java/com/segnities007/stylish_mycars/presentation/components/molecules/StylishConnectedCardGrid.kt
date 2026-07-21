@@ -28,31 +28,34 @@ fun StylishConnectedCardGrid(
 ) {
     require(columns > 0) { "columns must be greater than zero" }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing)) {
-        items.chunked(columns).forEachIndexed { rowIndex, rowItems ->
-            Row(
-                Modifier.height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(spacing),
-            ) {
-                val isFullRow = rowItems.size == columns
-                rowItems.forEachIndexed { columnIndex, item ->
-                    val index = rowIndex * columns + columnIndex
-                    StylishConnectedCard(
-                        title = item.title,
-                        supportingText = item.supportingText,
-                        onClick = item.onClick,
-                        onLongClick = item.onLongClick,
-                        modifier = Modifier.weight(1f).fillMaxHeight(),
-                        shape = stylishConnectedShape(
-                            stylishConnectedGridCorners(index, items.size, columns),
-                        ),
-                        trailingContent = item.trailingContent,
-                    )
-                }
-                if (isFullRow) {
-                    repeat(columns - rowItems.size) { Spacer(Modifier.weight(1f)) }
+        items.chunked(columns)
+            .forEachIndexed { rowIndex, rowItems ->
+                Row(
+                    Modifier.height(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.spacedBy(spacing),
+                ) {
+                    val isFullRow = rowItems.size == columns
+                    rowItems.forEachIndexed { columnIndex, item ->
+                        val index = rowIndex * columns + columnIndex
+                        StylishConnectedCard(
+                            title = item.title,
+                            supportingText = item.supportingText,
+                            onClick = item.onClick,
+                            onLongClick = item.onLongClick,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight(),
+                            shape = stylishConnectedShape(
+                                stylishConnectedGridCorners(index, items.size, columns),
+                            ),
+                            trailingContent = item.trailingContent,
+                        )
+                    }
+                    if (isFullRow) {
+                        repeat(columns - rowItems.size) { Spacer(Modifier.weight(1f)) }
+                    }
                 }
             }
-        }
     }
 }
 

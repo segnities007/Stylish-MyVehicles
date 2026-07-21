@@ -25,5 +25,10 @@ interface MaintenanceScheduleDao {
     suspend fun update(entity: MaintenanceScheduleEntity)
 
     @Query("UPDATE maintenance_schedules SET lastDoneDate = :date, lastDoneOdometer = :odometer WHERE vehicleId = :vehicleId AND category = :category")
-    suspend fun updateLastDone(vehicleId: Long, category: String, date: java.time.LocalDate, odometer: Int?)
+    suspend fun updateLastDone(
+        vehicleId: Long,
+        category: String,
+        date: java.time.LocalDate,
+        odometer: Int?
+    )
 }

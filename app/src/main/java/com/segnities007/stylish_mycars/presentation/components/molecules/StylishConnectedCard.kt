@@ -26,9 +26,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.segnities007.stylish_mycars.presentation.theme.StylishMyCarsTheme
 import com.segnities007.stylish_mycars.presentation.components.atoms.utils.StylishConnectedCorners
 import com.segnities007.stylish_mycars.presentation.components.atoms.utils.stylishConnectedShape
+import com.segnities007.stylish_mycars.presentation.theme.StylishMyCarsTheme
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -43,7 +43,8 @@ fun StylishConnectedCard(
 ) {
     val haptic = LocalHapticFeedback.current
     Card(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
             .semantics(mergeDescendants = true) {
                 role = Role.Button
             }
@@ -61,7 +62,9 @@ fun StylishConnectedCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Row(
-            Modifier.fillMaxWidth().padding(start = 20.dp, end = 12.dp, top = 14.dp, bottom = 14.dp),
+            Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 12.dp, top = 14.dp, bottom = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(Modifier.weight(1f)) {

@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -49,38 +48,42 @@ fun StylishConnectedButtonGrid(
 ) {
     require(columns > 0) { "columns must be greater than zero" }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing)) {
-        items.chunked(columns).forEachIndexed { rowIndex, rowItems ->
-            Row(
-                Modifier.height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(spacing),
-            ) {
-                rowItems.forEachIndexed { columnIndex, item ->
-                    val index = rowIndex * columns + columnIndex
-                    Button(
-                        onClick = item.onClick,
-                        enabled = item.enabled,
-                        modifier = Modifier.weight(1f).fillMaxHeight().heightIn(min = 52.dp),
-                        shape = stylishConnectedShape(
-                            stylishConnectedGridCorners(index, items.size, columns),
-                        ),
-                        colors = item.colors ?: defaultColors,
-                        contentPadding = contentPadding,
-                    ) {
-                        GridButtonSlot(item.leadingContent, Alignment.CenterStart)
-                        Row(
-                            modifier = Modifier.weight(1f),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically,
-                            content = item.content,
-                        )
-                        GridButtonSlot(item.trailingContent, Alignment.CenterEnd)
+        items.chunked(columns)
+            .forEachIndexed { rowIndex, rowItems ->
+                Row(
+                    Modifier.height(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.spacedBy(spacing),
+                ) {
+                    rowItems.forEachIndexed { columnIndex, item ->
+                        val index = rowIndex * columns + columnIndex
+                        Button(
+                            onClick = item.onClick,
+                            enabled = item.enabled,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .heightIn(min = 52.dp),
+                            shape = stylishConnectedShape(
+                                stylishConnectedGridCorners(index, items.size, columns),
+                            ),
+                            colors = item.colors ?: defaultColors,
+                            contentPadding = contentPadding,
+                        ) {
+                            GridButtonSlot(item.leadingContent, Alignment.CenterStart)
+                            Row(
+                                modifier = Modifier.weight(1f),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically,
+                                content = item.content,
+                            )
+                            GridButtonSlot(item.trailingContent, Alignment.CenterEnd)
+                        }
+                    }
+                    if (rowItems.size == columns) {
+                        repeat(columns - rowItems.size) { Spacer(Modifier.weight(1f)) }
                     }
                 }
-                if (rowItems.size == columns) {
-                    repeat(columns - rowItems.size) { Spacer(Modifier.weight(1f)) }
-                }
             }
-        }
     }
 }
 

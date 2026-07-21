@@ -17,7 +17,6 @@ data class CostListUiState(
     val inputDate: LocalDate = LocalDate.now(),
     val inputTitle: String = "",
     val inputAmount: String = "",
-    val inputMemo: String = "",
 ) {
     val filteredRecords: List<CostRecord>
         get() = selectedCategory?.let { cat ->

@@ -1,4 +1,4 @@
-package com.segnities007.stylish_mycars.presentation.components.charts
+package com.segnities007.stylish_mycars.presentation.components.molecules
 
 import android.graphics.Paint
 import android.graphics.Typeface
@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 data class BarChartData(
@@ -30,11 +31,18 @@ fun SimpleBarChart(
     barColor: Color = MaterialTheme.colorScheme.primary,
     gridColor: Color = MaterialTheme.colorScheme.outlineVariant,
 ) {
-    if (data.isEmpty()) return
-
-    val maxValue = data.maxOf { it.value }.coerceAtLeast(1f)
+    val maxValue = if (data.isNotEmpty()) data.maxOf { it.value }
+        .coerceAtLeast(1f)
+    else 1f
     val labelColor = MaterialTheme.colorScheme.onSurfaceVariant.toArgb()
-    val description = "棒グラフ: " + data.joinToString(", ") { "${it.label}=${String.format("%,d", it.value.toInt())}" }
+    val description = "棒グラフ: " + data.joinToString(", ") {
+        "${it.label}=${
+            String.format(
+                "%,d",
+                it.value.toInt()
+            )
+        }"
+    }
 
     Canvas(
         modifier = modifier
@@ -49,8 +57,6 @@ fun SimpleBarChart(
         val leftPadding = 40.dp.toPx()
         val usableWidth = chartWidth - leftPadding
         val usableHeight = chartHeight - bottomPadding - topPadding
-        val barWidth = usableWidth / (data.size * 2f + 1)
-        val spacing = barWidth
 
         val labelPaint = Paint().apply {
             color = labelColor
@@ -59,7 +65,6 @@ fun SimpleBarChart(
             typeface = Typeface.DEFAULT
         }
 
-        // グリッド線 + Y軸目盛り
         for (i in 0..3) {
             val y = topPadding + usableHeight * i / 3
             drawLine(
@@ -77,32 +82,69 @@ fun SimpleBarChart(
             )
         }
 
-        // 棒 + X軸ラベル
-        data.forEachIndexed { index, d ->
-            val barHeight = (d.value / maxValue) * usableHeight
-            val x = leftPadding + spacing + index * (barWidth + spacing)
-            val y = chartHeight - bottomPadding - barHeight
-
-            drawRoundRect(
-                color = barColor,
-                topLeft = Offset(x, y),
-                size = Size(barWidth, barHeight),
-                cornerRadius = CornerRadius(4.dp.toPx(), 4.dp.toPx()),
-            )
-
+        if (data.isEmpty()) {
             labelPaint.textAlign = Paint.Align.CENTER
+            labelPaint.color = labelColor
             drawContext.canvas.nativeCanvas.drawText(
-                d.label,
-                x + barWidth / 2,
-                chartHeight - 8.dp.toPx(),
+                "データがありません",
+                chartWidth / 2f,
+                chartHeight / 2f,
                 labelPaint,
             )
+        }
+        else {
+            data.forEachIndexed { index, d ->
+                val barHeight = (d.value / maxValue) * usableHeight
+                val barWidth = usableWidth / (data.size * 2f + 1)
+                val spacing = barWidth
+                val x = leftPadding + spacing + index * (barWidth + spacing)
+                val y = chartHeight - bottomPadding - barHeight
+
+                drawRoundRect(
+                    color = barColor,
+                    topLeft = Offset(x, y),
+                    size = Size(barWidth, barHeight),
+                    cornerRadius = CornerRadius(4.dp.toPx(), 4.dp.toPx()),
+                )
+
+                labelPaint.textAlign = Paint.Align.CENTER
+                drawContext.canvas.nativeCanvas.drawText(
+                    d.label,
+                    x + barWidth / 2,
+                    chartHeight - 8.dp.toPx(),
+                    labelPaint,
+                )
+            }
         }
     }
 }
 
-private fun formatCompact(value: Float): String = when {
+internal fun formatCompact(value: Float): String = when {
     value >= 10_000 -> "%.1f万".format(value / 10_000)
     value >= 1_000 -> "%.1fk".format(value / 1_000)
     else -> "%.0f".format(value)
+}
+
+@Preview(name = "Simple bar chart", showBackground = true, widthDp = 393)
+@Composable
+private fun SimpleBarChartPreview() {
+    MaterialTheme {
+        SimpleBarChart(
+            data = listOf(
+                BarChartData("1月", 30000f),
+                BarChartData("2月", 45000f),
+                BarChartData("3月", 28000f),
+                BarChartData("4月", 52000f),
+                BarChartData("5月", 41000f),
+            ),
+        )
+    }
+}
+
+@Preview(name = "Simple bar chart (empty)", showBackground = true, widthDp = 393)
+@Composable
+private fun SimpleBarChartEmptyPreview() {
+    MaterialTheme {
+        SimpleBarChart(data = emptyList())
+    }
 }

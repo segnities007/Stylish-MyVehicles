@@ -44,10 +44,12 @@ class VehicleDetailViewModel(
         viewModelScope.launch {
             getFuelRecordsUseCase(vehicleId).collect { records ->
                 val economies = records.mapNotNull { it.fuelEconomy }
-                val avg = economies.takeIf { it.isNotEmpty() }?.average()
+                val avg = economies.takeIf { it.isNotEmpty() }
+                    ?.average()
                 val totalDist = if (records.size >= 2) {
                     records.maxOf { it.odometer } - records.minOf { it.odometer }
-                } else 0
+                }
+                else 0
                 _uiState.update {
                     it.copy(
                         recentFuelRecords = records.take(3),
@@ -83,28 +85,38 @@ class VehicleDetailViewModel(
         when (intent) {
             is VehicleDetailIntent.NavigateBack ->
                 _effects.trySend(VehicleDetailEffect.NavigateBack)
+
             is VehicleDetailIntent.EditVehicle ->
                 _effects.trySend(VehicleDetailEffect.NavigateToEdit(vehicleId))
+
             is VehicleDetailIntent.OpenFuelRecords ->
                 _effects.trySend(VehicleDetailEffect.NavigateToFuel(vehicleId))
+
             is VehicleDetailIntent.OpenMaintenanceRecords ->
                 _effects.trySend(VehicleDetailEffect.NavigateToMaintenance(vehicleId))
+
             is VehicleDetailIntent.OpenCostList ->
                 _effects.trySend(VehicleDetailEffect.NavigateToCost(vehicleId))
+
             is VehicleDetailIntent.ExportFuelCsv -> exportFuel()
             is VehicleDetailIntent.ExportMaintenanceCsv -> exportMaintenance()
             is VehicleDetailIntent.ExportCostCsv -> exportCost()
             is VehicleDetailIntent.EditSchedule -> openScheduleDialog(intent.scheduleId)
             is VehicleDetailIntent.CloseScheduleDialog ->
                 _uiState.update { it.copy(isScheduleDialogOpen = false, editingScheduleId = null) }
+
             is VehicleDetailIntent.ScheduleIntervalKmChanged ->
                 _uiState.update { it.copy(scheduleInputKm = intent.value.filter { c -> c.isDigit() }) }
+
             is VehicleDetailIntent.ScheduleIntervalMonthsChanged ->
                 _uiState.update { it.copy(scheduleInputMonths = intent.value.filter { c -> c.isDigit() }) }
+
             is VehicleDetailIntent.ScheduleLastDoneDateChanged ->
                 _uiState.update { it.copy(scheduleInputLastDoneDate = intent.value) }
+
             is VehicleDetailIntent.ScheduleLastDoneOdometerChanged ->
                 _uiState.update { it.copy(scheduleInputLastDoneOdo = intent.value.filter { c -> c.isDigit() }) }
+
             is VehicleDetailIntent.SaveSchedule -> saveSchedule()
         }
     }
@@ -144,21 +156,39 @@ class VehicleDetailViewModel(
     private fun exportFuel() {
         viewModelScope.launch {
             val records = getFuelRecordsUseCase(vehicleId).first()
-            _effects.send(VehicleDetailEffect.SaveDocument(exportDataUseCase.exportFuelRecordsCsv(records)))
+            _effects.send(
+                VehicleDetailEffect.SaveDocument(
+                    exportDataUseCase.exportFuelRecordsCsv(
+                        records
+                    )
+                )
+            )
         }
     }
 
     private fun exportMaintenance() {
         viewModelScope.launch {
             val records = getMaintenanceRecordsUseCase(vehicleId).first()
-            _effects.send(VehicleDetailEffect.SaveDocument(exportDataUseCase.exportMaintenanceRecordsCsv(records)))
+            _effects.send(
+                VehicleDetailEffect.SaveDocument(
+                    exportDataUseCase.exportMaintenanceRecordsCsv(
+                        records
+                    )
+                )
+            )
         }
     }
 
     private fun exportCost() {
         viewModelScope.launch {
             val records = getCostRecordsUseCase(vehicleId).first()
-            _effects.send(VehicleDetailEffect.SaveDocument(exportDataUseCase.exportCostRecordsCsv(records)))
+            _effects.send(
+                VehicleDetailEffect.SaveDocument(
+                    exportDataUseCase.exportCostRecordsCsv(
+                        records
+                    )
+                )
+            )
         }
     }
 }
@@ -169,5 +199,6 @@ sealed interface VehicleDetailEffect {
     data class NavigateToFuel(val vehicleId: Long) : VehicleDetailEffect
     data class NavigateToMaintenance(val vehicleId: Long) : VehicleDetailEffect
     data class NavigateToCost(val vehicleId: Long) : VehicleDetailEffect
-    data class SaveDocument(val document: com.segnities007.stylish_mycars.domain.usecase.ExportDocument) : VehicleDetailEffect
+    data class SaveDocument(val document: com.segnities007.stylish_mycars.domain.usecase.ExportDocument) :
+        VehicleDetailEffect
 }

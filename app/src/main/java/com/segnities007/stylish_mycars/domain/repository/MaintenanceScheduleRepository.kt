@@ -2,8 +2,8 @@ package com.segnities007.stylish_mycars.domain.repository
 
 import com.segnities007.stylish_mycars.domain.model.MaintenanceSchedule
 import com.segnities007.stylish_mycars.domain.model.VehicleCategory
-import java.time.LocalDate
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
 
 interface MaintenanceScheduleRepository {
     fun getByVehicleId(vehicleId: Long): Flow<List<MaintenanceSchedule>>

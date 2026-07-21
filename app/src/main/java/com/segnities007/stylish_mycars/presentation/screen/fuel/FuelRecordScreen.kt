@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -18,7 +20,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,14 +33,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import com.segnities007.stylish_mycars.data.ocr.ReceiptScanner
+import com.segnities007.stylish_mycars.domain.model.CostRecord
 import com.segnities007.stylish_mycars.domain.model.FuelRecord
 import com.segnities007.stylish_mycars.domain.model.RecordPeriod
+import com.segnities007.stylish_mycars.domain.repository.CostRecordRepository
+import com.segnities007.stylish_mycars.domain.repository.FuelRecordRepository
+import com.segnities007.stylish_mycars.domain.usecase.fuel.DeleteFuelRecordUseCase
+import com.segnities007.stylish_mycars.domain.usecase.fuel.GetFuelRecordsUseCase
+import com.segnities007.stylish_mycars.domain.usecase.fuel.InsertFuelRecordUseCase
+import com.segnities007.stylish_mycars.domain.usecase.fuel.UpdateFuelRecordUseCase
 import com.segnities007.stylish_mycars.presentation.components.atoms.StylishIconButton
-import com.segnities007.stylish_mycars.presentation.components.charts.LineChartData
-import com.segnities007.stylish_mycars.presentation.components.charts.SimpleLineChart
+import com.segnities007.stylish_mycars.presentation.components.molecules.LineChartData
+import com.segnities007.stylish_mycars.presentation.components.molecules.SimpleLineChart
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedChipRow
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedListItemColumn
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishDeleteConfirmDialog
@@ -46,9 +56,13 @@ import com.segnities007.stylish_mycars.presentation.components.molecules.Stylish
 import com.segnities007.stylish_mycars.presentation.components.molecules.models.StylishConnectedChipItem
 import com.segnities007.stylish_mycars.presentation.components.molecules.models.StylishConnectedListItem
 import com.segnities007.stylish_mycars.presentation.components.organisms.StylishHeader
+import com.segnities007.stylish_mycars.presentation.components.organisms.StylishScaffold
 import com.segnities007.stylish_mycars.presentation.screen.fuel.components.FuelInputDialog
-import java.io.File
+import com.segnities007.stylish_mycars.presentation.theme.StylishMyCarsTheme
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import java.io.File
+import java.time.LocalDate
 
 @Composable
 fun FuelRecordScreen(
@@ -92,9 +106,8 @@ fun FuelRecordScreen(
         }
     }
 
-    Scaffold(
+    StylishScaffold(
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.background,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { viewModel.accept(FuelRecordIntent.OpenAddDialog) },
@@ -104,8 +117,12 @@ fun FuelRecordScreen(
                 Icon(Icons.Default.Add, contentDescription = "給油を記録")
             }
         },
-    ) { innerPadding ->
-        Column(Modifier.fillMaxSize().padding(innerPadding)) {
+    ) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
             StylishHeader(
                 modifier = Modifier.padding(horizontal = 20.dp),
                 title = { Text("給油記録") },
@@ -121,6 +138,7 @@ fun FuelRecordScreen(
             // 期間フィルタ
             StylishConnectedChipRow(
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                fillWidth = true,
                 items = RecordPeriod.entries.map { period ->
                     StylishConnectedChipItem(
                         label = period.label,
@@ -133,13 +151,18 @@ fun FuelRecordScreen(
             val visibleRecords = state.filteredRecords
 
             // 燃費推移グラフ（2件以上の燃費データで表示）
-            val economyData = visibleRecords
-                .filter { it.fuelEconomy != null }
-                .take(20)
-                .reversed()
-                .map { r ->
-                    LineChartData("${r.date.monthValue}/${r.date.dayOfMonth}", r.fuelEconomy!!.toFloat())
-                }
+            val economyData = remember {
+                visibleRecords
+                    .filter { it.fuelEconomy != null }
+                    .take(20)
+                    .reversed()
+                    .map { r ->
+                        LineChartData(
+                            "${r.date.monthValue}/${r.date.dayOfMonth}",
+                            r.fuelEconomy!!.toFloat()
+                        )
+                    }
+            }
             if (economyData.size >= 2) {
                 Column(Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
                     Text(
@@ -157,18 +180,21 @@ fun FuelRecordScreen(
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
                     }
+
                 state.records.isEmpty() ->
                     StylishEmptyState(
                         icon = Icons.Default.LocalGasStation,
                         title = "給油記録がありません",
                         description = "下の＋ボタンから給油を記録しましょう",
                     )
+
                 visibleRecords.isEmpty() ->
                     StylishEmptyState(
                         icon = Icons.Default.LocalGasStation,
                         title = "この期間の記録がありません",
                         description = "期間フィルタを変更してみてください",
                     )
+
                 else ->
                     StylishConnectedListItemColumn(
                         modifier = Modifier.padding(horizontal = 20.dp),
@@ -178,7 +204,13 @@ fun FuelRecordScreen(
                                 headline = buildRecordTitle(record),
                                 supportingText = buildRecordSubtitle(record),
                                 onClick = { viewModel.accept(FuelRecordIntent.EditRecord(record.id)) },
-                                onLongClick = { viewModel.accept(FuelRecordIntent.RequestDelete(record.id)) },
+                                onLongClick = {
+                                    viewModel.accept(
+                                        FuelRecordIntent.RequestDelete(
+                                            record.id
+                                        )
+                                    )
+                                },
                             )
                         },
                     )
@@ -230,4 +262,67 @@ private fun createReceiptImageUri(context: Context): Uri {
     val dir = File(context.cacheDir, "receipt_images").apply { mkdirs() }
     val file = File.createTempFile("receipt_", ".jpg", dir)
     return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+}
+
+@Preview(name = "FuelRecordScreen", showBackground = true, widthDp = 393)
+@Composable
+private fun FuelRecordScreenPreview() {
+    StylishMyCarsTheme {
+        Surface(Modifier.padding(20.dp)) {
+            val repository = remember {
+                object : FuelRecordRepository {
+                    override fun getByVehicleId(vehicleId: Long) = flowOf(
+                        listOf(
+                            FuelRecord(
+                                1,
+                                1,
+                                LocalDate.of(2026, 7, 15),
+                                50000,
+                                35.0,
+                                6500,
+                                unitPrice = 186,
+                                fuelEconomy = 14.2
+                            ),
+                            FuelRecord(
+                                2,
+                                1,
+                                LocalDate.of(2026, 7, 1),
+                                49500,
+                                33.5,
+                                6200,
+                                unitPrice = 185,
+                                fuelEconomy = 13.8
+                            ),
+                        ),
+                    )
+
+                    override suspend fun getLatest(vehicleId: Long) = null
+                    override suspend fun insert(record: FuelRecord) = 0L
+                    override suspend fun update(record: FuelRecord) {}
+                    override suspend fun delete(record: FuelRecord) {}
+                }
+            }
+            val costRepository = remember {
+                object : CostRecordRepository {
+                    override fun getByVehicleId(vehicleId: Long) = flowOf<List<CostRecord>>(emptyList())
+                    override fun getByVehicleIdAndDateRange(
+                        vehicleId: Long, start: LocalDate, end: LocalDate
+                    ) = flowOf<List<CostRecord>>(emptyList())
+                    override suspend fun insert(record: CostRecord) = 0L
+                    override suspend fun update(record: CostRecord) {}
+                    override suspend fun delete(record: CostRecord) {}
+                }
+            }
+            val viewModel = remember {
+                FuelRecordViewModel(
+                    vehicleId = 1L,
+                    getFuelRecordsUseCase = GetFuelRecordsUseCase(repository),
+                    insertFuelRecordUseCase = InsertFuelRecordUseCase(repository, costRepository),
+                    updateFuelRecordUseCase = UpdateFuelRecordUseCase(repository),
+                    deleteFuelRecordUseCase = DeleteFuelRecordUseCase(repository),
+                )
+            }
+            FuelRecordScreen(viewModel = viewModel, onNavigateBack = {})
+        }
+    }
 }

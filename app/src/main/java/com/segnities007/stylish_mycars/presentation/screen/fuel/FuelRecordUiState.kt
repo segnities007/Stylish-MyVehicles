@@ -17,7 +17,6 @@ data class FuelRecordUiState(
     val inputVolume: String = "",
     val inputAmount: String = "",
     val inputIsFullTank: Boolean = true,
-    val inputMemo: String = "",
     val calculatedEconomy: String? = null,
     // レシートスキャン
     val isScanning: Boolean = false,
@@ -30,11 +29,11 @@ data class FuelRecordUiState(
 
     val canSave: Boolean
         get() = inputOdometer.isNotBlank()
-            && inputVolume.isNotBlank()
-            && inputAmount.isNotBlank()
-            && inputOdometer.toIntOrNull() != null
-            && inputVolume.toDoubleOrNull() != null
-            && inputAmount.toIntOrNull() != null
+                && inputVolume.isNotBlank()
+                && inputAmount.isNotBlank()
+                && inputOdometer.toIntOrNull() != null
+                && inputVolume.toDoubleOrNull() != null
+                && inputAmount.toIntOrNull() != null
 
     val isEditing: Boolean
         get() = editingRecordId != null

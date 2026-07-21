@@ -30,7 +30,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_mycars.presentation.theme.StylishMyCarsTheme
 import kotlinx.coroutines.launch
 
 private data class OnboardingPage(
@@ -66,7 +68,9 @@ fun OnboardingScreen(
     val scope = rememberCoroutineScope()
 
     Column(
-        modifier = modifier.fillMaxSize().padding(24.dp),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(24.dp),
     ) {
         // スキップ
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
@@ -109,7 +113,9 @@ fun OnboardingScreen(
 
         // ドットインジケーター
         Row(
-            Modifier.fillMaxWidth().padding(bottom = 24.dp),
+            Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp),
             horizontalArrangement = Arrangement.Center,
         ) {
             repeat(pages.size) { index ->
@@ -135,16 +141,29 @@ fun OnboardingScreen(
             onClick = {
                 if (pagerState.currentPage < pages.size - 1) {
                     scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
-                } else {
+                }
+                else {
                     onComplete()
                 }
             },
-            modifier = Modifier.fillMaxWidth().height(52.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp),
         ) {
             Text(
                 if (pagerState.currentPage < pages.size - 1) "次へ" else "はじめる",
                 style = MaterialTheme.typography.titleMedium,
             )
+        }
+    }
+}
+
+@Preview(name = "OnboardingScreen", showBackground = true, widthDp = 393)
+@Composable
+private fun OnboardingScreenPreview() {
+    StylishMyCarsTheme {
+        Surface(Modifier.padding(20.dp)) {
+            OnboardingScreen(onComplete = {})
         }
     }
 }

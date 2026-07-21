@@ -42,10 +42,18 @@ class CostListViewModel(
         when (intent) {
             is CostListIntent.SelectCategory ->
                 _uiState.update { it.copy(selectedCategory = intent.category) }
+
             is CostListIntent.OpenAddDialog -> openAddDialog()
             is CostListIntent.EditRecord -> openEditDialog(intent.recordId)
             is CostListIntent.CloseDialog ->
-                _uiState.update { it.copy(isDialogOpen = false, editingRecordId = null) }
+                _uiState.update {
+                    it.copy(
+                        isDialogOpen = false,
+                        editingRecordId = null,
+                        selectedCategory = null
+                    )
+                }
+
             is CostListIntent.InputCategoryChanged ->
                 _uiState.update {
                     it.copy(
@@ -53,20 +61,24 @@ class CostListViewModel(
                         inputTitle = it.inputTitle.ifBlank { intent.value.label },
                     )
                 }
+
             is CostListIntent.InputDateChanged ->
                 _uiState.update { it.copy(inputDate = intent.value) }
+
             is CostListIntent.InputTitleChanged ->
                 _uiState.update { it.copy(inputTitle = intent.value) }
+
             is CostListIntent.InputAmountChanged ->
                 _uiState.update { it.copy(inputAmount = intent.value.filter { c -> c.isDigit() }) }
-            is CostListIntent.InputMemoChanged ->
-                _uiState.update { it.copy(inputMemo = intent.value) }
+
             is CostListIntent.Save -> save()
             is CostListIntent.RequestDelete ->
                 _uiState.update { it.copy(deletingRecordId = intent.recordId) }
+
             is CostListIntent.ConfirmDelete -> confirmDelete()
             is CostListIntent.DismissDelete ->
                 _uiState.update { it.copy(deletingRecordId = null) }
+
             is CostListIntent.NavigateBack ->
                 _effects.trySend(CostListEffect.NavigateBack)
         }
@@ -81,7 +93,6 @@ class CostListViewModel(
                 inputDate = java.time.LocalDate.now(),
                 inputTitle = "",
                 inputAmount = "",
-                inputMemo = "",
             )
         }
     }
@@ -96,7 +107,6 @@ class CostListViewModel(
                 inputDate = record.date,
                 inputTitle = record.title,
                 inputAmount = record.amount.toString(),
-                inputMemo = record.memo,
             )
         }
     }
@@ -107,17 +117,18 @@ class CostListViewModel(
 
         viewModelScope.launch {
             if (state.isEditing) {
-                val existing = state.records.find { it.id == state.editingRecordId } ?: return@launch
+                val existing =
+                    state.records.find { it.id == state.editingRecordId } ?: return@launch
                 updateCostRecordUseCase(
                     existing.copy(
                         date = state.inputDate,
                         category = state.inputCategory,
                         title = state.inputTitle.trim(),
                         amount = state.inputAmount.toInt(),
-                        memo = state.inputMemo.trim(),
                     ),
                 )
-            } else {
+            }
+            else {
                 insertCostRecordUseCase(
                     CostRecord(
                         vehicleId = vehicleId,
@@ -125,7 +136,6 @@ class CostListViewModel(
                         category = state.inputCategory,
                         title = state.inputTitle.trim(),
                         amount = state.inputAmount.toInt(),
-                        memo = state.inputMemo.trim(),
                     ),
                 )
             }

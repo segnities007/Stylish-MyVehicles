@@ -34,11 +34,12 @@ object InspectionCalculator {
     // ── カテゴリ対応 ──
 
     /** その乗り物が車検対象かどうか。バイクは250cc超のみ対象。 */
-    fun requiresInspection(category: VehicleCategory, displacement: Int?): Boolean = when (category) {
-        VehicleCategory.CAR, VehicleCategory.KEI_CAR, VehicleCategory.TRUCK -> true
-        VehicleCategory.MOTORCYCLE -> displacement != null && displacement > 250
-        VehicleCategory.BICYCLE, VehicleCategory.OTHER -> false
-    }
+    fun requiresInspection(category: VehicleCategory, displacement: Int?): Boolean =
+        when (category) {
+            VehicleCategory.CAR, VehicleCategory.KEI_CAR, VehicleCategory.TRUCK -> true
+            VehicleCategory.MOTORCYCLE -> displacement != null && displacement > 250
+            VehicleCategory.BICYCLE, VehicleCategory.OTHER -> false
+        }
 
     /** 初回車検までの年数（乗用車・バイク3年、トラック2年）。 */
     fun firstInspectionYears(category: VehicleCategory): Int = when (category) {

@@ -33,7 +33,9 @@ fun StylishConnectedCardRow(
                 supportingText = item.supportingText,
                 onClick = item.onClick,
                 onLongClick = item.onLongClick,
-                modifier = Modifier.weight(1f).fillMaxHeight(),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
                 shape = stylishConnectedShape(stylishConnectedRowCorners(index, items.size)),
                 trailingContent = item.trailingContent,
             )

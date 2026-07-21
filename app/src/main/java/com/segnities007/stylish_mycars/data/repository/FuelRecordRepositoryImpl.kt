@@ -12,10 +12,12 @@ class FuelRecordRepositoryImpl(
     private val dao: FuelRecordDao,
 ) : FuelRecordRepository {
     override fun getByVehicleId(vehicleId: Long): Flow<List<FuelRecord>> =
-        dao.getByVehicleId(vehicleId).map { entities -> entities.map { it.toDomain() } }
+        dao.getByVehicleId(vehicleId)
+            .map { entities -> entities.map { it.toDomain() } }
 
     override suspend fun getLatest(vehicleId: Long): FuelRecord? =
-        dao.getLatest(vehicleId)?.toDomain()
+        dao.getLatest(vehicleId)
+            ?.toDomain()
 
     override suspend fun insert(record: FuelRecord): Long =
         dao.insert(record.toEntity())

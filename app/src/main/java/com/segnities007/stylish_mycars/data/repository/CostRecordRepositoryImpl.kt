@@ -5,15 +5,16 @@ import com.segnities007.stylish_mycars.data.mapper.toDomain
 import com.segnities007.stylish_mycars.data.mapper.toEntity
 import com.segnities007.stylish_mycars.domain.model.CostRecord
 import com.segnities007.stylish_mycars.domain.repository.CostRecordRepository
-import java.time.LocalDate
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.time.LocalDate
 
 class CostRecordRepositoryImpl(
     private val dao: CostRecordDao,
 ) : CostRecordRepository {
     override fun getByVehicleId(vehicleId: Long): Flow<List<CostRecord>> =
-        dao.getByVehicleId(vehicleId).map { entities -> entities.map { it.toDomain() } }
+        dao.getByVehicleId(vehicleId)
+            .map { entities -> entities.map { it.toDomain() } }
 
     override fun getByVehicleIdAndDateRange(
         vehicleId: Long,

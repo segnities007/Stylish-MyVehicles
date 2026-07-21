@@ -27,17 +27,21 @@ enum class MaintenanceCategory(val label: String) {
                 OIL, OIL_FILTER, TIRE, BATTERY, BRAKE, WIPER, AIR_FILTER, COOLANT,
                 SPARK_PLUG, BELT, INSPECTION_12, INSPECTION_24, SHAKEN, OTHER,
             )
+
             VehicleCategory.MOTORCYCLE -> listOf(
                 OIL, OIL_FILTER, CHAIN, TIRE, BATTERY, BRAKE, SPARK_PLUG, COOLANT,
                 INSPECTION_12, INSPECTION_24, SHAKEN, OTHER,
             )
+
             VehicleCategory.BICYCLE -> listOf(
                 TIRE, BRAKE, CHAIN, GEAR, GENERAL_INSPECTION, OTHER,
             )
+
             VehicleCategory.TRUCK -> listOf(
                 OIL, OIL_FILTER, TIRE, BATTERY, BRAKE, COOLANT, BELT,
                 INSPECTION_12, INSPECTION_24, SHAKEN, OTHER,
             )
+
             VehicleCategory.OTHER -> entries.toList()
         }
     }

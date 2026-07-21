@@ -22,13 +22,23 @@ fun VehicleInfoSection(
         modifier = modifier,
         items = buildList {
             vehicle.year?.let { add(StylishConnectedListItem("年式", "${it}年", {})) }
-            vehicle.plateNumber.takeIf { it.isNotBlank() }?.let { add(StylishConnectedListItem("ナンバー", it, {})) }
+            vehicle.plateNumber.takeIf { it.isNotBlank() }
+                ?.let { add(StylishConnectedListItem("ナンバー", it, {})) }
             vehicle.displacement?.let { add(StylishConnectedListItem("排気量", "${it}cc", {})) }
             vehicle.weight?.let { add(StylishConnectedListItem("車両重量", "${it}kg", {})) }
             vehicle.maxLoadKg?.let { add(StylishConnectedListItem("最大積載量", "${it}kg", {})) }
-            vehicle.color.takeIf { it.isNotBlank() }?.let { add(StylishConnectedListItem("カラー", it, {})) }
-            vehicle.firstRegistrationDate?.let { add(StylishConnectedListItem("初度登録", it.toString(), {})) }
-            vehicle.insuranceCompany.takeIf { it.isNotBlank() }?.let { add(StylishConnectedListItem("保険会社", it, {})) }
+            vehicle.color.takeIf { it.isNotBlank() }
+                ?.let { add(StylishConnectedListItem("カラー", it, {})) }
+            vehicle.firstRegistrationDate?.let {
+                add(
+                    StylishConnectedListItem(
+                        "初度登録",
+                        it.toString(),
+                        {})
+                )
+            }
+            vehicle.insuranceCompany.takeIf { it.isNotBlank() }
+                ?.let { add(StylishConnectedListItem("保険会社", it, {})) }
             vehicle.insuranceRank?.let { add(StylishConnectedListItem("等級", "${it}等級", {})) }
         },
     )

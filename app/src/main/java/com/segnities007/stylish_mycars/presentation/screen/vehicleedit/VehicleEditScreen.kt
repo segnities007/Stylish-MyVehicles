@@ -1,8 +1,5 @@
 package com.segnities007.stylish_mycars.presentation.screen.vehicleedit
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,41 +8,45 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import com.segnities007.stylish_mycars.domain.model.MaintenanceSchedule
+import com.segnities007.stylish_mycars.domain.model.Vehicle
 import com.segnities007.stylish_mycars.domain.model.VehicleCategory
+import com.segnities007.stylish_mycars.domain.repository.MaintenanceScheduleRepository
+import com.segnities007.stylish_mycars.domain.repository.VehicleRepository
+import com.segnities007.stylish_mycars.domain.usecase.vehicle.DeleteVehicleUseCase
+import com.segnities007.stylish_mycars.domain.usecase.vehicle.GetVehicleUseCase
+import com.segnities007.stylish_mycars.domain.usecase.vehicle.InsertVehicleUseCase
+import com.segnities007.stylish_mycars.domain.usecase.vehicle.UpdateVehicleUseCase
 import com.segnities007.stylish_mycars.presentation.components.atoms.StylishIconButton
-import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedButtonRow
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedChipRow
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishDatePickerField
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishDialogActions
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishDialogSurface
-import com.segnities007.stylish_mycars.presentation.components.molecules.models.StylishConnectedButtonItem
 import com.segnities007.stylish_mycars.presentation.components.molecules.models.StylishConnectedChipItem
 import com.segnities007.stylish_mycars.presentation.components.organisms.StylishHeader
+import com.segnities007.stylish_mycars.presentation.components.organisms.StylishScaffold
 import com.segnities007.stylish_mycars.presentation.components.organisms.StylishSectionTitle
+import com.segnities007.stylish_mycars.presentation.theme.StylishMyCarsTheme
+import kotlinx.coroutines.flow.flowOf
+import java.time.LocalDate
 
 @Composable
 fun VehicleEditScreen(
@@ -55,12 +56,6 @@ fun VehicleEditScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    val photoPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-    ) { uri ->
-        viewModel.accept(VehicleEditIntent.PhotoUriChanged(uri?.toString()))
-    }
-
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
@@ -69,12 +64,13 @@ fun VehicleEditScreen(
         }
     }
 
-    Scaffold(
+    StylishScaffold(
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.background,
-    ) { innerPadding ->
+    ) {
         Column(
-            Modifier.fillMaxSize().padding(innerPadding).verticalScroll(rememberScrollState()),
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
             StylishHeader(
                 modifier = Modifier.padding(horizontal = 20.dp),
@@ -96,7 +92,8 @@ fun VehicleEditScreen(
                             contentColor = MaterialTheme.colorScheme.onErrorContainer,
                         )
                     }
-                } else {
+                }
+                else {
                     null
                 },
             )
@@ -114,58 +111,7 @@ fun VehicleEditScreen(
                     },
                 )
 
-                // 写真
-                Spacer(Modifier.height(24.dp))
-                StylishSectionTitle("写真")
-                state.photoUri?.let { uri ->
-                    AsyncImage(
-                        model = uri,
-                        contentDescription = "車両写真",
-                        modifier = Modifier.fillMaxWidth().height(180.dp)
-                            .clip(RoundedCornerShape(12.dp)),
-                        contentScale = ContentScale.Crop,
-                    )
-                    Spacer(Modifier.height(8.dp))
-                }
-                // 写真なし → 単体ボタン、写真あり → 隣接する[削除][変更]をConnectedで
-                if (state.photoUri == null) {
-                    OutlinedButton(
-                        onClick = {
-                            photoPickerLauncher.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Icon(Icons.Default.Add, contentDescription = null)
-                        Spacer(Modifier.padding(start = 8.dp))
-                        Text("写真を追加")
-                    }
-                } else {
-                    StylishConnectedButtonRow(
-                        items = listOf(
-                            StylishConnectedButtonItem(
-                                onClick = { viewModel.accept(VehicleEditIntent.PhotoUriChanged(null)) },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                                ),
-                                leadingContent = { Icon(Icons.Default.Delete, null) },
-                            ) { Text("削除") },
-                            StylishConnectedButtonItem(
-                                onClick = {
-                                    photoPickerLauncher.launch(
-                                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
-                                    )
-                                },
-                            ) { Text("写真を変更") },
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-
                 // ── 基本情報 ──
-                Spacer(Modifier.height(24.dp))
                 StylishSectionTitle("基本情報")
                 TextField(
                     value = state.maker,
@@ -245,11 +191,16 @@ fun VehicleEditScreen(
                 )
 
                 // ── 期限・保険 ──
-                Spacer(Modifier.height(24.dp))
                 StylishSectionTitle("期限・保険")
                 StylishDatePickerField(
                     value = state.firstRegistrationDate,
-                    onValueChange = { viewModel.accept(VehicleEditIntent.FirstRegistrationDateChanged(it)) },
+                    onValueChange = {
+                        viewModel.accept(
+                            VehicleEditIntent.FirstRegistrationDateChanged(
+                                it
+                            )
+                        )
+                    },
                     label = "初度登録日（車検計算に使用）",
                 )
                 Spacer(Modifier.height(12.dp))
@@ -293,17 +244,6 @@ fun VehicleEditScreen(
                         onCheckedChange = { viewModel.accept(VehicleEditIntent.TaxPaidChanged(it)) },
                     )
                 }
-
-                // ── メモ ──
-                Spacer(Modifier.height(24.dp))
-                StylishSectionTitle("メモ")
-                TextField(
-                    value = state.memo,
-                    onValueChange = { viewModel.accept(VehicleEditIntent.MemoChanged(it)) },
-                    label = "メモ",
-                    placeholder = "自由記入",
-                    minLines = 3,
-                )
 
                 // ── アクション ──
                 Spacer(Modifier.height(24.dp))
@@ -373,6 +313,78 @@ private fun TextField(
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(start = 16.dp, top = 4.dp),
             )
+        }
+    }
+}
+
+@Preview(name = "VehicleEditScreen", showBackground = true, widthDp = 393)
+@Composable
+private fun VehicleEditScreenPreview() {
+    StylishMyCarsTheme {
+        Surface(Modifier.padding(20.dp)) {
+            val vehicleRepository = remember {
+                object : VehicleRepository {
+                    override fun getAll() = flowOf<List<Vehicle>>(emptyList())
+                    override fun getById(id: Long) = flowOf(
+                        Vehicle(
+                            id = 1,
+                            category = VehicleCategory.CAR,
+                            maker = "トヨタ",
+                            name = "プリウス",
+                            grade = "Z",
+                            year = 2022,
+                            modelCode = "MXWH60",
+                            plateNumber = "品川 330 あ 12-34",
+                            displacement = 1800,
+                            weight = 1350,
+                            color = "ホワイトパール",
+                            firstRegistrationDate = LocalDate.of(2022, 4, 1),
+                            jibaiExpiry = LocalDate.of(2028, 4, 1),
+                            insuranceExpiry = LocalDate.of(2026, 4, 1),
+                            insuranceCompany = "東京海上日動",
+                            insuranceRank = 20,
+                            taxPaid = true,
+                        ),
+                    )
+
+                    override suspend fun insert(vehicle: Vehicle) = 0L
+                    override suspend fun update(vehicle: Vehicle) {}
+                    override suspend fun delete(vehicle: Vehicle) {}
+                }
+            }
+            val scheduleRepository = remember {
+                object : MaintenanceScheduleRepository {
+                    override fun getByVehicleId(vehicleId: Long) = flowOf<List<MaintenanceSchedule>>(emptyList())
+                    override suspend fun getAll() = emptyList<MaintenanceSchedule>()
+                    override suspend fun insertDefaults(
+                        vehicleId: Long,
+                        category: VehicleCategory
+                    ) {
+                    }
+
+                    override suspend fun update(schedule: MaintenanceSchedule) {}
+                    override suspend fun updateLastDone(
+                        vehicleId: Long,
+                        category: String,
+                        date: LocalDate,
+                        odometer: Int?
+                    ) {
+                    }
+                }
+            }
+            val viewModel = remember {
+                VehicleEditViewModel(
+                    vehicleId = 1L,
+                    getVehicleUseCase = GetVehicleUseCase(vehicleRepository),
+                    insertVehicleUseCase = InsertVehicleUseCase(
+                        vehicleRepository,
+                        scheduleRepository
+                    ),
+                    updateVehicleUseCase = UpdateVehicleUseCase(vehicleRepository),
+                    deleteVehicleUseCase = DeleteVehicleUseCase(vehicleRepository),
+                )
+            }
+            VehicleEditScreen(viewModel = viewModel, onNavigateBack = {})
         }
     }
 }

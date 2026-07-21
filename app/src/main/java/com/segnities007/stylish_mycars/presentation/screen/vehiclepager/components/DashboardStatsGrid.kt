@@ -3,11 +3,11 @@ package com.segnities007.stylish_mycars.presentation.screen.vehiclepager.compone
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.LocalGasStation
 import androidx.compose.material.icons.filled.Payments
-import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -26,8 +26,6 @@ import com.segnities007.stylish_mycars.presentation.theme.StylishMyCarsTheme
 @Composable
 fun DashboardStatsGrid(
     dashboard: VehicleDashboard,
-    onCostClick: () -> Unit,
-    onFuelClick: () -> Unit,
     modifier: Modifier = Modifier,
     showFuelEconomy: Boolean = true,
 ) {
@@ -37,7 +35,7 @@ fun DashboardStatsGrid(
                 StylishConnectedCardItem(
                     title = "${String.format("%,d", dashboard.monthlyCost)}円",
                     supportingText = "今月の費用",
-                    onClick = onCostClick,
+                    onClick = {},
                     trailingContent = {
                         Icon(
                             Icons.Default.AccountBalanceWallet,
@@ -52,7 +50,7 @@ fun DashboardStatsGrid(
                 StylishConnectedCardItem(
                     title = "${String.format("%,d", dashboard.yearlyCost)}円",
                     supportingText = "年間費用",
-                    onClick = onCostClick,
+                    onClick = {},
                     trailingContent = {
                         Icon(
                             Icons.Default.CalendarMonth,
@@ -67,7 +65,7 @@ fun DashboardStatsGrid(
                 StylishConnectedCardItem(
                     title = "${String.format("%,d", dashboard.totalCost)}円",
                     supportingText = "総費用",
-                    onClick = onCostClick,
+                    onClick = {},
                     trailingContent = {
                         Icon(
                             Icons.Default.Payments,
@@ -80,12 +78,19 @@ fun DashboardStatsGrid(
             )
             add(
                 StylishConnectedCardItem(
-                    title = dashboard.averageMonthlyCost?.let { "${String.format("%,d", it.toInt())}円" } ?: "--",
+                    title = dashboard.averageMonthlyCost?.let {
+                        "${
+                            String.format(
+                                "%,d",
+                                it.toInt()
+                            )
+                        }円"
+                    } ?: "--",
                     supportingText = "月平均",
-                    onClick = onCostClick,
+                    onClick = {},
                     trailingContent = {
                         Icon(
-                            Icons.Default.TrendingUp,
+                            Icons.AutoMirrored.Filled.TrendingUp,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(18.dp),
@@ -96,9 +101,10 @@ fun DashboardStatsGrid(
             if (showFuelEconomy) {
                 add(
                     StylishConnectedCardItem(
-                        title = dashboard.averageFuelEconomy?.let { "%.1f km/L".format(it) } ?: "--",
+                        title = dashboard.averageFuelEconomy?.let { "%.1f km/L".format(it) }
+                            ?: "--",
                         supportingText = "平均燃費",
-                        onClick = onFuelClick,
+                        onClick = {},
                         trailingContent = {
                             Icon(
                                 Icons.Default.LocalGasStation,
@@ -128,8 +134,6 @@ private fun DashboardStatsGridPreview() {
                     totalCost = 523000,
                     averageFuelEconomy = 18.5,
                 ),
-                onCostClick = {},
-                onFuelClick = {},
             )
         }
     }
@@ -142,8 +146,6 @@ private fun DashboardStatsGridEmptyPreview() {
         Surface(Modifier.padding(20.dp)) {
             DashboardStatsGrid(
                 dashboard = VehicleDashboard(),
-                onCostClick = {},
-                onFuelClick = {},
             )
         }
     }

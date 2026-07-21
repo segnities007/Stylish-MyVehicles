@@ -5,24 +5,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.segnities007.stylish_mycars.domain.model.MaintenanceCategory
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedChipRow
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishDatePickerField
@@ -38,7 +27,6 @@ import com.segnities007.stylish_mycars.presentation.theme.StylishMyCarsTheme
 fun MaintenanceInputDialog(
     state: MaintenanceRecordUiState,
     onIntent: (MaintenanceRecordIntent) -> Unit,
-    onCapturePhoto: () -> Unit,
 ) {
     StylishDialogSurface(onDismiss = { onIntent(MaintenanceRecordIntent.CloseDialog) }) {
         Column(Modifier.padding(24.dp)) {
@@ -102,35 +90,6 @@ fun MaintenanceInputDialog(
             )
             Spacer(Modifier.height(12.dp))
 
-            // 写真添付
-            if (state.inputPhotoUri != null) {
-                AsyncImage(
-                    model = state.inputPhotoUri,
-                    contentDescription = "添付写真",
-                    modifier = Modifier.fillMaxWidth().height(160.dp)
-                        .clip(RoundedCornerShape(12.dp)),
-                    contentScale = ContentScale.Crop,
-                )
-                Spacer(Modifier.height(8.dp))
-                OutlinedButton(
-                    onClick = { onIntent(MaintenanceRecordIntent.PhotoChanged(null)) },
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Icon(Icons.Default.Delete, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text("写真を削除")
-                }
-            } else {
-                OutlinedButton(
-                    onClick = onCapturePhoto,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Icon(Icons.Default.CameraAlt, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text("写真を添付")
-                }
-            }
-
             Spacer(Modifier.height(24.dp))
             StylishDialogActions(
                 confirmLabel = if (state.isEditing) "更新" else "保存",
@@ -154,7 +113,6 @@ private fun MaintenanceInputDialogPreview() {
                 inputCost = "4200",
             ),
             onIntent = {},
-            onCapturePhoto = {},
         )
     }
 }

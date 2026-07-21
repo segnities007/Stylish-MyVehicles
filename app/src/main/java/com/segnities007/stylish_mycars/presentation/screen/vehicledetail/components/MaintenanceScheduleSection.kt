@@ -51,11 +51,13 @@ private fun buildScheduleStatus(schedule: MaintenanceSchedule, today: LocalDate)
         schedule.lastDoneDate?.let { lastDone ->
             val nextDue = lastDone.plusMonths(interval.toLong())
             val days = ChronoUnit.DAYS.between(today, nextDue)
-            parts.add(when {
-                days < 0 -> "⚠️ 期間超過"
-                days <= 30 -> "⚠️ あと${days}日"
-                else -> "あと${days}日（${interval}ヶ月ごと）"
-            })
+            parts.add(
+                when {
+                    days < 0 -> "⚠️ 期間超過"
+                    days <= 30 -> "⚠️ あと${days}日"
+                    else -> "あと${days}日（${interval}ヶ月ごと）"
+                }
+            )
         } ?: parts.add("${interval}ヶ月ごと（未実施）")
     }
 
@@ -65,7 +67,8 @@ private fun buildScheduleStatus(schedule: MaintenanceSchedule, today: LocalDate)
         } ?: parts.add("${String.format("%,d", interval)}kmごと（未実施）")
     }
 
-    return parts.joinToString(" / ").ifEmpty { "未設定" }
+    return parts.joinToString(" / ")
+        .ifEmpty { "未設定" }
 }
 
 @Preview(name = "Maintenance schedule section", showBackground = true, widthDp = 393)
@@ -78,7 +81,8 @@ private fun MaintenanceScheduleSectionPreview() {
                     MaintenanceSchedule(
                         id = 1, vehicleId = 1, category = MaintenanceCategory.OIL,
                         intervalKm = 5000, intervalMonths = 6,
-                        lastDoneDate = LocalDate.now().minusMonths(5),
+                        lastDoneDate = LocalDate.now()
+                            .minusMonths(5),
                         lastDoneOdometer = 40000,
                     ),
                     MaintenanceSchedule(

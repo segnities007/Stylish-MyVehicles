@@ -30,7 +30,10 @@ fun StylishHeader(
     actions: (@Composable () -> Unit)? = null,
 ) {
     Column(
-        modifier.fillMaxWidth().statusBarsPadding().padding(top = 8.dp, bottom = 16.dp),
+        modifier
+            .fillMaxWidth()
+            .statusBarsPadding()
+            .padding(top = 8.dp, bottom = 16.dp),
     ) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
@@ -40,15 +43,25 @@ fun StylishHeader(
             shadowElevation = 4.dp,
         ) {
             Box(
-                modifier = Modifier.fillMaxWidth().height(56.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Box(Modifier.semantics { heading() }) { title() }
                 navigation?.let {
-                    Box(Modifier.align(Alignment.CenterStart).padding(start = 4.dp)) { it() }
+                    Box(
+                        Modifier
+                            .align(Alignment.CenterStart)
+                            .padding(start = 4.dp)
+                    ) { it() }
                 }
                 actions?.let {
-                    Box(Modifier.align(Alignment.CenterEnd).padding(end = 4.dp)) { it() }
+                    Box(
+                        Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(end = 4.dp)
+                    ) { it() }
                 }
             }
         }

@@ -34,6 +34,7 @@ import com.segnities007.stylish_mycars.domain.usecase.vehicle.UpdateVehicleUseCa
 import com.segnities007.stylish_mycars.presentation.screen.cost.CostListViewModel
 import com.segnities007.stylish_mycars.presentation.screen.fuel.FuelRecordViewModel
 import com.segnities007.stylish_mycars.presentation.screen.maintenance.MaintenanceRecordViewModel
+import com.segnities007.stylish_mycars.presentation.screen.records.RecordsViewModel
 import com.segnities007.stylish_mycars.presentation.screen.vehicledetail.VehicleDetailViewModel
 import com.segnities007.stylish_mycars.presentation.screen.vehicleedit.VehicleEditViewModel
 import com.segnities007.stylish_mycars.presentation.screen.vehiclelist.VehicleListViewModel
@@ -145,6 +146,15 @@ val appModule = module {
             insertCostRecordUseCase = get(),
             updateCostRecordUseCase = get(),
             deleteCostRecordUseCase = get(),
+        )
+    }
+    viewModel { params ->
+        RecordsViewModel(
+            vehicleId = params.get(),
+            getFuelRecordsUseCase = get(),
+            getMaintenanceRecordsUseCase = get(),
+            getCostRecordsUseCase = get(),
+            getVehiclesUseCase = get(),
         )
     }
 }

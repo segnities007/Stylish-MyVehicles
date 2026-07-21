@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DirectionsCar
@@ -15,7 +17,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -24,13 +26,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_mycars.domain.model.Vehicle
+import com.segnities007.stylish_mycars.domain.model.VehicleCategory
 import com.segnities007.stylish_mycars.domain.service.InspectionCalculator
 import com.segnities007.stylish_mycars.presentation.components.atoms.StylishIconButton
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedListItemColumn
 import com.segnities007.stylish_mycars.presentation.components.molecules.models.StylishConnectedListItem
 import com.segnities007.stylish_mycars.presentation.components.organisms.StylishHeader
+import com.segnities007.stylish_mycars.presentation.components.organisms.StylishScaffold
+import com.segnities007.stylish_mycars.presentation.theme.StylishMyCarsTheme
 
 @Composable
 fun VehicleListScreen(
@@ -47,15 +53,15 @@ fun VehicleListScreen(
             when (effect) {
                 is VehicleListEffect.NavigateToDetail ->
                     onNavigateToDetail(effect.vehicleId)
+
                 is VehicleListEffect.NavigateToEdit ->
                     onNavigateToEdit(effect.vehicleId)
             }
         }
     }
 
-    Scaffold(
+    StylishScaffold(
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.background,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { viewModel.accept(VehicleListIntent.AddVehicle) },
@@ -65,9 +71,11 @@ fun VehicleListScreen(
                 Icon(Icons.Default.Add, contentDescription = "車両を追加")
             }
         },
-    ) { innerPadding ->
+    ) {
         Column(
-            Modifier.fillMaxSize().padding(innerPadding),
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
             StylishHeader(
                 modifier = Modifier.padding(horizontal = 20.dp),
@@ -88,7 +96,9 @@ fun VehicleListScreen(
                     placeholder = { Text("メーカー・車種・ナンバーで検索") },
                     leadingIcon = { Icon(Icons.Default.Search, null) },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
                 )
             }
 
@@ -97,6 +107,7 @@ fun VehicleListScreen(
                 state.vehicles.isEmpty() -> EmptyState(
                     onAddClick = { viewModel.accept(VehicleListIntent.AddVehicle) },
                 )
+
                 state.filteredVehicles.isEmpty() -> NoSearchResultState()
                 else -> VehicleList(
                     vehicles = state.filteredVehicles,
@@ -178,7 +189,8 @@ private fun NoSearchResultState() {
 
 private fun buildSupportingText(vehicle: Vehicle): String {
     val parts = mutableListOf<String>()
-    vehicle.plateNumber.takeIf { it.isNotBlank() }?.let { parts.add(it) }
+    vehicle.plateNumber.takeIf { it.isNotBlank() }
+        ?.let { parts.add(it) }
     vehicle.currentInspectionExpiry?.let { expiry ->
         val days = InspectionCalculator.daysUntilExpiry(expiry)
         val label = when {
@@ -189,5 +201,96 @@ private fun buildSupportingText(vehicle: Vehicle): String {
         }
         parts.add(label)
     }
-    return parts.joinToString(" / ").ifEmpty { "詳細を登録" }
+    return parts.joinToString(" / ")
+        .ifEmpty { "詳細を登録" }
+}
+
+@Preview(name = "VehicleListScreen", showBackground = true, widthDp = 393)
+@Composable
+private fun VehicleListScreenPreview() {
+    val vehicles = listOf(
+        Vehicle(
+            id = 1L,
+            maker = "トヨタ",
+            name = "カローラ",
+            category = VehicleCategory.CAR,
+            grade = "G",
+            year = 2020,
+            plateNumber = "横浜 300 あ 12-34"
+        ),
+        Vehicle(
+            id = 2L,
+            maker = "ホンダ",
+            name = "フィット",
+            category = VehicleCategory.CAR,
+            grade = "RS",
+            year = 2021,
+            plateNumber = "品川 500 い 56-78"
+        ),
+    )
+    StylishMyCarsTheme {
+        Surface(Modifier.padding(20.dp)) {
+            VehicleList(vehicles = vehicles, onVehicleClick = {})
+        }
+    }
+}
+
+@Preview(name = "VehicleList", showBackground = true, widthDp = 393)
+@Composable
+private fun VehicleListPreview() {
+    val vehicles = listOf(
+        Vehicle(
+            id = 1L,
+            maker = "トヨタ",
+            name = "カローラ",
+            category = VehicleCategory.CAR,
+            grade = "G",
+            year = 2020,
+            plateNumber = "横浜 300 あ 12-34"
+        ),
+        Vehicle(
+            id = 2L,
+            maker = "ホンダ",
+            name = "フィット",
+            category = VehicleCategory.CAR,
+            grade = "RS",
+            year = 2021,
+            plateNumber = "品川 500 い 56-78"
+        ),
+    )
+    StylishMyCarsTheme {
+        Surface(Modifier.padding(20.dp)) {
+            VehicleList(vehicles = vehicles, onVehicleClick = {})
+        }
+    }
+}
+
+@Preview(name = "LoadingState", showBackground = true, widthDp = 393)
+@Composable
+private fun LoadingStatePreview() {
+    StylishMyCarsTheme {
+        Surface(Modifier.padding(20.dp)) {
+            LoadingState()
+        }
+    }
+}
+
+@Preview(name = "EmptyState", showBackground = true, widthDp = 393)
+@Composable
+private fun EmptyStatePreview() {
+    StylishMyCarsTheme {
+        Surface(Modifier.padding(20.dp)) {
+            EmptyState(onAddClick = {})
+        }
+    }
+}
+
+@Preview(name = "NoSearchResultState", showBackground = true, widthDp = 393)
+@Composable
+private fun NoSearchResultStatePreview() {
+    StylishMyCarsTheme {
+        Surface(Modifier.padding(20.dp)) {
+            NoSearchResultState()
+        }
+    }
 }

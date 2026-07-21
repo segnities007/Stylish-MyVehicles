@@ -11,6 +11,7 @@ sealed interface VehicleDetailIntent {
     data object ExportFuelCsv : VehicleDetailIntent
     data object ExportMaintenanceCsv : VehicleDetailIntent
     data object ExportCostCsv : VehicleDetailIntent
+
     // メンテナンス目安の編集
     data class EditSchedule(val scheduleId: Long) : VehicleDetailIntent
     data object CloseScheduleDialog : VehicleDetailIntent

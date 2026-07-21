@@ -50,6 +50,7 @@ class MaintenanceRecordViewModel(
         when (intent) {
             is MaintenanceRecordIntent.SelectPeriod ->
                 _uiState.update { it.copy(selectedPeriod = intent.period) }
+
             is MaintenanceRecordIntent.OpenAddDialog ->
                 _uiState.update {
                     it.copy(
@@ -61,44 +62,48 @@ class MaintenanceRecordViewModel(
                         inputTitle = "",
                         inputCost = "",
                         inputShopName = "",
-                        inputMemo = "",
-                        inputPhotoUri = null,
                     )
                 }
+
             is MaintenanceRecordIntent.EditRecord -> openEditDialog(intent.recordId)
             is MaintenanceRecordIntent.CloseDialog ->
                 _uiState.update { it.copy(isDialogOpen = false, editingRecordId = null) }
+
             is MaintenanceRecordIntent.DateChanged ->
                 _uiState.update { it.copy(inputDate = intent.value) }
+
             is MaintenanceRecordIntent.OdometerChanged ->
                 _uiState.update { it.copy(inputOdometer = intent.value.filter { c -> c.isDigit() }) }
+
             is MaintenanceRecordIntent.CategoryChanged ->
                 _uiState.update {
                     // タイトルが未入力、またはカテゴリの自動入力そのままなら新カテゴリに合わせて切替える
                     val isDefaultTitle = it.inputTitle.isBlank() ||
-                        com.segnities007.stylish_mycars.domain.model.MaintenanceCategory.entries
-                            .any { cat -> cat.label == it.inputTitle }
+                            com.segnities007.stylish_mycars.domain.model.MaintenanceCategory.entries
+                                .any { cat -> cat.label == it.inputTitle }
                     it.copy(
                         inputCategory = intent.value,
                         inputTitle = if (isDefaultTitle) intent.value.label else it.inputTitle,
                     )
                 }
+
             is MaintenanceRecordIntent.TitleChanged ->
                 _uiState.update { it.copy(inputTitle = intent.value) }
+
             is MaintenanceRecordIntent.CostChanged ->
                 _uiState.update { it.copy(inputCost = intent.value.filter { c -> c.isDigit() }) }
+
             is MaintenanceRecordIntent.ShopNameChanged ->
                 _uiState.update { it.copy(inputShopName = intent.value) }
-            is MaintenanceRecordIntent.MemoChanged ->
-                _uiState.update { it.copy(inputMemo = intent.value) }
-            is MaintenanceRecordIntent.PhotoChanged ->
-                _uiState.update { it.copy(inputPhotoUri = intent.value) }
+
             is MaintenanceRecordIntent.Save -> save()
             is MaintenanceRecordIntent.RequestDelete ->
                 _uiState.update { it.copy(deletingRecordId = intent.recordId) }
+
             is MaintenanceRecordIntent.ConfirmDelete -> confirmDelete()
             is MaintenanceRecordIntent.DismissDelete ->
                 _uiState.update { it.copy(deletingRecordId = null) }
+
             is MaintenanceRecordIntent.NavigateBack ->
                 _effects.trySend(MaintenanceRecordEffect.NavigateBack)
         }
@@ -116,8 +121,6 @@ class MaintenanceRecordViewModel(
                 inputTitle = record.title,
                 inputCost = if (record.cost > 0) record.cost.toString() else "",
                 inputShopName = record.shopName,
-                inputMemo = record.memo,
-                inputPhotoUri = record.photoUri,
             )
         }
     }
@@ -128,7 +131,8 @@ class MaintenanceRecordViewModel(
 
         viewModelScope.launch {
             if (state.isEditing) {
-                val existing = state.records.find { it.id == state.editingRecordId } ?: return@launch
+                val existing =
+                    state.records.find { it.id == state.editingRecordId } ?: return@launch
                 updateMaintenanceRecordUseCase(
                     existing.copy(
                         date = state.inputDate,
@@ -137,11 +141,10 @@ class MaintenanceRecordViewModel(
                         title = state.inputTitle.trim(),
                         cost = state.inputCost.toIntOrNull() ?: 0,
                         shopName = state.inputShopName.trim(),
-                        memo = state.inputMemo.trim(),
-                        photoUri = state.inputPhotoUri,
                     ),
                 )
-            } else {
+            }
+            else {
                 insertMaintenanceRecordUseCase(
                     MaintenanceRecord(
                         vehicleId = vehicleId,
@@ -151,8 +154,6 @@ class MaintenanceRecordViewModel(
                         title = state.inputTitle.trim(),
                         cost = state.inputCost.toIntOrNull() ?: 0,
                         shopName = state.inputShopName.trim(),
-                        memo = state.inputMemo.trim(),
-                        photoUri = state.inputPhotoUri,
                     ),
                 )
             }

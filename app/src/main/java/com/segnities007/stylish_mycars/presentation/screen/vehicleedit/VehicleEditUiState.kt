@@ -25,10 +25,6 @@ data class VehicleEditUiState(
     val insuranceCompany: String = "",
     val insuranceRank: String = "",
     val taxPaid: Boolean = false,
-    // 写真
-    val photoUri: String? = null,
-    // メモ
-    val memo: String = "",
     // 状態
     val isEditing: Boolean = false,
     val isSaving: Boolean = false,
@@ -44,22 +40,30 @@ data class VehicleEditUiState(
         get() = if (name.isBlank()) "車種名は必須です" else null
 
     val yearError: String?
-        get() = year.toIntOrNull()?.let {
-            if (it < 1900 || it > 2100) "1900〜2100の範囲で入力してください" else null
-        } ?: year.takeIf { it.isNotBlank() }?.let { "数値で入力してください" }
+        get() = year.toIntOrNull()
+            ?.let {
+                if (it < 1900 || it > 2100) "1900〜2100の範囲で入力してください" else null
+            } ?: year.takeIf { it.isNotBlank() }
+            ?.let { "数値で入力してください" }
 
     val displacementError: String?
-        get() = displacement.toIntOrNull()?.let {
-            if (it <= 0) "0より大きい値を入力してください" else null
-        } ?: displacement.takeIf { it.isNotBlank() }?.let { "数値で入力してください" }
+        get() = displacement.toIntOrNull()
+            ?.let {
+                if (it <= 0) "0より大きい値を入力してください" else null
+            } ?: displacement.takeIf { it.isNotBlank() }
+            ?.let { "数値で入力してください" }
 
     val weightError: String?
-        get() = weight.toIntOrNull()?.let {
-            if (it <= 0) "0より大きい値を入力してください" else null
-        } ?: weight.takeIf { it.isNotBlank() }?.let { "数値で入力してください" }
+        get() = weight.toIntOrNull()
+            ?.let {
+                if (it <= 0) "0より大きい値を入力してください" else null
+            } ?: weight.takeIf { it.isNotBlank() }
+            ?.let { "数値で入力してください" }
 
     val maxLoadKgError: String?
-        get() = maxLoadKg.toIntOrNull()?.let {
-            if (it <= 0) "0より大きい値を入力してください" else null
-        } ?: maxLoadKg.takeIf { it.isNotBlank() }?.let { "数値で入力してください" }
+        get() = maxLoadKg.toIntOrNull()
+            ?.let {
+                if (it <= 0) "0より大きい値を入力してください" else null
+            } ?: maxLoadKg.takeIf { it.isNotBlank() }
+            ?.let { "数値で入力してください" }
 }

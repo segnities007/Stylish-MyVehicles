@@ -8,9 +8,9 @@ import androidx.work.WorkManager
 import com.segnities007.stylish_mycars.app.di.appModule
 import com.segnities007.stylish_mycars.data.notification.NotificationHelper
 import com.segnities007.stylish_mycars.data.worker.DeadlineCheckWorker
-import java.util.concurrent.TimeUnit
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
+import java.util.concurrent.TimeUnit
 
 class StylishMyCarsApp : Application() {
     override fun onCreate() {
@@ -31,10 +31,11 @@ class StylishMyCarsApp : Application() {
                     .build(),
             )
             .build()
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "deadline_check",
-            ExistingPeriodicWorkPolicy.KEEP,
-            request,
-        )
+        WorkManager.getInstance(this)
+            .enqueueUniquePeriodicWork(
+                "deadline_check",
+                ExistingPeriodicWorkPolicy.KEEP,
+                request,
+            )
     }
 }

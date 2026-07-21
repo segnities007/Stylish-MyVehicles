@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -39,7 +40,9 @@ fun StylishDatePickerField(
         onValueChange = {},
         label = { Text(label) },
         placeholder = { Text(placeholder) },
-        modifier = modifier.fillMaxWidth().clickable { showDialog = true },
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { showDialog = true },
         readOnly = true,
         singleLine = true,
     )
@@ -71,5 +74,29 @@ fun StylishDatePickerField(
         ) {
             DatePicker(state = datePickerState)
         }
+    }
+}
+
+@Preview(name = "Stylish date picker field", showBackground = true, widthDp = 393)
+@Composable
+private fun StylishDatePickerFieldPreview() {
+    MaterialTheme {
+        StylishDatePickerField(
+            value = LocalDate.now(),
+            onValueChange = {},
+            label = "日付",
+        )
+    }
+}
+
+@Preview(name = "Stylish date picker field (null)", showBackground = true, widthDp = 393)
+@Composable
+private fun StylishDatePickerFieldNullPreview() {
+    MaterialTheme {
+        StylishDatePickerField(
+            value = null,
+            onValueChange = {},
+            label = "日付",
+        )
     }
 }

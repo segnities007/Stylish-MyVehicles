@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -12,23 +14,36 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_mycars.domain.model.CostCategory
+import com.segnities007.stylish_mycars.domain.model.CostRecord
+import com.segnities007.stylish_mycars.domain.repository.CostRecordRepository
+import com.segnities007.stylish_mycars.domain.usecase.cost.DeleteCostRecordUseCase
+import com.segnities007.stylish_mycars.domain.usecase.cost.GetCostRecordsUseCase
+import com.segnities007.stylish_mycars.domain.usecase.cost.InsertCostRecordUseCase
+import com.segnities007.stylish_mycars.domain.usecase.cost.UpdateCostRecordUseCase
 import com.segnities007.stylish_mycars.presentation.components.atoms.StylishIconButton
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedListItemColumn
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishDeleteConfirmDialog
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishEmptyState
 import com.segnities007.stylish_mycars.presentation.components.molecules.models.StylishConnectedListItem
 import com.segnities007.stylish_mycars.presentation.components.organisms.StylishHeader
+import com.segnities007.stylish_mycars.presentation.components.organisms.StylishScaffold
 import com.segnities007.stylish_mycars.presentation.screen.cost.components.CostInputDialog
 import com.segnities007.stylish_mycars.presentation.screen.cost.components.CostSummarySection
+import com.segnities007.stylish_mycars.presentation.theme.StylishMyCarsTheme
+import kotlinx.coroutines.flow.flowOf
+import java.time.LocalDate
 
 @Composable
 fun CostListScreen(
@@ -46,9 +61,8 @@ fun CostListScreen(
         }
     }
 
-    Scaffold(
+    StylishScaffold(
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.background,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { viewModel.accept(CostListIntent.OpenAddDialog) },
@@ -58,8 +72,12 @@ fun CostListScreen(
                 Icon(Icons.Default.Add, contentDescription = "費用を記録")
             }
         },
-    ) { innerPadding ->
-        Column(Modifier.fillMaxSize().padding(innerPadding)) {
+    ) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
             StylishHeader(
                 modifier = Modifier.padding(horizontal = 20.dp),
                 title = { Text("費用") },
@@ -83,12 +101,14 @@ fun CostListScreen(
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
                     }
+
                 state.filteredRecords.isEmpty() ->
                     StylishEmptyState(
                         icon = Icons.Default.AttachMoney,
                         title = "費用記録がありません",
                         description = "給油・整備の記録や下の＋ボタンから費用を追加できます",
                     )
+
                 else -> {
                     val filtered = state.filteredRecords
                     StylishConnectedListItemColumn(
@@ -127,5 +147,66 @@ fun CostListScreen(
             onConfirm = { viewModel.accept(CostListIntent.ConfirmDelete) },
             onDismiss = { viewModel.accept(CostListIntent.DismissDelete) },
         )
+    }
+}
+
+@Preview(name = "CostListScreen", showBackground = true, widthDp = 393)
+@Composable
+private fun CostListScreenPreview() {
+    StylishMyCarsTheme {
+        Surface() {
+            val repository = remember {
+                object : CostRecordRepository {
+                    override fun getByVehicleId(vehicleId: Long) = flowOf(
+                        listOf(
+                            CostRecord(
+                                1,
+                                1,
+                                LocalDate.of(2026, 7, 15),
+                                CostCategory.FUEL,
+                                "給油",
+                                5000
+                            ),
+                            CostRecord(
+                                2,
+                                1,
+                                LocalDate.of(2026, 7, 10),
+                                CostCategory.PARKING,
+                                "駐車場",
+                                1500
+                            ),
+                            CostRecord(
+                                3,
+                                1,
+                                LocalDate.of(2026, 7, 5),
+                                CostCategory.MAINTENANCE,
+                                "オイル交換",
+                                8000
+                            ),
+                        ),
+                    )
+
+                    override fun getByVehicleIdAndDateRange(
+                        vehicleId: Long,
+                        start: LocalDate,
+                        end: LocalDate
+                    ) = flowOf<List<CostRecord>>(emptyList())
+
+                    override suspend fun insert(record: CostRecord) = 0L
+                    override suspend fun update(record: CostRecord) {}
+                    override suspend fun delete(record: CostRecord) {}
+                }
+            }
+            val viewModel = remember {
+                CostListViewModel(
+                    vehicleId = 1L,
+                    getCostRecordsUseCase = GetCostRecordsUseCase(repository),
+                    insertCostRecordUseCase = InsertCostRecordUseCase(repository),
+                    updateCostRecordUseCase = UpdateCostRecordUseCase(repository),
+                    deleteCostRecordUseCase = DeleteCostRecordUseCase(repository),
+                )
+            }
+            CostListScreen(viewModel = viewModel, onNavigateBack = {})
+        }
     }
 }

@@ -1,40 +1,46 @@
 package com.segnities007.stylish_mycars.presentation.screen.maintenance
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_mycars.domain.model.MaintenanceCategory
 import com.segnities007.stylish_mycars.domain.model.MaintenanceRecord
+import com.segnities007.stylish_mycars.domain.model.CostRecord
+import com.segnities007.stylish_mycars.domain.model.MaintenanceSchedule
 import com.segnities007.stylish_mycars.domain.model.RecordPeriod
+import com.segnities007.stylish_mycars.domain.model.Vehicle
+import com.segnities007.stylish_mycars.domain.model.VehicleCategory
+import com.segnities007.stylish_mycars.domain.repository.MaintenanceRecordRepository
+import com.segnities007.stylish_mycars.domain.repository.CostRecordRepository
+import com.segnities007.stylish_mycars.domain.repository.MaintenanceScheduleRepository
+import com.segnities007.stylish_mycars.domain.repository.VehicleRepository
+import com.segnities007.stylish_mycars.domain.usecase.maintenance.DeleteMaintenanceRecordUseCase
+import com.segnities007.stylish_mycars.domain.usecase.maintenance.GetMaintenanceRecordsUseCase
+import com.segnities007.stylish_mycars.domain.usecase.maintenance.InsertMaintenanceRecordUseCase
+import com.segnities007.stylish_mycars.domain.usecase.maintenance.UpdateMaintenanceRecordUseCase
+import com.segnities007.stylish_mycars.domain.usecase.vehicle.GetVehicleUseCase
 import com.segnities007.stylish_mycars.presentation.components.atoms.StylishIconButton
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedChipRow
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedListItemColumn
@@ -43,8 +49,11 @@ import com.segnities007.stylish_mycars.presentation.components.molecules.Stylish
 import com.segnities007.stylish_mycars.presentation.components.molecules.models.StylishConnectedChipItem
 import com.segnities007.stylish_mycars.presentation.components.molecules.models.StylishConnectedListItem
 import com.segnities007.stylish_mycars.presentation.components.organisms.StylishHeader
+import com.segnities007.stylish_mycars.presentation.components.organisms.StylishScaffold
 import com.segnities007.stylish_mycars.presentation.screen.maintenance.components.MaintenanceInputDialog
-import com.segnities007.stylish_mycars.presentation.util.ImageCaptureHelper
+import com.segnities007.stylish_mycars.presentation.theme.StylishMyCarsTheme
+import kotlinx.coroutines.flow.flowOf
+import java.time.LocalDate
 
 @Composable
 fun MaintenanceRecordScreen(
@@ -53,16 +62,6 @@ fun MaintenanceRecordScreen(
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsState()
-    val context = LocalContext.current
-    var photoUri by remember { mutableStateOf<Uri?>(null) }
-
-    val photoLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture(),
-    ) { success ->
-        if (success) {
-            photoUri?.let { viewModel.accept(MaintenanceRecordIntent.PhotoChanged(it.toString())) }
-        }
-    }
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
@@ -72,9 +71,8 @@ fun MaintenanceRecordScreen(
         }
     }
 
-    Scaffold(
+    StylishScaffold(
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.background,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { viewModel.accept(MaintenanceRecordIntent.OpenAddDialog) },
@@ -84,8 +82,12 @@ fun MaintenanceRecordScreen(
                 Icon(Icons.Default.Add, contentDescription = "整備を記録")
             }
         },
-    ) { innerPadding ->
-        Column(Modifier.fillMaxSize().padding(innerPadding)) {
+    ) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
             StylishHeader(
                 modifier = Modifier.padding(horizontal = 20.dp),
                 title = { Text("整備記録") },
@@ -101,6 +103,7 @@ fun MaintenanceRecordScreen(
             // 期間フィルタ
             StylishConnectedChipRow(
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                fillWidth = true,
                 items = RecordPeriod.entries.map { period ->
                     StylishConnectedChipItem(
                         label = period.label,
@@ -117,18 +120,21 @@ fun MaintenanceRecordScreen(
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
                     }
+
                 state.records.isEmpty() ->
                     StylishEmptyState(
                         icon = Icons.Default.Build,
                         title = "整備記録がありません",
                         description = "下の＋ボタンから整備を記録しましょう",
                     )
+
                 visibleRecords.isEmpty() ->
                     StylishEmptyState(
                         icon = Icons.Default.Build,
                         title = "この期間の記録がありません",
                         description = "期間フィルタを変更してみてください",
                     )
+
                 else ->
                     StylishConnectedListItemColumn(
                         modifier = Modifier.padding(horizontal = 20.dp),
@@ -137,26 +143,22 @@ fun MaintenanceRecordScreen(
                             StylishConnectedListItem(
                                 headline = record.title,
                                 supportingText = buildSubtitle(record),
-                                onClick = { viewModel.accept(MaintenanceRecordIntent.EditRecord(record.id)) },
+                                onClick = {
+                                    viewModel.accept(
+                                        MaintenanceRecordIntent.EditRecord(
+                                            record.id
+                                        )
+                                    )
+                                },
                                 onLongClick = {
                                     viewModel.accept(MaintenanceRecordIntent.RequestDelete(record.id))
                                 },
                                 trailingContent = {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        if (record.photoUri != null) {
-                                            Icon(
-                                                Icons.Default.CameraAlt, null,
-                                                modifier = Modifier.size(16.dp),
-                                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            )
-                                            Spacer(Modifier.width(4.dp))
-                                        }
-                                        Text(
-                                            record.category.label,
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        )
-                                    }
+                                    Text(
+                                        record.category.label,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
                                 },
                             )
                         },
@@ -169,11 +171,6 @@ fun MaintenanceRecordScreen(
         MaintenanceInputDialog(
             state = state,
             onIntent = viewModel::accept,
-            onCapturePhoto = {
-                val uri = ImageCaptureHelper.createImageUri(context, "maintenance")
-                photoUri = uri
-                photoLauncher.launch(uri)
-            },
         )
     }
 
@@ -191,6 +188,93 @@ private fun buildSubtitle(record: MaintenanceRecord): String {
     val parts = mutableListOf(record.date.toString())
     record.odometer?.let { parts.add("${String.format("%,d", it)}km") }
     if (record.cost > 0) parts.add("${String.format("%,d", record.cost)}円")
-    record.shopName.takeIf { it.isNotBlank() }?.let { parts.add(it) }
+    record.shopName.takeIf { it.isNotBlank() }
+        ?.let { parts.add(it) }
     return parts.joinToString(" / ")
+}
+
+@Preview(name = "MaintenanceRecordScreen", showBackground = true, widthDp = 393)
+@Composable
+private fun MaintenanceRecordScreenPreview() {
+    StylishMyCarsTheme {
+        Surface(Modifier.padding(20.dp)) {
+            val repository = remember {
+                object : MaintenanceRecordRepository {
+                    override fun getByVehicleId(vehicleId: Long) = flowOf(
+                        listOf(
+                            MaintenanceRecord(
+                                1,
+                                1,
+                                LocalDate.of(2026, 7, 10),
+                                50000,
+                                MaintenanceCategory.OIL,
+                                "エンジンオイル交換",
+                                5000,
+                                "カーショップA"
+                            ),
+                            MaintenanceRecord(
+                                2,
+                                1,
+                                LocalDate.of(2026, 6, 15),
+                                49000,
+                                MaintenanceCategory.TIRE,
+                                "タイヤ交換",
+                                40000,
+                                "タイヤ館"
+                            ),
+                        ),
+                    )
+
+                    override suspend fun insert(record: MaintenanceRecord) = 0L
+                    override suspend fun update(record: MaintenanceRecord) {}
+                    override suspend fun delete(record: MaintenanceRecord) {}
+                }
+            }
+            val vehicleRepository = remember {
+                object : VehicleRepository {
+                    override fun getAll() = flowOf<List<Vehicle>>(emptyList())
+                    override fun getById(id: Long) = flowOf<Vehicle?>(
+                        Vehicle(1, VehicleCategory.CAR, "トヨタ", "プリウス", "Z", 2022),
+                    )
+
+                    override suspend fun insert(vehicle: Vehicle) = 0L
+                    override suspend fun update(vehicle: Vehicle) {}
+                    override suspend fun delete(vehicle: Vehicle) {}
+                }
+            }
+            val costRepository = remember {
+                object : CostRecordRepository {
+                    override fun getByVehicleId(vehicleId: Long) = flowOf<List<CostRecord>>(emptyList())
+                    override fun getByVehicleIdAndDateRange(
+                        vehicleId: Long, start: LocalDate, end: LocalDate
+                    ) = flowOf<List<CostRecord>>(emptyList())
+                    override suspend fun insert(record: com.segnities007.stylish_mycars.domain.model.CostRecord) = 0L
+                    override suspend fun update(record: com.segnities007.stylish_mycars.domain.model.CostRecord) {}
+                    override suspend fun delete(record: com.segnities007.stylish_mycars.domain.model.CostRecord) {}
+                }
+            }
+            val scheduleRepository = remember {
+                object : MaintenanceScheduleRepository {
+                    override fun getByVehicleId(vehicleId: Long) = flowOf<List<MaintenanceSchedule>>(emptyList())
+                    override suspend fun getAll() = emptyList<MaintenanceSchedule>()
+                    override suspend fun insertDefaults(vehicleId: Long, category: VehicleCategory) {}
+                    override suspend fun update(schedule: MaintenanceSchedule) {}
+                    override suspend fun updateLastDone(vehicleId: Long, category: String, date: LocalDate, odometer: Int?) {}
+                }
+            }
+            val viewModel = remember {
+                MaintenanceRecordViewModel(
+                    vehicleId = 1L,
+                    getMaintenanceRecordsUseCase = GetMaintenanceRecordsUseCase(repository),
+                    insertMaintenanceRecordUseCase = InsertMaintenanceRecordUseCase(
+                        repository, costRepository, scheduleRepository
+                    ),
+                    updateMaintenanceRecordUseCase = UpdateMaintenanceRecordUseCase(repository),
+                    deleteMaintenanceRecordUseCase = DeleteMaintenanceRecordUseCase(repository),
+                    getVehicleUseCase = GetVehicleUseCase(vehicleRepository),
+                )
+            }
+            MaintenanceRecordScreen(viewModel = viewModel, onNavigateBack = {})
+        }
+    }
 }

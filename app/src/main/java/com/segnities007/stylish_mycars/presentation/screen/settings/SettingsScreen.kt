@@ -5,12 +5,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -19,11 +21,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_mycars.presentation.components.atoms.StylishIconButton
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedListItemColumn
 import com.segnities007.stylish_mycars.presentation.components.molecules.models.StylishConnectedListItem
 import com.segnities007.stylish_mycars.presentation.components.organisms.StylishHeader
+import com.segnities007.stylish_mycars.presentation.components.organisms.StylishScaffold
+import com.segnities007.stylish_mycars.presentation.theme.StylishMyCarsTheme
 import com.segnities007.stylish_mycars.presentation.theme.ThemeMode
 import com.segnities007.stylish_mycars.presentation.theme.ThemePreference
 
@@ -37,11 +42,14 @@ fun SettingsScreen(
     val context = LocalContext.current
     var currentTheme by remember { mutableStateOf(ThemePreference.getThemeMode(context)) }
 
-    Scaffold(
+    StylishScaffold(
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.background,
-    ) { innerPadding ->
-        Column(Modifier.fillMaxSize().padding(innerPadding)) {
+    ) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
             StylishHeader(
                 modifier = Modifier.padding(horizontal = 20.dp),
                 title = { Text("設定") },
@@ -98,6 +106,16 @@ fun SettingsScreen(
                     ),
                 )
             }
+        }
+    }
+}
+
+@Preview(name = "SettingsScreen", showBackground = true, widthDp = 393)
+@Composable
+private fun SettingsScreenPreview() {
+    StylishMyCarsTheme {
+        Surface(Modifier.padding(20.dp)) {
+            SettingsScreen(onNavigateBack = {}, onThemeChanged = {}, onNavigateToLicenses = {})
         }
     }
 }

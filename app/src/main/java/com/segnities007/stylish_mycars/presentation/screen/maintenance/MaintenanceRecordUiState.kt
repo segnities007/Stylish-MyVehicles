@@ -20,8 +20,6 @@ data class MaintenanceRecordUiState(
     val inputTitle: String = "",
     val inputCost: String = "",
     val inputShopName: String = "",
-    val inputMemo: String = "",
-    val inputPhotoUri: String? = null,
     // 削除確認
     val deletingRecordId: Long? = null,
 ) {

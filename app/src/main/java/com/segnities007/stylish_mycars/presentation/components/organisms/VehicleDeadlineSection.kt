@@ -1,6 +1,7 @@
 package com.segnities007.stylish_mycars.presentation.components.organisms
 
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Icon
@@ -16,8 +17,6 @@ import com.segnities007.stylish_mycars.domain.service.VehicleTaxCalculator
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedListItemColumn
 import com.segnities007.stylish_mycars.presentation.components.molecules.models.StylishConnectedListItem
 import com.segnities007.stylish_mycars.presentation.theme.StylishMyCarsTheme
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
 import java.time.LocalDate
 
 /** 車検・自賠責・任意保険・自動車税の期限一覧。タップで編集へ誘導する。 */
@@ -44,26 +43,53 @@ fun VehicleDeadlineSection(
                     days <= 365 -> "あと${days / 30}ヶ月"
                     else -> "あと${days / 365}年${(days % 365) / 30}ヶ月"
                 }
-                add(StylishConnectedListItem("車検", "$expiry（$status）", onEdit, trailingContent = chevron))
+                add(
+                    StylishConnectedListItem(
+                        "車検",
+                        "$expiry（$status）",
+                        onEdit,
+                        trailingContent = chevron
+                    )
+                )
             }
             vehicle.jibaiExpiry?.let { expiry ->
                 val days = InspectionCalculator.daysUntilExpiry(expiry)
                 val status = if (days < 0) "⚠️ 期限切れ" else "あと${days}日"
-                add(StylishConnectedListItem("自賠責", "$expiry（$status）", onEdit, trailingContent = chevron))
+                add(
+                    StylishConnectedListItem(
+                        "自賠責",
+                        "$expiry（$status）",
+                        onEdit,
+                        trailingContent = chevron
+                    )
+                )
             }
             vehicle.insuranceExpiry?.let { expiry ->
                 val days = InspectionCalculator.daysUntilExpiry(expiry)
                 val status = if (days < 0) "⚠️ 期限切れ" else "あと${days}日"
-                add(StylishConnectedListItem("任意保険", "$expiry（$status）", onEdit, trailingContent = chevron))
+                add(
+                    StylishConnectedListItem(
+                        "任意保険",
+                        "$expiry（$status）",
+                        onEdit,
+                        trailingContent = chevron
+                    )
+                )
             }
-            val tax = VehicleTaxCalculator.calculateTax(vehicle.category, vehicle.displacement, vehicle.maxLoadKg)
+            val tax = VehicleTaxCalculator.calculateTax(
+                vehicle.category,
+                vehicle.displacement,
+                vehicle.maxLoadKg
+            )
             if (tax != null) {
-                add(StylishConnectedListItem(
-                    taxLabel(vehicle.category),
-                    "${String.format("%,d", tax)}円/年${if (vehicle.taxPaid) " ✓" else ""}",
-                    onEdit,
-                    trailingContent = chevron,
-                ))
+                add(
+                    StylishConnectedListItem(
+                        taxLabel(vehicle.category),
+                        "${String.format("%,d", tax)}円/年${if (vehicle.taxPaid) " ✓" else ""}",
+                        onEdit,
+                        trailingContent = chevron,
+                    )
+                )
             }
         },
     )
@@ -83,9 +109,12 @@ private fun VehicleDeadlineSectionPreview() {
             VehicleDeadlineSection(
                 vehicle = Vehicle(
                     maker = "トヨタ", name = "プリウス",
-                    firstRegistrationDate = LocalDate.now().minusYears(2),
-                    jibaiExpiry = LocalDate.now().plusDays(45),
-                    insuranceExpiry = LocalDate.now().plusMonths(5),
+                    firstRegistrationDate = LocalDate.now()
+                        .minusYears(2),
+                    jibaiExpiry = LocalDate.now()
+                        .plusDays(45),
+                    insuranceExpiry = LocalDate.now()
+                        .plusMonths(5),
                     displacement = 1800,
                     taxPaid = true,
                 ),

@@ -54,8 +54,6 @@ class VehicleEditViewModel(
                         insuranceCompany = vehicle.insuranceCompany,
                         insuranceRank = vehicle.insuranceRank?.toString() ?: "",
                         taxPaid = vehicle.taxPaid,
-                        photoUri = vehicle.photoUri,
-                        memo = vehicle.memo,
                         isEditing = true,
                     )
                 }
@@ -67,48 +65,69 @@ class VehicleEditViewModel(
         when (intent) {
             is VehicleEditIntent.CategoryChanged ->
                 _uiState.update { it.copy(category = intent.value) }
+
             is VehicleEditIntent.MakerChanged ->
                 _uiState.update { it.copy(maker = intent.value) }
+
             is VehicleEditIntent.NameChanged ->
                 _uiState.update { it.copy(name = intent.value) }
+
             is VehicleEditIntent.GradeChanged ->
                 _uiState.update { it.copy(grade = intent.value) }
+
             is VehicleEditIntent.YearChanged ->
-                _uiState.update { it.copy(year = intent.value.filter { c -> c.isDigit() }.take(4)) }
+                _uiState.update {
+                    it.copy(year = intent.value.filter { c -> c.isDigit() }
+                        .take(4))
+                }
+
             is VehicleEditIntent.ModelCodeChanged ->
                 _uiState.update { it.copy(modelCode = intent.value) }
+
             is VehicleEditIntent.PlateNumberChanged ->
                 _uiState.update { it.copy(plateNumber = intent.value) }
+
             is VehicleEditIntent.DisplacementChanged ->
                 _uiState.update { it.copy(displacement = intent.value.filter { c -> c.isDigit() }) }
+
             is VehicleEditIntent.WeightChanged ->
                 _uiState.update { it.copy(weight = intent.value.filter { c -> c.isDigit() }) }
+
             is VehicleEditIntent.MaxLoadKgChanged ->
                 _uiState.update { it.copy(maxLoadKg = intent.value.filter { c -> c.isDigit() }) }
+
             is VehicleEditIntent.ColorChanged ->
                 _uiState.update { it.copy(color = intent.value) }
+
             is VehicleEditIntent.FirstRegistrationDateChanged ->
                 _uiState.update { it.copy(firstRegistrationDate = intent.value) }
+
             is VehicleEditIntent.JibaiExpiryChanged ->
                 _uiState.update { it.copy(jibaiExpiry = intent.value) }
+
             is VehicleEditIntent.InsuranceExpiryChanged ->
                 _uiState.update { it.copy(insuranceExpiry = intent.value) }
+
             is VehicleEditIntent.InsuranceCompanyChanged ->
                 _uiState.update { it.copy(insuranceCompany = intent.value) }
+
             is VehicleEditIntent.InsuranceRankChanged ->
-                _uiState.update { it.copy(insuranceRank = intent.value.filter { c -> c.isDigit() }.take(2)) }
+                _uiState.update {
+                    it.copy(insuranceRank = intent.value.filter { c -> c.isDigit() }
+                        .take(2))
+                }
+
             is VehicleEditIntent.TaxPaidChanged ->
                 _uiState.update { it.copy(taxPaid = intent.value) }
-            is VehicleEditIntent.PhotoUriChanged ->
-                _uiState.update { it.copy(photoUri = intent.value) }
-            is VehicleEditIntent.MemoChanged ->
-                _uiState.update { it.copy(memo = intent.value) }
+
             is VehicleEditIntent.Save -> save()
             is VehicleEditIntent.RequestDelete ->
                 _uiState.update { it.copy(showDeleteDialog = true) }
+
             is VehicleEditIntent.ConfirmDelete -> confirmDelete()
             is VehicleEditIntent.DismissDeleteDialog ->
                 _uiState.update { it.copy(showDeleteDialog = false) }
+
             is VehicleEditIntent.NavigateBack ->
                 _effects.trySend(VehicleEditEffect.NavigateBack)
         }
@@ -121,7 +140,11 @@ class VehicleEditViewModel(
 
         viewModelScope.launch {
             val inspectionExpiry = state.firstRegistrationDate?.let {
-                InspectionCalculator.calculateCurrentExpiry(state.category, it, state.displacement.toIntOrNull())
+                InspectionCalculator.calculateCurrentExpiry(
+                    state.category,
+                    it,
+                    state.displacement.toIntOrNull()
+                )
             }
             val vehicle = Vehicle(
                 id = state.vehicleId ?: 0,
@@ -143,12 +166,11 @@ class VehicleEditViewModel(
                 insuranceCompany = state.insuranceCompany.trim(),
                 insuranceRank = state.insuranceRank.toIntOrNull(),
                 taxPaid = state.taxPaid,
-                photoUri = state.photoUri,
-                memo = state.memo.trim(),
             )
             if (state.isEditing) {
                 updateVehicleUseCase(vehicle)
-            } else {
+            }
+            else {
                 insertVehicleUseCase(vehicle)
             }
             _effects.send(VehicleEditEffect.NavigateBack)

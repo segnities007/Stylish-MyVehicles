@@ -15,8 +15,6 @@ sealed interface MaintenanceRecordIntent {
     data class TitleChanged(val value: String) : MaintenanceRecordIntent
     data class CostChanged(val value: String) : MaintenanceRecordIntent
     data class ShopNameChanged(val value: String) : MaintenanceRecordIntent
-    data class MemoChanged(val value: String) : MaintenanceRecordIntent
-    data class PhotoChanged(val value: String?) : MaintenanceRecordIntent
     data object Save : MaintenanceRecordIntent
     data class RequestDelete(val recordId: Long) : MaintenanceRecordIntent
     data object ConfirmDelete : MaintenanceRecordIntent

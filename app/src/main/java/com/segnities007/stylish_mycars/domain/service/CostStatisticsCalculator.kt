@@ -14,13 +14,15 @@ object CostStatisticsCalculator {
      */
     fun averageMonthlyCost(records: List<CostRecord>, today: LocalDate = LocalDate.now()): Double? {
         if (records.isEmpty()) return null
-        val total = records.sumOf { it.amount }.toDouble()
+        val total = records.sumOf { it.amount }
+            .toDouble()
         val firstDate = records.minOf { it.date }
         // 最初の記録の月から今月まで（両端含む）の月数で按分する
         val months = ChronoUnit.MONTHS.between(
             firstDate.withDayOfMonth(1),
             today.withDayOfMonth(1),
-        ).toInt() + 1
+        )
+            .toInt() + 1
         return total / months.coerceAtLeast(1)
     }
 

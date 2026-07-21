@@ -42,28 +42,33 @@ class FuelRecordViewModel(
         when (intent) {
             is FuelRecordIntent.SelectPeriod ->
                 _uiState.update { it.copy(selectedPeriod = intent.period) }
+
             is FuelRecordIntent.OpenAddDialog -> openAddDialog()
             is FuelRecordIntent.EditRecord -> openEditDialog(intent.recordId)
             is FuelRecordIntent.CloseDialog ->
                 _uiState.update {
                     it.copy(isDialogOpen = false, editingRecordId = null, calculatedEconomy = null)
                 }
+
             is FuelRecordIntent.DateChanged ->
                 _uiState.update { it.copy(inputDate = intent.value) }
+
             is FuelRecordIntent.OdometerChanged -> {
                 _uiState.update { it.copy(inputOdometer = intent.value.filter { c -> c.isDigit() }) }
                 recalculateEconomy()
             }
+
             is FuelRecordIntent.VolumeChanged -> {
                 _uiState.update { it.copy(inputVolume = intent.value.filter { c -> c.isDigit() || c == '.' }) }
                 recalculateEconomy()
             }
+
             is FuelRecordIntent.AmountChanged ->
                 _uiState.update { it.copy(inputAmount = intent.value.filter { c -> c.isDigit() }) }
+
             is FuelRecordIntent.FullTankChanged ->
                 _uiState.update { it.copy(inputIsFullTank = intent.value) }
-            is FuelRecordIntent.MemoChanged ->
-                _uiState.update { it.copy(inputMemo = intent.value) }
+
             is FuelRecordIntent.ReceiptScanned -> {
                 _uiState.update {
                     it.copy(
@@ -74,14 +79,18 @@ class FuelRecordViewModel(
                 }
                 recalculateEconomy()
             }
+
             is FuelRecordIntent.ScanningChanged ->
                 _uiState.update { it.copy(isScanning = intent.value) }
+
             is FuelRecordIntent.Save -> save()
             is FuelRecordIntent.RequestDelete ->
                 _uiState.update { it.copy(deletingRecordId = intent.recordId) }
+
             is FuelRecordIntent.ConfirmDelete -> confirmDelete()
             is FuelRecordIntent.DismissDelete ->
                 _uiState.update { it.copy(deletingRecordId = null) }
+
             is FuelRecordIntent.NavigateBack ->
                 _effects.trySend(FuelRecordEffect.NavigateBack)
         }
@@ -98,7 +107,6 @@ class FuelRecordViewModel(
                 inputVolume = "",
                 inputAmount = "",
                 inputIsFullTank = true,
-                inputMemo = "",
                 calculatedEconomy = null,
             )
         }
@@ -115,7 +123,6 @@ class FuelRecordViewModel(
                 inputVolume = record.volume.toString(),
                 inputAmount = record.amount.toString(),
                 inputIsFullTank = record.isFullTank,
-                inputMemo = record.memo,
                 calculatedEconomy = record.fuelEconomy?.let { e -> "%.1f km/L".format(e) },
             )
         }
@@ -130,7 +137,8 @@ class FuelRecordViewModel(
             state.records
                 .filter { it.id != state.editingRecordId }
                 .firstOrNull { it.odometer < currentOdo }
-        } else {
+        }
+        else {
             state.records.firstOrNull()
         }
 
@@ -157,18 +165,22 @@ class FuelRecordViewModel(
                 state.records
                     .filter { it.id != state.editingRecordId }
                     .firstOrNull { it.odometer < currentOdo }
-            } else {
+            }
+            else {
                 state.records.firstOrNull()
             }
 
-            val economy = if (state.inputIsFullTank && prevRecord != null && prevRecord.isFullTank) {
-                FuelEconomyCalculator.calculate(currentOdo, prevRecord.odometer, volume)
-            } else null
+            val economy =
+                if (state.inputIsFullTank && prevRecord != null && prevRecord.isFullTank) {
+                    FuelEconomyCalculator.calculate(currentOdo, prevRecord.odometer, volume)
+                }
+                else null
 
             val unitPrice = if (volume > 0) (amount / volume).toInt() else null
 
             if (state.isEditing) {
-                val existing = state.records.find { it.id == state.editingRecordId } ?: return@launch
+                val existing =
+                    state.records.find { it.id == state.editingRecordId } ?: return@launch
                 updateFuelRecordUseCase(
                     existing.copy(
                         date = state.inputDate,
@@ -178,10 +190,10 @@ class FuelRecordViewModel(
                         unitPrice = unitPrice,
                         fuelEconomy = economy,
                         isFullTank = state.inputIsFullTank,
-                        memo = state.inputMemo,
                     ),
                 )
-            } else {
+            }
+            else {
                 insertFuelRecordUseCase(
                     FuelRecord(
                         vehicleId = vehicleId,
@@ -192,7 +204,6 @@ class FuelRecordViewModel(
                         unitPrice = unitPrice,
                         fuelEconomy = economy,
                         isFullTank = state.inputIsFullTank,
-                        memo = state.inputMemo,
                     ),
                 )
             }

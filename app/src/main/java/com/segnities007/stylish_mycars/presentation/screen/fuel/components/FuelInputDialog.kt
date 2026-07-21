@@ -15,7 +15,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -57,7 +56,8 @@ fun FuelInputDialog(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text("読み取り中…")
-                } else {
+                }
+                else {
                     Icon(Icons.Default.CameraAlt, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
                     Text("レシートを読み取って自動入力")
@@ -102,7 +102,11 @@ fun FuelInputDialog(
                 Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text("満タン", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                Text(
+                    "満タン",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.weight(1f)
+                )
                 Switch(
                     checked = state.inputIsFullTank,
                     onCheckedChange = { onIntent(FuelRecordIntent.FullTankChanged(it)) },

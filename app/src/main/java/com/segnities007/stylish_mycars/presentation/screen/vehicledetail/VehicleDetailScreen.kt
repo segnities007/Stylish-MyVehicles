@@ -3,11 +3,9 @@ package com.segnities007.stylish_mycars.presentation.screen.vehicledetail
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -17,17 +15,17 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocalGasStation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import com.segnities007.stylish_mycars.domain.model.Vehicle
+import com.segnities007.stylish_mycars.domain.model.VehicleCategory
 import com.segnities007.stylish_mycars.domain.usecase.ExportDocument
 import com.segnities007.stylish_mycars.presentation.components.atoms.StylishIconButton
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedCardRow
@@ -35,11 +33,13 @@ import com.segnities007.stylish_mycars.presentation.components.molecules.Stylish
 import com.segnities007.stylish_mycars.presentation.components.molecules.models.StylishConnectedCardItem
 import com.segnities007.stylish_mycars.presentation.components.molecules.models.StylishConnectedListItem
 import com.segnities007.stylish_mycars.presentation.components.organisms.StylishHeader
+import com.segnities007.stylish_mycars.presentation.components.organisms.StylishScaffold
 import com.segnities007.stylish_mycars.presentation.components.organisms.StylishSectionTitle
 import com.segnities007.stylish_mycars.presentation.components.organisms.VehicleDeadlineSection
 import com.segnities007.stylish_mycars.presentation.components.organisms.VehicleInfoSection
 import com.segnities007.stylish_mycars.presentation.screen.vehicledetail.components.MaintenanceScheduleSection
 import com.segnities007.stylish_mycars.presentation.screen.vehicledetail.components.ScheduleEditDialog
+import com.segnities007.stylish_mycars.presentation.theme.StylishMyCarsTheme
 
 @Composable
 fun VehicleDetailScreen(
@@ -67,12 +67,13 @@ fun VehicleDetailScreen(
         }
     }
 
-    Scaffold(
+    StylishScaffold(
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.background,
-    ) { innerPadding ->
+    ) {
         Column(
-            Modifier.fillMaxSize().padding(innerPadding).verticalScroll(rememberScrollState()),
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
             val vehicle = state.vehicle
             StylishHeader(
@@ -96,33 +97,36 @@ fun VehicleDetailScreen(
 
             if (vehicle != null) {
                 Column(Modifier.padding(horizontal = 20.dp)) {
-                    vehicle.photoUri?.let { uri ->
-                        AsyncImage(
-                            model = uri,
-                            contentDescription = "${vehicle.maker} ${vehicle.name}",
-                            modifier = Modifier.fillMaxWidth().height(180.dp)
-                                .clip(RoundedCornerShape(12.dp)),
-                            contentScale = ContentScale.Crop,
-                        )
-                        Spacer(Modifier.height(16.dp))
-                    }
-
-                    // 記録ナビゲーション
+                    StylishSectionTitle("記録")
                     StylishConnectedCardRow(
                         items = buildList {
                             if (vehicle.category.usesFuel) {
                                 add(
                                     StylishConnectedCardItem(
-                                        title = "給油", supportingText = "${state.recentFuelRecords.size}件",
+                                        title = "給油",
+                                        supportingText = "${state.recentFuelRecords.size}件",
                                         onClick = { viewModel.accept(VehicleDetailIntent.OpenFuelRecords) },
-                                    ) { Icon(Icons.Default.LocalGasStation, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+                                    ) {
+                                        Icon(
+                                            Icons.Default.LocalGasStation,
+                                            null,
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    },
                                 )
                             }
                             add(
                                 StylishConnectedCardItem(
-                                    title = "整備", supportingText = "${state.recentMaintenanceRecords.size}件",
+                                    title = "整備",
+                                    supportingText = "${state.recentMaintenanceRecords.size}件",
                                     onClick = { viewModel.accept(VehicleDetailIntent.OpenMaintenanceRecords) },
-                                ) { Icon(Icons.Default.Build, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+                                ) {
+                                    Icon(
+                                        Icons.Default.Build,
+                                        null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                },
                             )
                         },
                     )
@@ -131,31 +135,59 @@ fun VehicleDetailScreen(
                         items = listOf(
                             StylishConnectedListItem(
                                 headline = "費用",
-                                supportingText = "今月: ${String.format("%,d", state.monthlyCost)}円 / 合計: ${String.format("%,d", state.totalCost)}円",
+                                supportingText = "今月: ${
+                                    String.format(
+                                        "%,d",
+                                        state.monthlyCost
+                                    )
+                                }円 / 合計: ${String.format("%,d", state.totalCost)}円",
                                 onClick = { viewModel.accept(VehicleDetailIntent.OpenCostList) },
                                 trailingContent = {
-                                    Icon(Icons.AutoMirrored.Filled.ArrowForward, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.ArrowForward,
+                                        null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 },
                             ),
                         ),
                     )
 
                     // レポート
-                    Spacer(Modifier.height(24.dp))
                     StylishSectionTitle("レポート")
                     StylishConnectedListItemColumn(
                         items = buildList {
                             state.averageFuelEconomy?.let {
-                                add(StylishConnectedListItem("平均燃費", "%.1f km/L".format(it), {}))
+                                add(
+                                    StylishConnectedListItem(
+                                        "平均燃費",
+                                        "%.1f km/L".format(it),
+                                        {})
+                                )
                             }
                             if (state.totalDistance > 0) {
-                                add(StylishConnectedListItem("総走行距離", "${String.format("%,d", state.totalDistance)}km", {}))
+                                add(
+                                    StylishConnectedListItem(
+                                        "総走行距離",
+                                        "${String.format("%,d", state.totalDistance)}km",
+                                        {})
+                                )
                             }
-                            add(StylishConnectedListItem("総費用", "${String.format("%,d", state.totalCost)}円", {}))
+                            add(
+                                StylishConnectedListItem(
+                                    "総費用",
+                                    "${String.format("%,d", state.totalCost)}円",
+                                    {})
+                            )
                             state.averageFuelEconomy?.let { avg ->
                                 if (state.totalDistance > 0 && avg > 0) {
                                     val costPerKm = state.totalCost.toDouble() / state.totalDistance
-                                    add(StylishConnectedListItem("1kmあたりコスト", "%.1f円/km".format(costPerKm), {}))
+                                    add(
+                                        StylishConnectedListItem(
+                                            "1kmあたりコスト",
+                                            "%.1f円/km".format(costPerKm),
+                                            {})
+                                    )
                                 }
                             }
                         },
@@ -163,7 +195,6 @@ fun VehicleDetailScreen(
 
                     // 整備スケジュール
                     if (state.schedules.isNotEmpty()) {
-                        Spacer(Modifier.height(24.dp))
                         StylishSectionTitle("メンテナンス目安")
                         MaintenanceScheduleSection(
                             schedules = state.schedules,
@@ -174,7 +205,6 @@ fun VehicleDetailScreen(
                     }
 
                     // 期限管理
-                    Spacer(Modifier.height(24.dp))
                     StylishSectionTitle("期限管理")
                     VehicleDeadlineSection(
                         vehicle = vehicle,
@@ -182,24 +212,43 @@ fun VehicleDetailScreen(
                     )
 
                     // 車両情報
-                    Spacer(Modifier.height(24.dp))
                     StylishSectionTitle("車両情報")
                     VehicleInfoSection(vehicle)
 
                     // エクスポート
-                    Spacer(Modifier.height(24.dp))
                     StylishSectionTitle("データエクスポート")
                     StylishConnectedListItemColumn(
                         items = listOf(
-                            StylishConnectedListItem("給油記録をCSV出力",
+                            StylishConnectedListItem(
+                                "給油記録をCSV出力",
                                 onClick = { viewModel.accept(VehicleDetailIntent.ExportFuelCsv) },
-                                trailingContent = { Icon(Icons.AutoMirrored.Filled.ArrowForward, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }),
-                            StylishConnectedListItem("整備記録をCSV出力",
+                                trailingContent = {
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.ArrowForward,
+                                        null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }),
+                            StylishConnectedListItem(
+                                "整備記録をCSV出力",
                                 onClick = { viewModel.accept(VehicleDetailIntent.ExportMaintenanceCsv) },
-                                trailingContent = { Icon(Icons.AutoMirrored.Filled.ArrowForward, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }),
-                            StylishConnectedListItem("費用記録をCSV出力",
+                                trailingContent = {
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.ArrowForward,
+                                        null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }),
+                            StylishConnectedListItem(
+                                "費用記録をCSV出力",
                                 onClick = { viewModel.accept(VehicleDetailIntent.ExportCostCsv) },
-                                trailingContent = { Icon(Icons.AutoMirrored.Filled.ArrowForward, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }),
+                                trailingContent = {
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.ArrowForward,
+                                        null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }),
                         ),
                     )
 
@@ -211,5 +260,31 @@ fun VehicleDetailScreen(
 
     if (state.isScheduleDialogOpen) {
         ScheduleEditDialog(state = state, onIntent = viewModel::accept)
+    }
+}
+
+@Preview(name = "VehicleDetailScreen", showBackground = true, widthDp = 393)
+@Composable
+private fun VehicleDetailScreenPreview() {
+    val vehicle = Vehicle(
+        id = 1L,
+        category = VehicleCategory.CAR,
+        maker = "トヨタ",
+        name = "カローラ",
+        grade = "G",
+        year = 2020,
+        plateNumber = "横浜 300 あ 12-34",
+        firstRegistrationDate = java.time.LocalDate.of(2020, 4, 1),
+        inspectionExpiry = java.time.LocalDate.of(2026, 4, 30),
+        insuranceExpiry = java.time.LocalDate.of(2026, 10, 1),
+        insuranceCompany = "東京海上日動",
+        memo = "セダン / シルバー",
+    )
+    StylishMyCarsTheme {
+        Surface(Modifier.padding(20.dp)) {
+            Column(Modifier.fillMaxSize()) {
+                VehicleInfoSection(vehicle)
+            }
+        }
     }
 }

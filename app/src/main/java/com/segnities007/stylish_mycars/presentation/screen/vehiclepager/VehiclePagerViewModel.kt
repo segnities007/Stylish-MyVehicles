@@ -10,8 +10,6 @@ import com.segnities007.stylish_mycars.domain.usecase.cost.GetCostRecordsUseCase
 import com.segnities007.stylish_mycars.domain.usecase.fuel.GetFuelRecordsUseCase
 import com.segnities007.stylish_mycars.domain.usecase.maintenance.GetMaintenanceSchedulesUseCase
 import com.segnities007.stylish_mycars.domain.usecase.vehicle.GetVehiclesUseCase
-import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -22,6 +20,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 class VehiclePagerViewModel(
     private val getVehiclesUseCase: GetVehiclesUseCase,
@@ -50,27 +50,39 @@ class VehiclePagerViewModel(
         when (intent) {
             is VehiclePagerIntent.AddVehicle ->
                 _effects.trySend(VehiclePagerEffect.NavigateToEdit(null))
+
             is VehiclePagerIntent.OpenSettings ->
                 _effects.trySend(VehiclePagerEffect.NavigateToSettings)
+
             is VehiclePagerIntent.EditVehicle ->
                 _effects.trySend(VehiclePagerEffect.NavigateToEdit(intent.vehicleId))
+
             is VehiclePagerIntent.OpenFuel ->
                 _effects.trySend(VehiclePagerEffect.NavigateToFuel(intent.vehicleId))
+
             is VehiclePagerIntent.OpenMaintenance ->
                 _effects.trySend(VehiclePagerEffect.NavigateToMaintenance(intent.vehicleId))
+
             is VehiclePagerIntent.OpenCost ->
                 _effects.trySend(VehiclePagerEffect.NavigateToCost(intent.vehicleId))
+
+            is VehiclePagerIntent.OpenVehicleDetail ->
+                _effects.trySend(VehiclePagerEffect.NavigateToVehicleDetail(intent.vehicleId))
+
             is VehiclePagerIntent.PageChanged ->
                 _uiState.update { it.copy(currentPage = intent.page) }
         }
     }
 
     private fun syncDashboardJobs(vehicles: List<Vehicle>) {
-        val currentIds = vehicles.map { it.id }.toSet()
-        dashboardJobs.keys.filter { it !in currentIds }.forEach { id ->
-            dashboardJobs.remove(id)?.cancel()
-            _uiState.update { it.copy(dashboardByVehicle = it.dashboardByVehicle - id) }
-        }
+        val currentIds = vehicles.map { it.id }
+            .toSet()
+        dashboardJobs.keys.filter { it !in currentIds }
+            .forEach { id ->
+                dashboardJobs.remove(id)
+                    ?.cancel()
+                _uiState.update { it.copy(dashboardByVehicle = it.dashboardByVehicle - id) }
+            }
         vehicles.forEach { vehicle ->
             if (dashboardJobs[vehicle.id] == null) {
                 dashboardJobs[vehicle.id] = viewModelScope.launch {
@@ -99,23 +111,28 @@ class VehiclePagerViewModel(
         val monthlyCost = costs
             .filter { it.date.year == now.year && it.date.month == now.month }
             .sumOf { it.amount }
-        val yearlyCost = costs.filter { it.date.year == now.year }.sumOf { it.amount }
+        val yearlyCost = costs.filter { it.date.year == now.year }
+            .sumOf { it.amount }
         val totalCost = costs.sumOf { it.amount }
 
         val economies = fuels.mapNotNull { it.fuelEconomy }
-        val avgEconomy = economies.takeIf { it.isNotEmpty() }?.average()
+        val avgEconomy = economies.takeIf { it.isNotEmpty() }
+            ?.average()
         val totalDistance = if (fuels.size >= 2) {
             fuels.maxOf { it.odometer } - fuels.minOf { it.odometer }
-        } else 0
+        }
+        else 0
 
         val nextMaintenance = schedules.mapNotNull { schedule ->
             val days = daysUntilScheduleDue(schedule, now)
             if (days != null) schedule.category.label to days else null
-        }.minByOrNull { it.second }
+        }
+            .minByOrNull { it.second }
 
         val costByCategory = com.segnities007.stylish_mycars.domain.model.CostCategory.entries
             .mapNotNull { cat ->
-                val total = costs.filter { it.category == cat }.sumOf { it.amount }
+                val total = costs.filter { it.category == cat }
+                    .sumOf { it.amount }
                 if (total > 0) cat to total else null
             }
 
@@ -162,4 +179,5 @@ sealed interface VehiclePagerEffect {
     data class NavigateToFuel(val vehicleId: Long) : VehiclePagerEffect
     data class NavigateToMaintenance(val vehicleId: Long) : VehiclePagerEffect
     data class NavigateToCost(val vehicleId: Long) : VehiclePagerEffect
+    data class NavigateToVehicleDetail(val vehicleId: Long) : VehiclePagerEffect
 }

@@ -34,7 +34,8 @@ fun UrgentAlertCard(
     modifier: Modifier = Modifier,
 ) {
     val candidates = buildList {
-        DeadlineResolver.resolve(vehicle)?.let { add(it.label to it.daysRemaining) }
+        DeadlineResolver.resolve(vehicle)
+            ?.let { add(it.label to it.daysRemaining) }
         dashboard.nextMaintenanceLabel?.let { label ->
             dashboard.nextMaintenanceDays?.let { days -> add(label to days) }
         }
@@ -51,7 +52,9 @@ fun UrgentAlertCard(
         else MaterialTheme.colorScheme.onSurface,
     ) {
         Row(
-            Modifier.fillMaxWidth().padding(16.dp),
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(Icons.Default.Event, contentDescription = null)
@@ -83,7 +86,9 @@ private fun UrgentAlertCardPreview() {
             UrgentAlertCard(
                 vehicle = Vehicle(
                     maker = "トヨタ", name = "プリウス",
-                    firstRegistrationDate = java.time.LocalDate.now().minusYears(3).plusDays(20),
+                    firstRegistrationDate = java.time.LocalDate.now()
+                        .minusYears(3)
+                        .plusDays(20),
                 ),
                 dashboard = VehicleDashboard(),
             )
@@ -99,7 +104,8 @@ private fun UrgentAlertCardCalmPreview() {
             UrgentAlertCard(
                 vehicle = Vehicle(
                     maker = "トヨタ", name = "プリウス",
-                    firstRegistrationDate = java.time.LocalDate.now().minusYears(1),
+                    firstRegistrationDate = java.time.LocalDate.now()
+                        .minusYears(1),
                 ),
                 dashboard = VehicleDashboard(),
             )

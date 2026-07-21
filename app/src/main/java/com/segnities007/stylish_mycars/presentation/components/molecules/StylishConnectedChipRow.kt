@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
@@ -37,10 +38,14 @@ fun StylishConnectedChipRow(
     items: List<StylishConnectedChipItem>,
     modifier: Modifier = Modifier,
     spacing: Dp = 2.dp,
+    fillWidth: Boolean = false,
 ) {
     val haptic = LocalHapticFeedback.current
     Row(
-        modifier = modifier.horizontalScroll(rememberScrollState()),
+        modifier = if (fillWidth) modifier.fillMaxWidth()
+        else modifier.horizontalScroll(
+            rememberScrollState()
+        ),
         horizontalArrangement = Arrangement.spacedBy(spacing),
     ) {
         items.forEachIndexed { index, item ->
@@ -58,14 +63,15 @@ fun StylishConnectedChipRow(
             )
             Surface(
                 modifier = Modifier
+                    .let { if (fillWidth) it.weight(1f) else it }
                     .semantics {
                         selected = item.selected
                         role = Role.Tab
                     }
                     .clickable(enabled = item.enabled) {
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    item.onClick()
-                },
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        item.onClick()
+                    },
                 shape = stylishConnectedShape(stylishConnectedRowCorners(index, items.size)),
                 color = containerColor,
                 contentColor = contentColor,

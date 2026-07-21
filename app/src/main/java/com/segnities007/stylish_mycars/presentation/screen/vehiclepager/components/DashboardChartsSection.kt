@@ -1,86 +1,50 @@
 package com.segnities007.stylish_mycars.presentation.screen.vehiclepager.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_mycars.domain.model.CostCategory
-import com.segnities007.stylish_mycars.presentation.components.charts.BarChartData
-import com.segnities007.stylish_mycars.presentation.components.charts.LineChartData
-import com.segnities007.stylish_mycars.presentation.components.charts.PieChartData
-import com.segnities007.stylish_mycars.presentation.components.charts.SimpleBarChart
-import com.segnities007.stylish_mycars.presentation.components.charts.SimpleLineChart
-import com.segnities007.stylish_mycars.presentation.components.charts.SimplePieChart
-import com.segnities007.stylish_mycars.presentation.components.charts.costCategoryColor
-import com.segnities007.stylish_mycars.presentation.components.organisms.StylishSectionTitle
+import com.segnities007.stylish_mycars.presentation.components.molecules.BarChartData
+import com.segnities007.stylish_mycars.presentation.components.molecules.LineChartData
+import com.segnities007.stylish_mycars.presentation.components.molecules.PieChartData
+import com.segnities007.stylish_mycars.presentation.components.molecules.costCategoryColor
+import com.segnities007.stylish_mycars.presentation.components.organisms.BarChartSection
+import com.segnities007.stylish_mycars.presentation.components.organisms.LineChartSection
+import com.segnities007.stylish_mycars.presentation.components.organisms.PieChartSection
 import com.segnities007.stylish_mycars.presentation.screen.vehiclepager.VehicleDashboard
 import com.segnities007.stylish_mycars.presentation.theme.StylishMyCarsTheme
 
-/** 燃費推移・費用カテゴリ・月次費用のグラフ群。データがある項目のみ表示。 */
+/** 燃費推移・費用カテゴリ・月次費用のグラフ群。データがなくてもスケルトンを表示。 */
 @Composable
 fun DashboardChartsSection(
     dashboard: VehicleDashboard,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
-        if (dashboard.fuelEconomyTrend.size >= 2) {
-            StylishSectionTitle("燃費推移 (km/L)")
-            SimpleLineChart(
-                data = dashboard.fuelEconomyTrend.map { LineChartData(it.first, it.second) },
-            )
-            Spacer(Modifier.height(20.dp))
-        }
+        LineChartSection(
+            title = "燃費推移 (km/L)",
+            data = dashboard.fuelEconomyTrend.map { LineChartData(it.first, it.second) },
+        )
+        Spacer(Modifier.height(20.dp))
 
-        if (dashboard.costByCategory.size >= 2) {
-            StylishSectionTitle("費用カテゴリ")
-            val pieData = dashboard.costByCategory.map { (category, total) ->
+        PieChartSection(
+            title = "費用カテゴリ",
+            data = dashboard.costByCategory.map { (category, total) ->
                 PieChartData(category.label, total.toFloat(), costCategoryColor(category.ordinal))
-            }
-            Row(
-                Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly,
-            ) {
-                SimplePieChart(data = pieData)
-                Column {
-                    pieData.forEach { slice ->
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                Modifier.padding(end = 6.dp).size(10.dp)
-                                    .background(slice.color, CircleShape),
-                            )
-                            Text(
-                                "${slice.label}: ${String.format("%,d", slice.value.toInt())}円",
-                                style = MaterialTheme.typography.labelSmall,
-                            )
-                        }
-                    }
-                }
-            }
-            Spacer(Modifier.height(20.dp))
-        }
+            },
+        )
+        Spacer(Modifier.height(20.dp))
 
-        if (dashboard.monthlyCostTrend.any { it.second > 0 }) {
-            StylishSectionTitle("月次費用")
-            SimpleBarChart(
-                data = dashboard.monthlyCostTrend.map { BarChartData(it.first, it.second) },
-            )
-        }
+        BarChartSection(
+            title = "月次費用",
+            data = dashboard.monthlyCostTrend.map { BarChartData(it.first, it.second) },
+        )
     }
 }
 

@@ -35,7 +35,6 @@ import com.segnities007.stylish_mycars.domain.usecase.ExportDocument
 import com.segnities007.stylish_mycars.presentation.navigation.AppNavigation
 import com.segnities007.stylish_mycars.presentation.theme.OnboardingPreference
 import com.segnities007.stylish_mycars.presentation.theme.StylishMyCarsTheme
-import com.segnities007.stylish_mycars.presentation.theme.ThemeMode
 import com.segnities007.stylish_mycars.presentation.theme.ThemePreference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -60,9 +59,11 @@ class MainActivity : ComponentActivity() {
                     if (uri != null && document != null) {
                         lifecycleScope.launch(Dispatchers.IO) {
                             val result = runCatching {
-                                contentResolver.openOutputStream(uri)?.bufferedWriter()?.use {
-                                    it.write(document.content)
-                                } ?: error("Unable to open export destination")
+                                contentResolver.openOutputStream(uri)
+                                    ?.bufferedWriter()
+                                    ?.use {
+                                        it.write(document.content)
+                                    } ?: error("Unable to open export destination")
                             }
                             withContext(Dispatchers.Main) {
                                 Toast.makeText(
@@ -70,7 +71,8 @@ class MainActivity : ComponentActivity() {
                                     if (result.isSuccess) R.string.export_saved
                                     else R.string.export_failed,
                                     Toast.LENGTH_LONG,
-                                ).show()
+                                )
+                                    .show()
                             }
                         }
                     }
@@ -108,15 +110,23 @@ private class CreateExportDocumentContract :
 @Composable
 private fun BoxScope.SystemBarScrims() {
     val scrim = MaterialTheme.colorScheme.background.copy(alpha = 0.4f)
-    val topHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-    val bottomHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val topHeight = WindowInsets.statusBars.asPaddingValues()
+        .calculateTopPadding()
+    val bottomHeight = WindowInsets.navigationBars.asPaddingValues()
+        .calculateBottomPadding()
 
     Box(
-        Modifier.fillMaxWidth().height(topHeight).align(Alignment.TopCenter)
+        Modifier
+            .fillMaxWidth()
+            .height(topHeight)
+            .align(Alignment.TopCenter)
             .background(scrim),
     )
     Box(
-        Modifier.fillMaxWidth().height(bottomHeight).align(Alignment.BottomCenter)
+        Modifier
+            .fillMaxWidth()
+            .height(bottomHeight)
+            .align(Alignment.BottomCenter)
             .background(scrim),
     )
 }

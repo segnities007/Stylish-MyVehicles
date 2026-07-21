@@ -30,12 +30,14 @@ fun StylishIconButton(
 ) {
     val resolvedContainerColor = containerColor ?: if (active) {
         MaterialTheme.colorScheme.primary
-    } else {
+    }
+    else {
         MaterialTheme.colorScheme.surfaceContainerHighest
     }
     val resolvedContentColor = contentColor ?: if (active) {
         MaterialTheme.colorScheme.onPrimary
-    } else {
+    }
+    else {
         MaterialTheme.colorScheme.onSurfaceVariant
     }
     Surface(

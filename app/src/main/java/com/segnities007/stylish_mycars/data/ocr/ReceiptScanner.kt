@@ -18,7 +18,10 @@ data class ReceiptData(
 
 object ReceiptScanner {
     private val recognizer by lazy {
-        TextRecognition.getClient(JapaneseTextRecognizerOptions.Builder().build())
+        TextRecognition.getClient(
+            JapaneseTextRecognizerOptions.Builder()
+                .build()
+        )
     }
 
     suspend fun scan(context: Context, uri: Uri): ReceiptData {
@@ -32,7 +35,9 @@ object ReceiptScanner {
     }
 
     internal fun parseReceipt(text: String): ReceiptData {
-        val lines = text.lines().map { it.trim() }.filter { it.isNotBlank() }
+        val lines = text.lines()
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
         val fullText = lines.joinToString("\n")
 
         // 給油量: "32.5L", "32.50ﾘｯﾄﾙ", "給油量 32.5"
@@ -43,11 +48,14 @@ object ReceiptScanner {
 
         // 金額: "¥5,688", "5688円", "合計 5,688"
         val amount = Regex("""[¥￥]\s*([\d,]+)""")
-            .find(fullText)?.groupValues?.get(1)?.replace(",", "")
+            .find(fullText)?.groupValues?.get(1)
+            ?.replace(",", "")
             ?: Regex("""([\d,]+)\s*円""")
-                .find(fullText)?.groupValues?.get(1)?.replace(",", "")
+                .find(fullText)?.groupValues?.get(1)
+                ?.replace(",", "")
             ?: Regex("""[合計金額]\s*[¥￥]?\s*([\d,]+)""")
-                .find(fullText)?.groupValues?.get(1)?.replace(",", "")
+                .find(fullText)?.groupValues?.get(1)
+                ?.replace(",", "")
 
         // 単価: "175円/L", "175.0円/ﾘｯﾄﾙ"
         val unitPrice = Regex("""(\d+(?:\.\d+)?)\s*円\s*/\s*[Llﾘｯﾄﾙ]""")

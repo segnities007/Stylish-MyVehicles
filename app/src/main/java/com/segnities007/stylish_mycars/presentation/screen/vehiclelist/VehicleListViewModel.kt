@@ -33,8 +33,10 @@ class VehicleListViewModel(
         when (intent) {
             is VehicleListIntent.AddVehicle ->
                 _effects.trySend(VehicleListEffect.NavigateToEdit(null))
+
             is VehicleListIntent.SelectVehicle ->
                 _effects.trySend(VehicleListEffect.NavigateToDetail(intent.vehicleId))
+
             is VehicleListIntent.SearchQueryChanged ->
                 _uiState.update { it.copy(searchQuery = intent.query) }
         }

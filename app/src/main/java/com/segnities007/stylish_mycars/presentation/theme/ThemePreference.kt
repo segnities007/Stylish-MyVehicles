@@ -22,6 +22,8 @@ object ThemePreference {
     }
 
     fun setThemeMode(context: Context, mode: ThemeMode) {
-        prefs(context).edit().putString(KEY_THEME, mode.name).apply()
+        prefs(context).edit()
+            .putString(KEY_THEME, mode.name)
+            .apply()
     }
 }
