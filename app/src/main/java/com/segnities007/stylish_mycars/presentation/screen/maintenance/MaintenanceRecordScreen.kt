@@ -3,7 +3,6 @@ package com.segnities007.stylish_mycars.presentation.screen.maintenance
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -38,13 +36,12 @@ import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_mycars.domain.model.MaintenanceRecord
 import com.segnities007.stylish_mycars.domain.model.RecordPeriod
 import com.segnities007.stylish_mycars.presentation.components.atoms.StylishIconButton
-import com.segnities007.stylish_mycars.presentation.components.atoms.utils.stylishConnectedColumnCorners
-import com.segnities007.stylish_mycars.presentation.components.atoms.utils.stylishConnectedShape
-import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedCard
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedChipRow
+import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedListItemColumn
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishDeleteConfirmDialog
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishEmptyState
 import com.segnities007.stylish_mycars.presentation.components.molecules.models.StylishConnectedChipItem
+import com.segnities007.stylish_mycars.presentation.components.molecules.models.StylishConnectedListItem
 import com.segnities007.stylish_mycars.presentation.components.organisms.StylishHeader
 import com.segnities007.stylish_mycars.presentation.screen.maintenance.components.MaintenanceInputDialog
 import com.segnities007.stylish_mycars.presentation.util.ImageCaptureHelper
@@ -133,22 +130,17 @@ fun MaintenanceRecordScreen(
                         description = "期間フィルタを変更してみてください",
                     )
                 else ->
-                    LazyColumn(
-                        Modifier.padding(horizontal = 20.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        items(visibleRecords.size) { index ->
-                            val record = visibleRecords[index]
-                            StylishConnectedCard(
-                                title = record.title,
+                    StylishConnectedListItemColumn(
+                        modifier = Modifier.padding(horizontal = 20.dp),
+                        spacing = 4.dp,
+                        items = visibleRecords.map { record ->
+                            StylishConnectedListItem(
+                                headline = record.title,
                                 supportingText = buildSubtitle(record),
                                 onClick = { viewModel.accept(MaintenanceRecordIntent.EditRecord(record.id)) },
                                 onLongClick = {
                                     viewModel.accept(MaintenanceRecordIntent.RequestDelete(record.id))
                                 },
-                                shape = stylishConnectedShape(
-                                    stylishConnectedColumnCorners(index, visibleRecords.size),
-                                ),
                                 trailingContent = {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         if (record.photoUri != null) {
@@ -167,8 +159,8 @@ fun MaintenanceRecordScreen(
                                     }
                                 },
                             )
-                        }
-                    }
+                        },
+                    )
             }
         }
     }

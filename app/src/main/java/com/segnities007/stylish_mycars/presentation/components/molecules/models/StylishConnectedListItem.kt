@@ -9,6 +9,7 @@ data class StylishConnectedListItem(
     val headline: String,
     val supportingText: String? = null,
     val onClick: () -> Unit,
+    val onLongClick: () -> Unit = {},
     val enabled: Boolean = true,
     val leadingContent: (@Composable RowScope.() -> Unit)? = null,
     val trailingContent: (@Composable RowScope.() -> Unit)? = null,

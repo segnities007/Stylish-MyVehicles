@@ -24,7 +24,6 @@ class VehicleEditViewModel(
     private val insertVehicleUseCase: InsertVehicleUseCase,
     private val updateVehicleUseCase: UpdateVehicleUseCase,
     private val deleteVehicleUseCase: DeleteVehicleUseCase,
-    private val appContext: android.content.Context,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(VehicleEditUiState(vehicleId = vehicleId))
     val uiState: StateFlow<VehicleEditUiState> = _uiState.asStateFlow()
@@ -152,7 +151,6 @@ class VehicleEditViewModel(
             } else {
                 insertVehicleUseCase(vehicle)
             }
-            com.segnities007.stylish_mycars.widget.WidgetUpdater.update(appContext)
             _effects.send(VehicleEditEffect.NavigateBack)
         }
     }
@@ -163,7 +161,6 @@ class VehicleEditViewModel(
         viewModelScope.launch {
             val vehicle = getVehicleUseCase(id).first() ?: return@launch
             deleteVehicleUseCase(vehicle)
-            com.segnities007.stylish_mycars.widget.WidgetUpdater.update(appContext)
             _effects.send(VehicleEditEffect.NavigateBack)
         }
     }

@@ -1,7 +1,10 @@
 package com.segnities007.stylish_mycars.presentation.components.molecules
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -20,14 +23,17 @@ fun StylishConnectedCardRow(
     modifier: Modifier = Modifier,
     spacing: Dp = 4.dp,
 ) {
-    Row(modifier, horizontalArrangement = Arrangement.spacedBy(spacing)) {
+    Row(
+        modifier.height(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(spacing),
+    ) {
         items.forEachIndexed { index, item ->
             StylishConnectedCard(
                 title = item.title,
                 supportingText = item.supportingText,
                 onClick = item.onClick,
                 onLongClick = item.onLongClick,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).fillMaxHeight(),
                 shape = stylishConnectedShape(stylishConnectedRowCorners(index, items.size)),
                 trailingContent = item.trailingContent,
             )

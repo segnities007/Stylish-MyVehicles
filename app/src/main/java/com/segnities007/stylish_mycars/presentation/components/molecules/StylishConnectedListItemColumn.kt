@@ -1,6 +1,7 @@
 package com.segnities007.stylish_mycars.presentation.components.molecules
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,7 +18,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -27,18 +32,30 @@ import com.segnities007.stylish_mycars.presentation.components.atoms.utils.styli
 import com.segnities007.stylish_mycars.presentation.components.molecules.models.StylishConnectedListItem
 import com.segnities007.stylish_mycars.presentation.theme.StylishMyCarsTheme
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun StylishConnectedListItemColumn(
     items: List<StylishConnectedListItem>,
     modifier: Modifier = Modifier,
     spacing: Dp = 2.dp,
 ) {
+    val haptic = LocalHapticFeedback.current
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing)) {
         items.forEachIndexed { index, item ->
             Surface(
                 modifier = Modifier
-                    .clickable(enabled = item.enabled, onClick = item.onClick)
-                    .then(if (item.enabled) Modifier else Modifier.semantics { disabled() }),
+                    .combinedClickable(
+                        enabled = item.enabled,
+                        onClick = item.onClick,
+                        onLongClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            item.onLongClick()
+                        },
+                    )
+                    .semantics {
+                        role = Role.Button
+                        if (!item.enabled) disabled()
+                    },
                 shape = stylishConnectedShape(stylishConnectedColumnCorners(index, items.size)),
                 color = MaterialTheme.colorScheme.surfaceContainerHighest,
                 contentColor = if (item.enabled) MaterialTheme.colorScheme.onSurface

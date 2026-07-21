@@ -46,8 +46,6 @@ fun stylishConnectedGridCorners(index: Int, size: Int, columns: Int): StylishCon
     val column = index % columns
     val row = index / columns
 
-    // 隣接セルが埋まっているかで判定する。最終行が埋まっていない場合でも、
-    // 空白セルに面した角が正しく丸くなる（例: 3要素・2列で右上セルの右下隅）。
     fun hasCell(r: Int, c: Int): Boolean {
         if (c < 0 || c >= columns) return false
         val i = r * columns + c
@@ -59,10 +57,18 @@ fun stylishConnectedGridCorners(index: Int, size: Int, columns: Int): StylishCon
     val hasLeft = hasCell(row, column - 1)
     val hasRight = hasCell(row, column + 1)
 
+    // 最終行が columns 未満なら、残った要素が横幅いっぱいに広がる（Spacer 未配置）。
+    // その場合、上の行で真下にセルがない位置も、下の要素が左から広がっているため flat にする。
+    val lastRowSize = size % columns
+    val lastRowIndex = (size - 1) / columns
+    val lastRowSpans = lastRowSize != 0 && lastRowSize < columns && row != lastRowIndex
+
+    val effectivelyHasBelow = hasBelow || (lastRowSpans && hasCell(row + 1, 0))
+
     return StylishConnectedCorners(
         topStart = !hasAbove && !hasLeft,
         topEnd = !hasAbove && !hasRight,
-        bottomStart = !hasBelow && !hasLeft,
-        bottomEnd = !hasBelow && !hasRight,
+        bottomStart = !effectivelyHasBelow && !hasLeft,
+        bottomEnd = !effectivelyHasBelow && !hasRight,
     )
 }

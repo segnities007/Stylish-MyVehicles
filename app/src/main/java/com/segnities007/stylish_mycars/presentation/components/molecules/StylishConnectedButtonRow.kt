@@ -2,10 +2,13 @@ package com.segnities007.stylish_mycars.presentation.components.molecules
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -45,14 +48,14 @@ fun StylishConnectedButtonRow(
     ),
 ) {
     Row(
-        modifier = modifier,
+        modifier = modifier.height(IntrinsicSize.Min),
         horizontalArrangement = Arrangement.spacedBy(spacing),
     ) {
         items.forEachIndexed { index, item ->
             Button(
                 onClick = item.onClick,
                 enabled = item.enabled,
-                modifier = Modifier.weight(1f).heightIn(min = 52.dp),
+                modifier = Modifier.weight(1f).fillMaxHeight().heightIn(min = 52.dp),
                 shape = stylishConnectedShape(
                     stylishConnectedRowCorners(index, items.size),
                     cornerRadius = cornerRadius,

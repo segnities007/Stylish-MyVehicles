@@ -117,7 +117,6 @@ val appModule = module {
             insertVehicleUseCase = get(),
             updateVehicleUseCase = get(),
             deleteVehicleUseCase = get(),
-            appContext = androidContext(),
         )
     }
     viewModel { params ->

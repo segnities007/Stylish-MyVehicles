@@ -1,12 +1,10 @@
 package com.segnities007.stylish_mycars.presentation.screen.vehiclelist
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DirectionsCar
@@ -30,9 +28,8 @@ import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_mycars.domain.model.Vehicle
 import com.segnities007.stylish_mycars.domain.service.InspectionCalculator
 import com.segnities007.stylish_mycars.presentation.components.atoms.StylishIconButton
-import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedCard
-import com.segnities007.stylish_mycars.presentation.components.atoms.utils.stylishConnectedColumnCorners
-import com.segnities007.stylish_mycars.presentation.components.atoms.utils.stylishConnectedShape
+import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedListItemColumn
+import com.segnities007.stylish_mycars.presentation.components.molecules.models.StylishConnectedListItem
 import com.segnities007.stylish_mycars.presentation.components.organisms.StylishHeader
 
 @Composable
@@ -117,23 +114,17 @@ private fun VehicleList(
     onVehicleClick: (Vehicle) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    LazyColumn(
+    StylishConnectedListItemColumn(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        items(vehicles.size) { index ->
-            val vehicle = vehicles[index]
-            StylishConnectedCard(
-                title = "${vehicle.maker} ${vehicle.name}",
+        spacing = 4.dp,
+        items = vehicles.map { vehicle ->
+            StylishConnectedListItem(
+                headline = "${vehicle.maker} ${vehicle.name}",
                 supportingText = buildSupportingText(vehicle),
                 onClick = { onVehicleClick(vehicle) },
-                onLongClick = {},
-                shape = stylishConnectedShape(
-                    stylishConnectedColumnCorners(index, vehicles.size),
-                ),
             )
-        }
-    }
+        },
+    )
 }
 
 @Composable

@@ -4,14 +4,12 @@ import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -39,15 +37,14 @@ import com.segnities007.stylish_mycars.data.ocr.ReceiptScanner
 import com.segnities007.stylish_mycars.domain.model.FuelRecord
 import com.segnities007.stylish_mycars.domain.model.RecordPeriod
 import com.segnities007.stylish_mycars.presentation.components.atoms.StylishIconButton
-import com.segnities007.stylish_mycars.presentation.components.atoms.utils.stylishConnectedColumnCorners
-import com.segnities007.stylish_mycars.presentation.components.atoms.utils.stylishConnectedShape
 import com.segnities007.stylish_mycars.presentation.components.charts.LineChartData
 import com.segnities007.stylish_mycars.presentation.components.charts.SimpleLineChart
-import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedCard
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedChipRow
+import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedListItemColumn
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishDeleteConfirmDialog
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishEmptyState
 import com.segnities007.stylish_mycars.presentation.components.molecules.models.StylishConnectedChipItem
+import com.segnities007.stylish_mycars.presentation.components.molecules.models.StylishConnectedListItem
 import com.segnities007.stylish_mycars.presentation.components.organisms.StylishHeader
 import com.segnities007.stylish_mycars.presentation.screen.fuel.components.FuelInputDialog
 import java.io.File
@@ -173,23 +170,18 @@ fun FuelRecordScreen(
                         description = "期間フィルタを変更してみてください",
                     )
                 else ->
-                    LazyColumn(
-                        Modifier.padding(horizontal = 20.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        items(visibleRecords.size) { index ->
-                            val record = visibleRecords[index]
-                            StylishConnectedCard(
-                                title = buildRecordTitle(record),
+                    StylishConnectedListItemColumn(
+                        modifier = Modifier.padding(horizontal = 20.dp),
+                        spacing = 4.dp,
+                        items = visibleRecords.map { record ->
+                            StylishConnectedListItem(
+                                headline = buildRecordTitle(record),
                                 supportingText = buildRecordSubtitle(record),
                                 onClick = { viewModel.accept(FuelRecordIntent.EditRecord(record.id)) },
                                 onLongClick = { viewModel.accept(FuelRecordIntent.RequestDelete(record.id)) },
-                                shape = stylishConnectedShape(
-                                    stylishConnectedColumnCorners(index, visibleRecords.size),
-                                ),
                             )
-                        }
-                    }
+                        },
+                    )
             }
         }
     }

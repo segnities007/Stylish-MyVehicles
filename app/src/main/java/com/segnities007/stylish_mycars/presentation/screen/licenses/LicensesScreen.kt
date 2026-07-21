@@ -1,13 +1,10 @@
 package com.segnities007.stylish_mycars.presentation.screen.licenses
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.MaterialTheme
@@ -23,11 +20,10 @@ import androidx.compose.ui.unit.dp
 import com.mikepenz.aboutlibraries.entity.Library
 import com.mikepenz.aboutlibraries.ui.compose.android.rememberLibraries
 import com.segnities007.stylish_mycars.presentation.components.atoms.StylishIconButton
-import com.segnities007.stylish_mycars.presentation.components.atoms.utils.stylishConnectedColumnCorners
-import com.segnities007.stylish_mycars.presentation.components.atoms.utils.stylishConnectedShape
-import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedCard
+import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedListItemColumn
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishDialogActions
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishDialogSurface
+import com.segnities007.stylish_mycars.presentation.components.molecules.models.StylishConnectedListItem
 import com.segnities007.stylish_mycars.presentation.components.organisms.StylishHeader
 
 /**
@@ -61,19 +57,14 @@ fun LicensesScreen(
                 },
             )
 
-            LazyColumn(
-                Modifier.padding(horizontal = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                itemsIndexed(libraries) { index, library ->
-                    StylishConnectedCard(
-                        title = library.name,
+            StylishConnectedListItemColumn(
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 24.dp),
+                spacing = 4.dp,
+                items = libraries.map { library ->
+                    StylishConnectedListItem(
+                        headline = library.name,
                         supportingText = buildSupportingText(library),
                         onClick = { selected = library },
-                        onLongClick = {},
-                        shape = stylishConnectedShape(
-                            stylishConnectedColumnCorners(index, libraries.size),
-                        ),
                         trailingContent = {
                             Text(
                                 licenseLabel(library) ?: "",
@@ -82,9 +73,8 @@ fun LicensesScreen(
                             )
                         },
                     )
-                }
-                item { Spacer(Modifier.height(24.dp)) }
-            }
+                },
+            )
         }
     }
 

@@ -1,11 +1,9 @@
 package com.segnities007.stylish_mycars.presentation.screen.cost
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -24,11 +22,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_mycars.presentation.components.atoms.StylishIconButton
-import com.segnities007.stylish_mycars.presentation.components.atoms.utils.stylishConnectedColumnCorners
-import com.segnities007.stylish_mycars.presentation.components.atoms.utils.stylishConnectedShape
-import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedCard
+import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedListItemColumn
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishDeleteConfirmDialog
 import com.segnities007.stylish_mycars.presentation.components.molecules.StylishEmptyState
+import com.segnities007.stylish_mycars.presentation.components.molecules.models.StylishConnectedListItem
 import com.segnities007.stylish_mycars.presentation.components.organisms.StylishHeader
 import com.segnities007.stylish_mycars.presentation.screen.cost.components.CostInputDialog
 import com.segnities007.stylish_mycars.presentation.screen.cost.components.CostSummarySection
@@ -94,22 +91,17 @@ fun CostListScreen(
                     )
                 else -> {
                     val filtered = state.filteredRecords
-                    LazyColumn(
-                        Modifier.padding(horizontal = 20.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        items(filtered.size) { index ->
-                            val record = filtered[index]
-                            StylishConnectedCard(
-                                title = record.title,
+                    StylishConnectedListItemColumn(
+                        modifier = Modifier.padding(horizontal = 20.dp),
+                        spacing = 4.dp,
+                        items = filtered.map { record ->
+                            StylishConnectedListItem(
+                                headline = record.title,
                                 supportingText = "${record.date} / ${record.category.label}",
                                 onClick = { viewModel.accept(CostListIntent.EditRecord(record.id)) },
                                 onLongClick = {
                                     viewModel.accept(CostListIntent.RequestDelete(record.id))
                                 },
-                                shape = stylishConnectedShape(
-                                    stylishConnectedColumnCorners(index, filtered.size),
-                                ),
                                 trailingContent = {
                                     Text(
                                         "${String.format("%,d", record.amount)}円",
@@ -117,8 +109,8 @@ fun CostListScreen(
                                     )
                                 },
                             )
-                        }
-                    }
+                        },
+                    )
                 }
             }
         }

@@ -2,8 +2,11 @@ package com.segnities007.stylish_mycars.presentation.components.molecules
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -26,7 +29,11 @@ fun StylishConnectedCardGrid(
     require(columns > 0) { "columns must be greater than zero" }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing)) {
         items.chunked(columns).forEachIndexed { rowIndex, rowItems ->
-            Row(horizontalArrangement = Arrangement.spacedBy(spacing)) {
+            Row(
+                Modifier.height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(spacing),
+            ) {
+                val isFullRow = rowItems.size == columns
                 rowItems.forEachIndexed { columnIndex, item ->
                     val index = rowIndex * columns + columnIndex
                     StylishConnectedCard(
@@ -34,14 +41,16 @@ fun StylishConnectedCardGrid(
                         supportingText = item.supportingText,
                         onClick = item.onClick,
                         onLongClick = item.onLongClick,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
                         shape = stylishConnectedShape(
                             stylishConnectedGridCorners(index, items.size, columns),
                         ),
                         trailingContent = item.trailingContent,
                     )
                 }
-                repeat(columns - rowItems.size) { Spacer(Modifier.weight(1f)) }
+                if (isFullRow) {
+                    repeat(columns - rowItems.size) { Spacer(Modifier.weight(1f)) }
+                }
             }
         }
     }
