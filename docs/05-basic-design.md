@@ -14,7 +14,7 @@ Clean Architecture + MVVM（MVI風）を採用。StylishMemoと同一のアー�
 ```
 ┌─────────────────────────────────────────┐
 │  App 層                                  │
-│  StylishMyCarsApp / MainActivity / DI    │
+│  StylishMyVehiclesApp / MainActivity / DI    │
 ├─────────────────────────────────────────┤
 │  Presentation 層                         │
 │  Screen / ViewModel / UiState / Intent   │
@@ -343,12 +343,12 @@ fun calculateVehicleTax(displacement: Int): Int = when {
 ## 4. パッケージ構成
 
 ```
-com.segnities007.stylish_mycars/
+com.segnities007.stylish_myvehicles/
 ├── app/
 │   ├── di/
 │   │   └── AppModule.kt
 │   ├── MainActivity.kt
-│   └── StylishMyCarsApp.kt
+│   └── StylishMyVehiclesApp.kt
 ├── domain/
 │   ├── model/
 │   │   ├── Vehicle.kt

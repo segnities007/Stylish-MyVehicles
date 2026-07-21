@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Stylish-MyCars"
+rootProject.name = "Stylish-MyVehicles"
 include(":app")

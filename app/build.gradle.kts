@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.segnities007.stylish_mycars"
+    namespace = "com.segnities007.stylish_myvehicles"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.segnities007.stylish_mycars"
+        applicationId = "com.segnities007.stylish_myvehicles"
         minSdk = 26
         targetSdk = 37
         versionCode = 1

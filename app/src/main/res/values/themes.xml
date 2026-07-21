@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.StylishMyCars" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.StylishMyVehicles" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>

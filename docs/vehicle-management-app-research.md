@@ -1,7 +1,7 @@
 # 車両管理アプリ 市場調査・UX分析レポート
 
 > 作成日: 2026-07-20
-> プロジェクト: Stylish-MyCars (Android / Kotlin / Jetpack Compose)
+> プロジェクト: Stylish-MyVehicles (Android / Kotlin / Jetpack Compose)
 > 目的: 既存アプリの不満点分析と差別化ポイントの特定
 
 ---

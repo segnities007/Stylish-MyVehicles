@@ -1,6 +1,6 @@
-# Stylish-MyCars ドキュメント
+# Stylish-MyVehicles ドキュメント
 
-車両管理アプリ「Stylish-MyCars」の企画・設計ドキュメント。
+車両管理アプリ「Stylish-MyVehicles」の企画・設計ドキュメント。
 
 ## ドキュメント一覧
 
