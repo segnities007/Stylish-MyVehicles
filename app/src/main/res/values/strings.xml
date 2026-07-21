@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Stylish-MyCars</string>
+    <string name="export_saved">エクスポートしました</string>
+    <string name="export_failed">エクスポートに失敗しました</string>
+    <string name="widget_description">最も緊急な車検・保険の期限を表示します</string>
+</resources>

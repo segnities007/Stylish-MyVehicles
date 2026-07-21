@@ -1,0 +1,202 @@
+package com.segnities007.stylish_mycars.presentation.screen.vehiclelist
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_mycars.domain.model.Vehicle
+import com.segnities007.stylish_mycars.domain.service.InspectionCalculator
+import com.segnities007.stylish_mycars.presentation.components.atoms.StylishIconButton
+import com.segnities007.stylish_mycars.presentation.components.molecules.StylishConnectedCard
+import com.segnities007.stylish_mycars.presentation.components.atoms.utils.stylishConnectedColumnCorners
+import com.segnities007.stylish_mycars.presentation.components.atoms.utils.stylishConnectedShape
+import com.segnities007.stylish_mycars.presentation.components.organisms.StylishHeader
+
+@Composable
+fun VehicleListScreen(
+    viewModel: VehicleListViewModel,
+    onNavigateToDetail: (Long) -> Unit,
+    onNavigateToEdit: (Long?) -> Unit,
+    onNavigateToSettings: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val state by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                is VehicleListEffect.NavigateToDetail ->
+                    onNavigateToDetail(effect.vehicleId)
+                is VehicleListEffect.NavigateToEdit ->
+                    onNavigateToEdit(effect.vehicleId)
+            }
+        }
+    }
+
+    Scaffold(
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.background,
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { viewModel.accept(VehicleListIntent.AddVehicle) },
+                containerColor = MaterialTheme.colorScheme.onSurface,
+                contentColor = MaterialTheme.colorScheme.surface,
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "車両を追加")
+            }
+        },
+    ) { innerPadding ->
+        Column(
+            Modifier.fillMaxSize().padding(innerPadding),
+        ) {
+            StylishHeader(
+                modifier = Modifier.padding(horizontal = 20.dp),
+                title = { Text("マイカー") },
+                actions = {
+                    StylishIconButton(
+                        Icons.Default.Settings, "設定",
+                        onClick = onNavigateToSettings,
+                    )
+                },
+            )
+
+            // 検索バー（車両が2台以上で表示）
+            if (state.vehicles.size >= 2) {
+                OutlinedTextField(
+                    value = state.searchQuery,
+                    onValueChange = { viewModel.accept(VehicleListIntent.SearchQueryChanged(it)) },
+                    placeholder = { Text("メーカー・車種・ナンバーで検索") },
+                    leadingIcon = { Icon(Icons.Default.Search, null) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                )
+            }
+
+            when {
+                state.isLoading -> LoadingState()
+                state.vehicles.isEmpty() -> EmptyState(
+                    onAddClick = { viewModel.accept(VehicleListIntent.AddVehicle) },
+                )
+                state.filteredVehicles.isEmpty() -> NoSearchResultState()
+                else -> VehicleList(
+                    vehicles = state.filteredVehicles,
+                    onVehicleClick = { viewModel.accept(VehicleListIntent.SelectVehicle(it.id)) },
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun VehicleList(
+    vehicles: List<Vehicle>,
+    onVehicleClick: (Vehicle) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    LazyColumn(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        items(vehicles.size) { index ->
+            val vehicle = vehicles[index]
+            StylishConnectedCard(
+                title = "${vehicle.maker} ${vehicle.name}",
+                supportingText = buildSupportingText(vehicle),
+                onClick = { onVehicleClick(vehicle) },
+                onLongClick = {},
+                shape = stylishConnectedShape(
+                    stylishConnectedColumnCorners(index, vehicles.size),
+                ),
+            )
+        }
+    }
+}
+
+@Composable
+private fun LoadingState() {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+private fun EmptyState(onAddClick: () -> Unit) {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                Icons.Default.DirectionsCar,
+                contentDescription = null,
+                modifier = Modifier.padding(bottom = 16.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                "まだ車両が登録されていません",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                "下の＋ボタンから最初の車を登録しましょう",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+            TextButton(
+                onClick = onAddClick,
+                modifier = Modifier.padding(top = 16.dp),
+            ) {
+                Text("車両を登録する")
+            }
+        }
+    }
+}
+
+@Composable
+private fun NoSearchResultState() {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(
+            "該当する車両が見つかりません",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+private fun buildSupportingText(vehicle: Vehicle): String {
+    val parts = mutableListOf<String>()
+    vehicle.plateNumber.takeIf { it.isNotBlank() }?.let { parts.add(it) }
+    vehicle.currentInspectionExpiry?.let { expiry ->
+        val days = InspectionCalculator.daysUntilExpiry(expiry)
+        val label = when {
+            days < 0 -> "⚠️ 車検切れ"
+            days <= 30 -> "⚠️ 車検: あと${days}日"
+            days <= 365 -> "車検: あと${days / 30}ヶ月"
+            else -> "車検: ${expiry}"
+        }
+        parts.add(label)
+    }
+    return parts.joinToString(" / ").ifEmpty { "詳細を登録" }
+}
