@@ -35,6 +35,7 @@ import com.segnities007.stylish_myvehicles.presentation.screen.cost.CostListView
 import com.segnities007.stylish_myvehicles.presentation.screen.fuel.FuelRecordViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.maintenance.MaintenanceRecordViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.records.RecordsViewModel
+import com.segnities007.stylish_myvehicles.presentation.screen.recordslist.RecordsListViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.vehicledetail.VehicleDetailViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.vehicleedit.VehicleEditViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.vehiclelist.VehicleListViewModel
@@ -155,6 +156,15 @@ val appModule = module {
             getMaintenanceRecordsUseCase = get(),
             getCostRecordsUseCase = get(),
             getVehiclesUseCase = get(),
+        )
+    }
+    viewModel { params ->
+        RecordsListViewModel(
+            vehicleId = params.get(),
+            getVehicleUseCase = get(),
+            getFuelRecordsUseCase = get(),
+            getMaintenanceRecordsUseCase = get(),
+            getCostRecordsUseCase = get(),
         )
     }
 }

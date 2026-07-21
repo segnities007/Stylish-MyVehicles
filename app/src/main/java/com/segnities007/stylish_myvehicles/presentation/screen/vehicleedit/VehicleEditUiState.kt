@@ -24,7 +24,6 @@ data class VehicleEditUiState(
     val insuranceExpiry: LocalDate? = null,
     val insuranceCompany: String = "",
     val insuranceRank: String = "",
-    val taxPaid: Boolean = false,
     // 状態
     val isEditing: Boolean = false,
     val isSaving: Boolean = false,

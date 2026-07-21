@@ -13,6 +13,7 @@ data class VehicleDetailUiState(
     val schedules: List<MaintenanceSchedule> = emptyList(),
     val monthlyCost: Int = 0,
     val totalCost: Int = 0,
+    val taxPaidThisYear: Boolean = false,
     val averageFuelEconomy: Double? = null,
     val totalDistance: Int = 0,
     val isLoading: Boolean = true,

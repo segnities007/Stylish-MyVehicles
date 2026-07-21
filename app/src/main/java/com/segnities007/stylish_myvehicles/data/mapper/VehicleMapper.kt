@@ -25,7 +25,6 @@ fun VehicleEntity.toDomain(): Vehicle = Vehicle(
     insuranceExpiry = insuranceExpiry,
     insuranceCompany = insuranceCompany,
     insuranceRank = insuranceRank,
-    taxPaid = taxPaid,
     photoUri = photoUri,
     memo = memo,
 )
@@ -50,7 +49,6 @@ fun Vehicle.toEntity(): VehicleEntity = VehicleEntity(
     insuranceExpiry = insuranceExpiry,
     insuranceCompany = insuranceCompany,
     insuranceRank = insuranceRank,
-    taxPaid = taxPaid,
     photoUri = photoUri,
     memo = memo,
     updatedAt = LocalDateTime.now(),

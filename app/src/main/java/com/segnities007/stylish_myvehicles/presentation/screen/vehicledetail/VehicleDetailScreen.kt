@@ -208,7 +208,9 @@ fun VehicleDetailScreen(
                     StylishSectionTitle("期限管理")
                     VehicleDeadlineSection(
                         vehicle = vehicle,
+                        taxPaidThisYear = state.taxPaidThisYear,
                         onEdit = { viewModel.accept(VehicleDetailIntent.EditVehicle) },
+                        onTaxClick = { viewModel.accept(VehicleDetailIntent.OpenCostList) },
                     )
 
                     // 車両情報

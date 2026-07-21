@@ -34,6 +34,8 @@ import com.segnities007.stylish_myvehicles.presentation.screen.notification.Noti
 import com.segnities007.stylish_myvehicles.presentation.screen.onboarding.OnboardingScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.records.RecordsScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.records.RecordsViewModel
+import com.segnities007.stylish_myvehicles.presentation.screen.recordslist.RecordsListScreen
+import com.segnities007.stylish_myvehicles.presentation.screen.recordslist.RecordsListViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.settings.SettingsScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.vehicledetail.VehicleDetailScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.vehicledetail.VehicleDetailViewModel
@@ -108,6 +110,22 @@ fun AppNavigation(
                         onNavigateToCost = { backStack.add(RecordsDestination(it)) },
                         onNavigateToVehicleDetail = { backStack.add(VehicleDetailDestination(it)) },
                         onNavigateToNotifications = { backStack.add(NotificationDestination) },
+                        onNavigateToRecordsList = { backStack.add(RecordsListDestination(it)) },
+                        onAddFuel = { backStack.add(FuelRecordDestination(it, openAdd = true)) },
+                        onAddMaintenance = { backStack.add(MaintenanceRecordDestination(it, openAdd = true)) },
+                        onAddCost = { backStack.add(CostListDestination(it, openAdd = true)) },
+                    )
+                }
+                entry<RecordsListDestination> { dest ->
+                    val viewModel: RecordsListViewModel = koinViewModel(
+                        parameters = { parametersOf(dest.vehicleId) },
+                    )
+                    RecordsListScreen(
+                        viewModel = viewModel,
+                        onNavigateBack = { popBack() },
+                        onNavigateToFuel = { backStack.add(FuelRecordDestination(it)) },
+                        onNavigateToMaintenance = { backStack.add(MaintenanceRecordDestination(it)) },
+                        onNavigateToCost = { backStack.add(CostListDestination(it)) },
                     )
                 }
                 entry<RecordsDestination> { dest ->
@@ -158,6 +176,7 @@ fun AppNavigation(
                     FuelRecordScreen(
                         viewModel = viewModel,
                         onNavigateBack = { popBack() },
+                        openAddDialog = dest.openAdd,
                     )
                 }
                 entry<MaintenanceRecordDestination> { dest ->
@@ -167,6 +186,7 @@ fun AppNavigation(
                     MaintenanceRecordScreen(
                         viewModel = viewModel,
                         onNavigateBack = { popBack() },
+                        openAddDialog = dest.openAdd,
                     )
                 }
                 entry<CostListDestination> { dest ->
@@ -176,6 +196,7 @@ fun AppNavigation(
                     CostListScreen(
                         viewModel = viewModel,
                         onNavigateBack = { popBack() },
+                        openAddDialog = dest.openAdd,
                     )
                 }
                 entry<SettingsDestination> {

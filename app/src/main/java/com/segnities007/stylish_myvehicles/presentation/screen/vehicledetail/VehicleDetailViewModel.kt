@@ -2,6 +2,7 @@ package com.segnities007.stylish_myvehicles.presentation.screen.vehicledetail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.segnities007.stylish_myvehicles.domain.model.CostCategory
 import com.segnities007.stylish_myvehicles.domain.usecase.ExportDataUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.cost.GetCostRecordsUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.fuel.GetFuelRecordsUseCase
@@ -71,7 +72,15 @@ class VehicleDetailViewModel(
                     .filter { it.date.year == now.year && it.date.month == now.month }
                     .sumOf { it.amount }
                 val total = records.sumOf { it.amount }
-                _uiState.update { it.copy(monthlyCost = monthly, totalCost = total) }
+                val taxPaidThisYear = records
+                    .any { it.category == CostCategory.TAX && it.date.year == now.year }
+                _uiState.update {
+                    it.copy(
+                        monthlyCost = monthly,
+                        totalCost = total,
+                        taxPaidThisYear = taxPaidThisYear,
+                    )
+                }
             }
         }
         viewModelScope.launch {

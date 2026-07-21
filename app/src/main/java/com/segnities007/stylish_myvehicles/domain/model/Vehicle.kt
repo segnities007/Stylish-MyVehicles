@@ -23,7 +23,6 @@ data class Vehicle(
     val insuranceExpiry: LocalDate? = null,
     val insuranceCompany: String = "",
     val insuranceRank: Int? = null,
-    val taxPaid: Boolean = false,
     val photoUri: String? = null,
     val memo: String = "",
 ) {

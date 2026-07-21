@@ -59,9 +59,15 @@ import java.time.LocalDate
 fun MaintenanceRecordScreen(
     viewModel: MaintenanceRecordViewModel,
     onNavigateBack: () -> Unit,
+    openAddDialog: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsState()
+
+    // 追加Dialog（記録を追加）から遷移してきた場合、すぐ入力Dialogを開く
+    LaunchedEffect(openAddDialog) {
+        if (openAddDialog) viewModel.accept(MaintenanceRecordIntent.OpenAddDialog)
+    }
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->

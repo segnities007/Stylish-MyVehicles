@@ -23,7 +23,9 @@ import java.time.LocalDate
 @Composable
 fun VehicleDeadlineSection(
     vehicle: Vehicle,
+    taxPaidThisYear: Boolean,
     onEdit: () -> Unit,
+    onTaxClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     StylishConnectedListItemColumn(
@@ -82,11 +84,12 @@ fun VehicleDeadlineSection(
                 vehicle.maxLoadKg
             )
             if (tax != null) {
+                val taxStatus = if (taxPaidThisYear) " ✓ 納付済み" else " 未納付"
                 add(
                     StylishConnectedListItem(
                         taxLabel(vehicle.category),
-                        "${String.format("%,d", tax)}円/年${if (vehicle.taxPaid) " ✓" else ""}",
-                        onEdit,
+                        "${String.format("%,d", tax)}円/年$taxStatus",
+                        onTaxClick,
                         trailingContent = chevron,
                     )
                 )
@@ -116,9 +119,10 @@ private fun VehicleDeadlineSectionPreview() {
                     insuranceExpiry = LocalDate.now()
                         .plusMonths(5),
                     displacement = 1800,
-                    taxPaid = true,
                 ),
+                taxPaidThisYear = true,
                 onEdit = {},
+                onTaxClick = {},
             )
         }
     }

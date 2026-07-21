@@ -14,7 +14,7 @@ data class ExportDocument(
 class ExportDataUseCase {
     fun exportVehiclesCsv(vehicles: List<Vehicle>): ExportDocument {
         val header =
-            "ID,メーカー,車種,グレード,年式,型式,ナンバー,排気量(cc),重量(kg),カラー,初度登録日,車検満了日,自賠責満了日,任意保険満了日,保険会社,等級,税金納付済み"
+            "ID,メーカー,車種,グレード,年式,型式,ナンバー,排気量(cc),重量(kg),カラー,初度登録日,車検満了日,自賠責満了日,任意保険満了日,保険会社,等級"
         val rows = vehicles.map { v ->
             listOf(
                 v.id, v.maker, v.name, v.grade, v.year ?: "",
@@ -22,7 +22,7 @@ class ExportDataUseCase {
                 v.weight ?: "", v.color, v.firstRegistrationDate ?: "",
                 v.inspectionExpiry ?: "", v.jibaiExpiry ?: "",
                 v.insuranceExpiry ?: "", v.insuranceCompany,
-                v.insuranceRank ?: "", if (v.taxPaid) "はい" else "いいえ",
+                v.insuranceRank ?: "",
             ).joinToString(",")
         }
         return ExportDocument(

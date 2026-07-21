@@ -1,6 +1,8 @@
 package com.segnities007.stylish_myvehicles.presentation.components.atoms
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -10,6 +12,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -45,8 +48,19 @@ fun StylishRoundedIconButton(
         shape = RoundedCornerShape(24.dp),
         color = resolvedContainerColor,
     ) {
-        IconButton(onClick = onClick, enabled = enabled) {
-            Icon(imageVector, contentDescription, tint = resolvedContentColor)
+        if (enabled) {
+            IconButton(onClick = onClick) {
+                Icon(imageVector, contentDescription, tint = resolvedContentColor)
+            }
+        }
+        else {
+            // 無効時はクリック可能領域（IconButton）を置かず、背後のコンテンツへタップを貫通させる。
+            Box(
+                modifier = Modifier.size(48.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(imageVector, contentDescription, tint = resolvedContentColor)
+            }
         }
     }
 }

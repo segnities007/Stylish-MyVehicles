@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +30,7 @@ fun StylishBottomBar(
     onAddRecord: () -> Unit,
     onNavigateToNotifications: () -> Unit,
     modifier: Modifier = Modifier,
+    onNavigateToRecordsList: (() -> Unit)? = null,
     scrollState: LazyListState? = null,
 ) {
     val targetAlpha = if (scrollState == null || (scrollState.firstVisibleItemIndex == 0 && scrollState.firstVisibleItemScrollOffset <= 0)) 1f else 0f
@@ -37,6 +39,8 @@ fun StylishBottomBar(
         animationSpec = tween(300),
         label = "bottomBarAlpha",
     )
+    // フェードアウト中はボタンを無効化し、見えない状態でのタップ判定（ヒットエリア）を残さない。
+    val interactive = targetAlpha == 1f
 
     Surface(
         modifier = modifier
@@ -56,16 +60,27 @@ fun StylishBottomBar(
                 imageVector = Icons.Default.Home,
                 contentDescription = "ホーム",
                 onClick = onNavigateToHome,
+                enabled = interactive,
             )
+            if (onNavigateToRecordsList != null) {
+                StylishRoundedIconButton(
+                    imageVector = Icons.Default.History,
+                    contentDescription = "記録一覧",
+                    onClick = onNavigateToRecordsList,
+                    enabled = interactive,
+                )
+            }
             StylishRoundedIconButton(
                 imageVector = Icons.Default.Add,
                 contentDescription = "記録を追加",
                 onClick = onAddRecord,
+                enabled = interactive,
             )
             StylishRoundedIconButton(
                 imageVector = Icons.Default.Notifications,
                 contentDescription = "通知",
                 onClick = onNavigateToNotifications,
+                enabled = interactive,
             )
         }
     }

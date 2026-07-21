@@ -25,7 +25,6 @@ sealed interface VehicleEditIntent {
     data class InsuranceExpiryChanged(val value: LocalDate?) : VehicleEditIntent
     data class InsuranceCompanyChanged(val value: String) : VehicleEditIntent
     data class InsuranceRankChanged(val value: String) : VehicleEditIntent
-    data class TaxPaidChanged(val value: Boolean) : VehicleEditIntent
 
     // アクション
     data object Save : VehicleEditIntent

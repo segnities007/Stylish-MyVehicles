@@ -1,10 +1,6 @@
 package com.segnities007.stylish_myvehicles.presentation.screen.vehicledetail.components
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -12,13 +8,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_myvehicles.domain.model.MaintenanceCategory
 import com.segnities007.stylish_myvehicles.domain.model.MaintenanceSchedule
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedListItemColumn
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedListItem
+import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedCardGrid
+import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedCardItem
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
-/** メンテナンス目安の一覧。タップで編集ダイアログへ誘導する。 */
+/** メンテナンス目安の一覧。2列Gridでコンパクトに表示し、タップで編集ダイアログへ誘導する。 */
 @Composable
 fun MaintenanceScheduleSection(
     schedules: List<MaintenanceSchedule>,
@@ -26,19 +22,14 @@ fun MaintenanceScheduleSection(
     modifier: Modifier = Modifier,
 ) {
     val today = LocalDate.now()
-    StylishConnectedListItemColumn(
+    StylishConnectedCardGrid(
         modifier = modifier,
+        columns = 2,
         items = schedules.map { schedule ->
-            StylishConnectedListItem(
-                headline = schedule.category.label,
+            StylishConnectedCardItem(
+                title = schedule.category.label,
                 supportingText = buildScheduleStatus(schedule, today),
                 onClick = { onEdit(schedule.id) },
-                trailingContent = {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForward, null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                },
             )
         },
     )

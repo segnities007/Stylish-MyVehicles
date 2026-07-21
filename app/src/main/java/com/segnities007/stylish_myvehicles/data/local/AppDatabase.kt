@@ -24,7 +24,7 @@ import com.segnities007.stylish_myvehicles.data.local.entity.VehicleEntity
         CostRecordEntity::class,
         MaintenanceScheduleEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = false,
 )
 @TypeConverters(Converters::class)

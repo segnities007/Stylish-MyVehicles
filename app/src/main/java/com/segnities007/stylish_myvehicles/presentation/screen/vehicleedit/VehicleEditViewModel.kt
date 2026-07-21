@@ -53,7 +53,6 @@ class VehicleEditViewModel(
                         insuranceExpiry = vehicle.insuranceExpiry,
                         insuranceCompany = vehicle.insuranceCompany,
                         insuranceRank = vehicle.insuranceRank?.toString() ?: "",
-                        taxPaid = vehicle.taxPaid,
                         isEditing = true,
                     )
                 }
@@ -117,9 +116,6 @@ class VehicleEditViewModel(
                         .take(2))
                 }
 
-            is VehicleEditIntent.TaxPaidChanged ->
-                _uiState.update { it.copy(taxPaid = intent.value) }
-
             is VehicleEditIntent.Save -> save()
             is VehicleEditIntent.RequestDelete ->
                 _uiState.update { it.copy(showDeleteDialog = true) }
@@ -165,7 +161,6 @@ class VehicleEditViewModel(
                 insuranceExpiry = state.insuranceExpiry,
                 insuranceCompany = state.insuranceCompany.trim(),
                 insuranceRank = state.insuranceRank.toIntOrNull(),
-                taxPaid = state.taxPaid,
             )
             if (state.isEditing) {
                 updateVehicleUseCase(vehicle)

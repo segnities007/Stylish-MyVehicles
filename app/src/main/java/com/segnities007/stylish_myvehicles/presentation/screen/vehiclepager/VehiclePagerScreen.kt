@@ -24,7 +24,6 @@ import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocalGasStation
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -50,6 +49,7 @@ import com.segnities007.stylish_myvehicles.presentation.components.atoms.Stylish
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.BarChartData
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.PieChartData
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedCardGrid
+import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDialogSurface
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.costCategoryColor
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedCardItem
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.BarChartSection
@@ -73,6 +73,10 @@ fun VehiclePagerScreen(
     onNavigateToCost: (Long) -> Unit,
     onNavigateToVehicleDetail: (Long) -> Unit,
     onNavigateToNotifications: () -> Unit,
+    onNavigateToRecordsList: (Long) -> Unit,
+    onAddFuel: (Long) -> Unit,
+    onAddMaintenance: (Long) -> Unit,
+    onAddCost: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -127,6 +131,10 @@ fun VehiclePagerScreen(
                 onNavigateToHome = {},
                 onAddRecord = { showAddDialog = true },
                 onNavigateToNotifications = onNavigateToNotifications,
+                onNavigateToRecordsList = {
+                    state.vehicles.getOrNull(pagerState.currentPage)
+                        ?.let { onNavigateToRecordsList(it.id) }
+                },
                 scrollState = pageListStates[pagerState.currentPage],
             )
         }
@@ -134,9 +142,10 @@ fun VehiclePagerScreen(
 
     if (showAddDialog) {
         val currentVehicle = state.vehicles.getOrNull(pagerState.currentPage)
-        AlertDialog(
-            onDismissRequest = { showAddDialog = false },
-            text = {
+        StylishDialogSurface(onDismiss = { showAddDialog = false }) {
+            Column(Modifier.padding(24.dp)) {
+                Text("記録を追加", style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.height(16.dp))
                 StylishConnectedCardGrid(
                     columns = 2,
                     spacing = 4.dp,
@@ -145,7 +154,7 @@ fun VehiclePagerScreen(
                             title = "給油",
                             onClick = {
                                 showAddDialog = false
-                                if (currentVehicle != null) onNavigateToFuel(currentVehicle.id)
+                                if (currentVehicle != null) onAddFuel(currentVehicle.id)
                             },
                             trailingContent = {
                                 Icon(
@@ -159,7 +168,7 @@ fun VehiclePagerScreen(
                             title = "整備",
                             onClick = {
                                 showAddDialog = false
-                                if (currentVehicle != null) onNavigateToMaintenance(currentVehicle.id)
+                                if (currentVehicle != null) onAddMaintenance(currentVehicle.id)
                             },
                             trailingContent = {
                                 Icon(
@@ -173,7 +182,7 @@ fun VehiclePagerScreen(
                             title = "費用",
                             onClick = {
                                 showAddDialog = false
-                                if (currentVehicle != null) onNavigateToCost(currentVehicle.id)
+                                if (currentVehicle != null) onAddCost(currentVehicle.id)
                             },
                             trailingContent = {
                                 Icon(
@@ -185,9 +194,8 @@ fun VehiclePagerScreen(
                         ),
                     ),
                 )
-            },
-            confirmButton = {},
-        )
+            }
+        }
     }
 }
 
@@ -317,11 +325,6 @@ private fun VehiclePage(
             )
         },
         content = {
-            item {
-                UrgentAlertCard(vehicle, dashboard)
-                Spacer(Modifier.height(16.dp))
-            }
-
             item {
                 PieChartSection(
                     title = "費用カテゴリ",

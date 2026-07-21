@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.LocalGasStation
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -49,10 +51,13 @@ import com.segnities007.stylish_myvehicles.domain.usecase.fuel.UpdateFuelRecordU
 import com.segnities007.stylish_myvehicles.presentation.components.atoms.StylishIconButton
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.LineChartData
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.SimpleLineChart
+import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedCardGrid
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedChipRow
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedListItemColumn
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDeleteConfirmDialog
+import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDialogSurface
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishEmptyState
+import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedCardItem
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedChipItem
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedListItem
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishHeader
@@ -68,34 +73,51 @@ import java.time.LocalDate
 fun FuelRecordScreen(
     viewModel: FuelRecordViewModel,
     onNavigateBack: () -> Unit,
+    openAddDialog: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var receiptImageUri by remember { mutableStateOf<Uri?>(null) }
+    var showReceiptSourceDialog by remember { mutableStateOf(false) }
+
+    // 追加Dialog（記録を追加）から遷移してきた場合、すぐ入力Dialogを開く
+    LaunchedEffect(openAddDialog) {
+        if (openAddDialog) viewModel.accept(FuelRecordIntent.OpenAddDialog)
+    }
+
+    // 取得した画像（カメラ撮影 or ギャラリー選択）をレシート読み取りにかける共通処理
+    fun scanReceipt(uri: Uri) {
+        viewModel.accept(FuelRecordIntent.ScanningChanged(true))
+        scope.launch {
+            val result = runCatching { ReceiptScanner.scan(context, uri) }
+            result.onSuccess { data ->
+                viewModel.accept(
+                    FuelRecordIntent.ReceiptScanned(
+                        volume = data.volume,
+                        amount = data.amount,
+                        odometer = data.odometer,
+                    ),
+                )
+            }
+            viewModel.accept(FuelRecordIntent.ScanningChanged(false))
+        }
+    }
 
     // カメラを起動して撮影し、その画像をレシート読み取りに使用する
     val receiptScanLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
     ) { success ->
         val uri = receiptImageUri
-        if (success && uri != null) {
-            viewModel.accept(FuelRecordIntent.ScanningChanged(true))
-            scope.launch {
-                val result = runCatching { ReceiptScanner.scan(context, uri) }
-                result.onSuccess { data ->
-                    viewModel.accept(
-                        FuelRecordIntent.ReceiptScanned(
-                            volume = data.volume,
-                            amount = data.amount,
-                            odometer = data.odometer,
-                        ),
-                    )
-                }
-                viewModel.accept(FuelRecordIntent.ScanningChanged(false))
-            }
-        }
+        if (success && uri != null) scanReceipt(uri)
+    }
+
+    // ギャラリーから画像を選択し、その画像をレシート読み取りに使用する
+    val receiptPickLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+    ) { uri ->
+        if (uri != null) scanReceipt(uri)
     }
 
     LaunchedEffect(viewModel) {
@@ -222,12 +244,58 @@ fun FuelRecordScreen(
         FuelInputDialog(
             state = state,
             onIntent = viewModel::accept,
-            onScanReceipt = {
-                val uri = createReceiptImageUri(context)
-                receiptImageUri = uri
-                receiptScanLauncher.launch(uri)
-            },
+            onScanReceipt = { showReceiptSourceDialog = true },
         )
+    }
+
+    // レシート画像の取得元（カメラ / 写真 / キャンセル）を選択するダイアログ
+    if (showReceiptSourceDialog) {
+        StylishDialogSurface(onDismiss = { showReceiptSourceDialog = false }) {
+            Column(Modifier.padding(24.dp)) {
+                Text("レシートを読み取る", style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.height(16.dp))
+                StylishConnectedCardGrid(
+                    columns = 2,
+                    spacing = 4.dp,
+                    items = listOf(
+                        StylishConnectedCardItem(
+                            title = "カメラ",
+                            onClick = {
+                                showReceiptSourceDialog = false
+                                val uri = createReceiptImageUri(context)
+                                receiptImageUri = uri
+                                receiptScanLauncher.launch(uri)
+                            },
+                            trailingContent = {
+                                Icon(
+                                    Icons.Default.CameraAlt,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            },
+                        ),
+                        StylishConnectedCardItem(
+                            title = "写真",
+                            onClick = {
+                                showReceiptSourceDialog = false
+                                receiptPickLauncher.launch("image/*")
+                            },
+                            trailingContent = {
+                                Icon(
+                                    Icons.Default.PhotoLibrary,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            },
+                        ),
+                        StylishConnectedCardItem(
+                            title = "キャンセル",
+                            onClick = { showReceiptSourceDialog = false },
+                        ),
+                    ),
+                )
+            }
+        }
     }
 
     if (state.deletingRecordId != null) {
