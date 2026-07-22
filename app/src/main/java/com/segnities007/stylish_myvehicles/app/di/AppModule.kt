@@ -34,6 +34,7 @@ import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.UpdateVehicleU
 import com.segnities007.stylish_myvehicles.presentation.screen.cost.CostListViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.fuel.FuelRecordViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.maintenance.MaintenanceRecordViewModel
+import com.segnities007.stylish_myvehicles.presentation.screen.notification.NotificationViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.records.RecordsViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.recordslist.RecordsListViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.vehicledetail.VehicleDetailViewModel
@@ -138,6 +139,7 @@ val appModule = module {
             updateMaintenanceRecordUseCase = get(),
             deleteMaintenanceRecordUseCase = get(),
             getVehicleUseCase = get(),
+            getMaintenanceSchedulesUseCase = get(),
         )
     }
     viewModel { params ->
@@ -165,6 +167,12 @@ val appModule = module {
             getFuelRecordsUseCase = get(),
             getMaintenanceRecordsUseCase = get(),
             getCostRecordsUseCase = get(),
+        )
+    }
+    viewModel {
+        NotificationViewModel(
+            getVehiclesUseCase = get(),
+            getMaintenanceSchedulesUseCase = get(),
         )
     }
 }

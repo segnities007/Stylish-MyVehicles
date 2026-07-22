@@ -1,8 +1,13 @@
 package com.segnities007.stylish_myvehicles.presentation.screen.maintenance
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -38,6 +43,7 @@ import com.segnities007.stylish_myvehicles.domain.repository.MaintenanceSchedule
 import com.segnities007.stylish_myvehicles.domain.repository.VehicleRepository
 import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.DeleteMaintenanceRecordUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.GetMaintenanceRecordsUseCase
+import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.GetMaintenanceSchedulesUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.InsertMaintenanceRecordUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.UpdateMaintenanceRecordUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.GetVehicleUseCase
@@ -120,6 +126,77 @@ fun MaintenanceRecordScreen(
             )
 
             val visibleRecords = state.filteredRecords
+
+            // 期間サマリー
+            if (visibleRecords.isNotEmpty()) {
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Column {
+                        Text(
+                            "整備件数",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Text(
+                            "${state.filteredCount}件",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            "合計費用",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Text(
+                            "${String.format("%,d", state.filteredTotalCost)}円",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
+                }
+            }
+
+            // 整備目安（期限超過 or 60日以内）
+            val dueItems = state.scheduleDueItems.filter { it.daysRemaining <= 60 }
+            if (dueItems.isNotEmpty()) {
+                Column(Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
+                    Text(
+                        "整備目安",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    StylishConnectedListItemColumn(
+                        spacing = 4.dp,
+                        items = dueItems.map { item ->
+                            val statusText = when {
+                                item.isOverdue -> "${-item.daysRemaining}日超過"
+                                else -> "あと${item.daysRemaining}日"
+                            }
+                            StylishConnectedListItem(
+                                headline = item.categoryLabel,
+                                supportingText = "${item.dueDate}（$statusText）",
+                                onClick = {},
+                                trailingContent = {
+                                    Text(
+                                        statusText,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = when {
+                                            item.isOverdue -> MaterialTheme.colorScheme.error
+                                            item.isDueSoon -> MaterialTheme.colorScheme.tertiary
+                                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                                        },
+                                    )
+                                },
+                            )
+                        },
+                    )
+                }
+            }
 
             when {
                 state.isLoading ->
@@ -278,6 +355,7 @@ private fun MaintenanceRecordScreenPreview() {
                     updateMaintenanceRecordUseCase = UpdateMaintenanceRecordUseCase(repository),
                     deleteMaintenanceRecordUseCase = DeleteMaintenanceRecordUseCase(repository),
                     getVehicleUseCase = GetVehicleUseCase(vehicleRepository),
+                    getMaintenanceSchedulesUseCase = GetMaintenanceSchedulesUseCase(scheduleRepository),
                 )
             }
             MaintenanceRecordScreen(viewModel = viewModel, onNavigateBack = {})

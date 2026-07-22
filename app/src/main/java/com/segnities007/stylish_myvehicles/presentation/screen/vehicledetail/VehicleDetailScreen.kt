@@ -26,12 +26,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
+import com.segnities007.stylish_myvehicles.domain.service.CostStatisticsCalculator
 import com.segnities007.stylish_myvehicles.domain.usecase.ExportDocument
 import com.segnities007.stylish_myvehicles.presentation.components.atoms.StylishIconButton
+import com.segnities007.stylish_myvehicles.presentation.components.molecules.LineChartData
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedCardRow
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedListItemColumn
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedCardItem
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedListItem
+import com.segnities007.stylish_myvehicles.presentation.components.organisms.LineChartSection
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishHeader
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishScaffold
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishSectionTitle
@@ -181,17 +184,37 @@ fun VehicleDetailScreen(
                             )
                             state.averageFuelEconomy?.let { avg ->
                                 if (state.totalDistance > 0 && avg > 0) {
-                                    val costPerKm = state.totalCost.toDouble() / state.totalDistance
-                                    add(
-                                        StylishConnectedListItem(
-                                            "1kmあたりコスト",
-                                            "%.1f円/km".format(costPerKm),
-                                            {})
-                                    )
+                                    val costPerKm = CostStatisticsCalculator.costPerKm(state.totalCost, state.totalDistance)
+                                    if (costPerKm != null) {
+                                        add(
+                                            StylishConnectedListItem(
+                                                "1kmあたりコスト",
+                                                "%.1f円/km".format(costPerKm),
+                                                {})
+                                        )
+                                    }
                                 }
                             }
                         },
                     )
+
+                    val economyData = state.recentFuelRecords
+                        .filter { it.fuelEconomy != null }
+                        .take(20)
+                        .reversed()
+                        .map { r ->
+                            LineChartData(
+                                "${r.date.monthValue}/${r.date.dayOfMonth}",
+                                r.fuelEconomy!!.toFloat(),
+                            )
+                        }
+                    if (economyData.size >= 2) {
+                        Spacer(Modifier.height(12.dp))
+                        LineChartSection(
+                            title = "燃費推移 (km/L)",
+                            data = economyData,
+                        )
+                    }
 
                     // 整備スケジュール
                     if (state.schedules.isNotEmpty()) {

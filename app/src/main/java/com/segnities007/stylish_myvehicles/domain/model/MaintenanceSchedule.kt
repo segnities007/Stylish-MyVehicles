@@ -1,6 +1,7 @@
 package com.segnities007.stylish_myvehicles.domain.model
 
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 data class MaintenanceSchedule(
     val id: Long = 0,
@@ -11,6 +12,17 @@ data class MaintenanceSchedule(
     val lastDoneDate: LocalDate? = null,
     val lastDoneOdometer: Int? = null,
 ) {
+    /** 期間ベースの次回期限日。intervalMonths または lastDoneDate が未設定なら null。 */
+    val dueDate: LocalDate?
+        get() {
+            val interval = intervalMonths ?: return null
+            val lastDone = lastDoneDate ?: return null
+            return lastDone.plusMonths(interval.toLong())
+        }
+
+    /** 現在日付基準の残り日数。期限計算不可なら null。 */
+    fun daysUntilDue(now: LocalDate = LocalDate.now()): Long? =
+        dueDate?.let { ChronoUnit.DAYS.between(now, it) }
     companion object {
         /** 後方互換: 乗用車前提の初期値。 */
         fun defaults(vehicleId: Long): List<MaintenanceSchedule> =

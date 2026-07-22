@@ -1,14 +1,21 @@
 package com.segnities007.stylish_myvehicles.presentation.navigation
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -16,13 +23,17 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.segnities007.stylish_myvehicles.domain.usecase.ExportDocument
+import com.segnities007.stylish_myvehicles.presentation.components.organisms.LocalBottomBarVisible
+import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishBottomBar
 import com.segnities007.stylish_myvehicles.presentation.screen.cost.CostListScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.cost.CostListViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.fuel.FuelRecordScreen
@@ -31,6 +42,7 @@ import com.segnities007.stylish_myvehicles.presentation.screen.licenses.Licenses
 import com.segnities007.stylish_myvehicles.presentation.screen.maintenance.MaintenanceRecordScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.maintenance.MaintenanceRecordViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.notification.NotificationScreen
+import com.segnities007.stylish_myvehicles.presentation.screen.notification.NotificationViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.onboarding.OnboardingScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.records.RecordsScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.records.RecordsViewModel
@@ -63,16 +75,57 @@ fun AppNavigation(
         )
     }
     val snackbarHostState = remember { SnackbarHostState() }
+    val bottomBarVisible = remember { mutableStateOf(true) }
 
     fun popBack() {
         if (backStack.size > 1) backStack.removeAt(backStack.lastIndex)
     }
+
+    val currentDestination = backStack.lastOrNull()
+    val showBottomBar = (currentDestination is VehiclePagerDestination ||
+            currentDestination is RecordsListDestination ||
+            currentDestination is NotificationDestination) && bottomBarVisible.value
 
     Scaffold(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = {
+            AnimatedVisibility(
+                visible = showBottomBar,
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .padding(bottom = 32.dp),
+                enter = fadeIn(tween(200)) + slideInVertically(tween(200)) { it / 2 },
+                exit = fadeOut(tween(200)) + slideOutVertically(tween(200)) { it / 2 },
+            ) {
+                StylishBottomBar(
+                    onNavigateToHome = {
+                        if (currentDestination !is VehiclePagerDestination) popBack()
+                    },
+                    onAddRecord = {
+                        when (val dest = currentDestination) {
+                            is VehiclePagerDestination -> backStack.add(FuelRecordDestination(1, openAdd = true))
+                            is RecordsListDestination -> backStack.add(FuelRecordDestination(dest.vehicleId, openAdd = true))
+                            else -> {}
+                        }
+                    },
+                    onNavigateToNotifications = {
+                        if (currentDestination !is NotificationDestination) {
+                            backStack.add(NotificationDestination)
+                        }
+                    },
+                    onNavigateToRecordsList = {
+                        when (val dest = currentDestination) {
+                            is VehiclePagerDestination -> backStack.add(RecordsListDestination(1))
+                            is NotificationDestination -> popBack()
+                            else -> {}
+                        }
+                    },
+                )
+            }
+        },
     ) { _ ->
         NavDisplay(
             backStack = backStack,
@@ -114,6 +167,7 @@ fun AppNavigation(
                         onAddFuel = { backStack.add(FuelRecordDestination(it, openAdd = true)) },
                         onAddMaintenance = { backStack.add(MaintenanceRecordDestination(it, openAdd = true)) },
                         onAddCost = { backStack.add(CostListDestination(it, openAdd = true)) },
+                        bottomBarVisible = bottomBarVisible,
                     )
                 }
                 entry<RecordsListDestination> { dest ->
@@ -126,6 +180,8 @@ fun AppNavigation(
                         onNavigateToFuel = { backStack.add(FuelRecordDestination(it)) },
                         onNavigateToMaintenance = { backStack.add(MaintenanceRecordDestination(it)) },
                         onNavigateToCost = { backStack.add(CostListDestination(it)) },
+                        onNavigateToHome = { popBack() },
+                        onNavigateToNotifications = { backStack.add(NotificationDestination) },
                     )
                 }
                 entry<RecordsDestination> { dest ->
@@ -212,10 +268,13 @@ fun AppNavigation(
                     )
                 }
                 entry<NotificationDestination> {
+                    val viewModel: NotificationViewModel = koinViewModel()
                     NotificationScreen(
+                        viewModel = viewModel,
                         onNavigateBack = { popBack() },
                         onAddRecord = { /* TODO: show add record dialog */ },
                         onNavigateToHome = { popBack() },
+                        onNavigateToRecordsList = { popBack() },
                     )
                 }
             },

@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.LocalGasStation
 import androidx.compose.material.icons.filled.Payments
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -108,6 +109,40 @@ fun DashboardStatsGrid(
                         trailingContent = {
                             Icon(
                                 Icons.Default.LocalGasStation,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(18.dp),
+                            )
+                        },
+                    ),
+                )
+            }
+            if (dashboard.totalDistance > 0) {
+                add(
+                    StylishConnectedCardItem(
+                        title = "${String.format("%,d", dashboard.totalDistance)}km",
+                        supportingText = "総走行距離",
+                        onClick = {},
+                        trailingContent = {
+                            Icon(
+                                Icons.Default.Speed,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(18.dp),
+                            )
+                        },
+                    ),
+                )
+            }
+            dashboard.costPerKm?.let { cpk ->
+                add(
+                    StylishConnectedCardItem(
+                        title = "%.1f円/km".format(cpk),
+                        supportingText = "1kmあたりコスト",
+                        onClick = {},
+                        trailingContent = {
+                            Icon(
+                                Icons.AutoMirrored.Filled.TrendingUp,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(18.dp),

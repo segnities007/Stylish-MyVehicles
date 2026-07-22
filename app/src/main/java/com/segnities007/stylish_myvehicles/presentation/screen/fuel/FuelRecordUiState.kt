@@ -27,6 +27,17 @@ data class FuelRecordUiState(
     val filteredRecords: List<FuelRecord>
         get() = selectedPeriod.filter(records) { it.date }
 
+    val filteredAverageEconomy: Double?
+        get() = filteredRecords.mapNotNull { it.fuelEconomy }
+            .takeIf { it.isNotEmpty() }
+            ?.average()
+
+    val filteredTotalAmount: Int
+        get() = filteredRecords.sumOf { it.amount }
+
+    val filteredTotalVolume: Double
+        get() = filteredRecords.sumOf { it.volume }
+
     val canSave: Boolean
         get() = inputOdometer.isNotBlank()
                 && inputVolume.isNotBlank()

@@ -11,6 +11,7 @@ data class MaintenanceRecordUiState(
     val isLoading: Boolean = true,
     val relevantCategories: List<MaintenanceCategory> = MaintenanceCategory.entries,
     val selectedPeriod: RecordPeriod = RecordPeriod.ALL,
+    val scheduleDueItems: List<ScheduleDueItem> = emptyList(),
     // ダイアログ
     val isDialogOpen: Boolean = false,
     val editingRecordId: Long? = null,
@@ -27,9 +28,24 @@ data class MaintenanceRecordUiState(
     val filteredRecords: List<MaintenanceRecord>
         get() = selectedPeriod.filter(records) { it.date }
 
+    val filteredTotalCost: Int
+        get() = filteredRecords.sumOf { it.cost }
+
+    val filteredCount: Int
+        get() = filteredRecords.size
+
     val canSave: Boolean
         get() = inputTitle.isNotBlank()
 
     val isEditing: Boolean
         get() = editingRecordId != null
+}
+
+data class ScheduleDueItem(
+    val categoryLabel: String,
+    val dueDate: LocalDate,
+    val daysRemaining: Long,
+) {
+    val isOverdue: Boolean get() = daysRemaining < 0
+    val isDueSoon: Boolean get() = daysRemaining in 0..30
 }

@@ -8,6 +8,7 @@ import com.segnities007.stylish_myvehicles.data.local.entity.VehicleEntity
 import com.segnities007.stylish_myvehicles.data.notification.NotificationHelper
 import com.segnities007.stylish_myvehicles.domain.model.CostCategory
 import com.segnities007.stylish_myvehicles.domain.model.MaintenanceCategory
+import com.segnities007.stylish_myvehicles.domain.service.InspectionCalculator
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -30,10 +31,7 @@ class DeadlineCheckWorker(
             val name = "${vehicle.maker} ${vehicle.name}"
 
             val inspectionExpiry = vehicle.firstRegistrationDate?.let {
-                com.segnities007.stylish_myvehicles.domain.service.InspectionCalculator.calculateCurrentExpiry(
-                    it,
-                    today
-                )
+                InspectionCalculator.calculateCurrentExpiry(it, today)
             } ?: vehicle.inspectionExpiry
             inspectionExpiry?.let { expiry ->
                 val days = ChronoUnit.DAYS.between(today, expiry)

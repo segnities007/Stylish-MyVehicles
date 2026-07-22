@@ -2,9 +2,12 @@ package com.segnities007.stylish_myvehicles.presentation.screen.maintenance
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.segnities007.stylish_myvehicles.domain.model.MaintenanceCategory
 import com.segnities007.stylish_myvehicles.domain.model.MaintenanceRecord
+import com.segnities007.stylish_myvehicles.domain.model.MaintenanceSchedule
 import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.DeleteMaintenanceRecordUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.GetMaintenanceRecordsUseCase
+import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.GetMaintenanceSchedulesUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.InsertMaintenanceRecordUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.UpdateMaintenanceRecordUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.GetVehicleUseCase
@@ -17,6 +20,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 class MaintenanceRecordViewModel(
     private val vehicleId: Long,
@@ -25,6 +29,7 @@ class MaintenanceRecordViewModel(
     private val updateMaintenanceRecordUseCase: UpdateMaintenanceRecordUseCase,
     private val deleteMaintenanceRecordUseCase: DeleteMaintenanceRecordUseCase,
     private val getVehicleUseCase: GetVehicleUseCase,
+    private val getMaintenanceSchedulesUseCase: GetMaintenanceSchedulesUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(MaintenanceRecordUiState(vehicleId = vehicleId))
     val uiState: StateFlow<MaintenanceRecordUiState> = _uiState.asStateFlow()
@@ -40,9 +45,23 @@ class MaintenanceRecordViewModel(
         }
         viewModelScope.launch {
             val vehicle = getVehicleUseCase(vehicleId).first() ?: return@launch
-            val relevant = com.segnities007.stylish_myvehicles.domain.model.MaintenanceCategory
+            val relevant = MaintenanceCategory
                 .relevantFor(vehicle.category)
             _uiState.update { it.copy(relevantCategories = relevant) }
+        }
+        viewModelScope.launch {
+            getMaintenanceSchedulesUseCase(vehicleId).collect { schedules ->
+                val now = LocalDate.now()
+                val dueItems = schedules.mapNotNull { schedule ->
+                    val days = schedule.daysUntilDue(now) ?: return@mapNotNull null
+                    ScheduleDueItem(
+                        categoryLabel = schedule.category.label,
+                        dueDate = schedule.dueDate!!,
+                        daysRemaining = days,
+                    )
+                }.sortedBy { it.daysRemaining }
+                _uiState.update { it.copy(scheduleDueItems = dueItems) }
+            }
         }
     }
 
@@ -58,7 +77,7 @@ class MaintenanceRecordViewModel(
                         editingRecordId = null,
                         inputDate = java.time.LocalDate.now(),
                         inputOdometer = "",
-                        inputCategory = com.segnities007.stylish_myvehicles.domain.model.MaintenanceCategory.OTHER,
+                        inputCategory = MaintenanceCategory.OTHER,
                         inputTitle = "",
                         inputCost = "",
                         inputShopName = "",
@@ -79,7 +98,7 @@ class MaintenanceRecordViewModel(
                 _uiState.update {
                     // タイトルが未入力、またはカテゴリの自動入力そのままなら新カテゴリに合わせて切替える
                     val isDefaultTitle = it.inputTitle.isBlank() ||
-                            com.segnities007.stylish_myvehicles.domain.model.MaintenanceCategory.entries
+                            MaintenanceCategory.entries
                                 .any { cat -> cat.label == it.inputTitle }
                     it.copy(
                         inputCategory = intent.value,

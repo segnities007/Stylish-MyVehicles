@@ -23,6 +23,7 @@ data class VehicleDashboard(
     val averageMonthlyCost: Double? = null,
     val averageFuelEconomy: Double? = null,
     val totalDistance: Int = 0,
+    val costPerKm: Double? = null,
     val nextMaintenanceLabel: String? = null,
     val nextMaintenanceDays: Long? = null,
     // グラフ用（label と値のペア。色はComposable側でテーマから解決する）

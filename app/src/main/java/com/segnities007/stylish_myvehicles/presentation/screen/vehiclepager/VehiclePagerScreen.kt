@@ -32,8 +32,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -47,19 +50,23 @@ import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
 import com.segnities007.stylish_myvehicles.presentation.components.atoms.StylishIconButton
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.BarChartData
+import com.segnities007.stylish_myvehicles.presentation.components.molecules.LineChartData
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.PieChartData
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedCardGrid
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDialogSurface
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.costCategoryColor
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedCardItem
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.BarChartSection
+import com.segnities007.stylish_myvehicles.presentation.components.organisms.LineChartSection
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.PieChartSection
+import com.segnities007.stylish_myvehicles.presentation.components.organisms.LocalBottomBarVisible
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishHeader
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishBottomBar
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishPageContent
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishScaffold
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishSectionTitle
 import com.segnities007.stylish_myvehicles.presentation.screen.vehiclepager.components.DashboardStatsGrid
+import com.segnities007.stylish_myvehicles.presentation.screen.vehiclepager.components.PagerIndicator
 import com.segnities007.stylish_myvehicles.presentation.screen.vehiclepager.components.UrgentAlertCard
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 
@@ -77,6 +84,7 @@ fun VehiclePagerScreen(
     onAddFuel: (Long) -> Unit,
     onAddMaintenance: (Long) -> Unit,
     onAddCost: (Long) -> Unit,
+    bottomBarVisible: MutableState<Boolean>? = null,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -98,6 +106,17 @@ fun VehiclePagerScreen(
     val pagerState = rememberPagerState(pageCount = { pageCount })
     val pageListStates = remember(pageCount) { List(pageCount) { LazyListState() } }
     var showAddDialog by remember { mutableStateOf(false) }
+
+    val currentListState = pageListStates[pagerState.currentPage]
+    val isAtTop by remember(currentListState) {
+        derivedStateOf {
+            currentListState.firstVisibleItemIndex == 0 &&
+                    currentListState.firstVisibleItemScrollOffset <= 0
+        }
+    }
+    LaunchedEffect(isAtTop) {
+        bottomBarVisible?.value = isAtTop
+    }
 
     LaunchedEffect(pagerState.currentPage) {
         viewModel.accept(VehiclePagerIntent.PageChanged(pagerState.currentPage))
@@ -123,20 +142,15 @@ fun VehiclePagerScreen(
                 }
             }
 
-            StylishBottomBar(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .navigationBarsPadding()
-                    .padding(bottom = 32.dp),
-                onNavigateToHome = {},
-                onAddRecord = { showAddDialog = true },
-                onNavigateToNotifications = onNavigateToNotifications,
-                onNavigateToRecordsList = {
-                    state.vehicles.getOrNull(pagerState.currentPage)
-                        ?.let { onNavigateToRecordsList(it.id) }
-                },
-                scrollState = pageListStates[pagerState.currentPage],
-            )
+            if (state.vehicles.size > 1) {
+                PagerIndicator(
+                    pagerState = pagerState,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .navigationBarsPadding()
+                        .padding(bottom = 88.dp),
+                )
+            }
         }
     }
 
@@ -309,7 +323,18 @@ private fun VehiclePage(
         listState = listState,
         header = {
             StylishHeader(
-                title = { Text(vehicle.name) },
+                title = {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(vehicle.name)
+                        if (vehicle.plateNumber.isNotBlank()) {
+                            Text(
+                                vehicle.plateNumber,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                },
                 navigation = {
                     StylishIconButton(
                         Icons.Default.Edit, "編集",
@@ -326,6 +351,25 @@ private fun VehiclePage(
         },
         content = {
             item {
+                UrgentAlertCard(vehicle = vehicle, dashboard = dashboard)
+                Spacer(Modifier.height(16.dp))
+                DashboardStatsGrid(
+                    dashboard = dashboard,
+                    showFuelEconomy = vehicle.category.usesFuel,
+                )
+                Spacer(Modifier.height(16.dp))
+            }
+
+            item {
+                if (dashboard.fuelEconomyTrend.size >= 2) {
+                    LineChartSection(
+                        title = "燃費推移 (km/L)",
+                        data = dashboard.fuelEconomyTrend.map {
+                            LineChartData(it.first, it.second)
+                        },
+                    )
+                    Spacer(Modifier.height(16.dp))
+                }
                 PieChartSection(
                     title = "費用カテゴリ",
                     data = dashboard.costByCategory.map { (category, total) ->
@@ -351,7 +395,9 @@ private fun VehiclePage(
                     items = listOf(
                         StylishConnectedCardItem(
                             title = "給油",
-                            supportingText = "記録・燃費",
+                            supportingText = dashboard.averageFuelEconomy?.let {
+                                "平均 %.1f km/L".format(it)
+                            } ?: "記録・燃費",
                             onClick = { onIntent(VehiclePagerIntent.OpenFuel(vehicle.id)) },
                         ) {
                             Icon(
@@ -362,7 +408,12 @@ private fun VehiclePage(
                         },
                         StylishConnectedCardItem(
                             title = "整備",
-                            supportingText = "記録・目安",
+                            supportingText = dashboard.nextMaintenanceLabel?.let { label ->
+                                dashboard.nextMaintenanceDays?.let { days ->
+                                    if (days < 0) "$label 期限超過"
+                                    else "$label あと${days}日"
+                                }
+                            } ?: "記録・目安",
                             onClick = { onIntent(VehiclePagerIntent.OpenMaintenance(vehicle.id)) },
                         ) {
                             Icon(
@@ -373,7 +424,11 @@ private fun VehiclePage(
                         },
                         StylishConnectedCardItem(
                             title = "費用",
-                            supportingText = "一覧・グラフ",
+                            supportingText = if (dashboard.monthlyCost > 0) {
+                                "今月 ${String.format("%,d", dashboard.monthlyCost)}円"
+                            } else {
+                                "一覧・グラフ"
+                            },
                             onClick = { onIntent(VehiclePagerIntent.OpenCost(vehicle.id)) },
                         ) {
                             Icon(
@@ -393,7 +448,9 @@ private fun VehiclePage(
                     items = listOf(
                         StylishConnectedCardItem(
                             title = "車両情報",
-                            supportingText = "車検・諸元・保険",
+                            supportingText = vehicle.currentInspectionExpiry?.let {
+                                "車検: $it"
+                            } ?: "車検・諸元・保険",
                             onClick = { onIntent(VehiclePagerIntent.OpenVehicleDetail(vehicle.id)) },
                         ),
                     ),
@@ -407,7 +464,10 @@ private fun VehiclePage(
 @Composable
 private fun AddVehiclePage(onAdd: () -> Unit) {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(horizontal = 32.dp),
+        ) {
             Icon(
                 Icons.Default.DirectionsCar,
                 contentDescription = null,
@@ -419,6 +479,13 @@ private fun AddVehiclePage(onAdd: () -> Unit) {
             Text(
                 "車両を追加しましょう",
                 style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(Modifier.height(12.dp))
+            Text(
+                "車検・保険・税金の期限管理、給油記録、整備履歴を一元管理できます",
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )

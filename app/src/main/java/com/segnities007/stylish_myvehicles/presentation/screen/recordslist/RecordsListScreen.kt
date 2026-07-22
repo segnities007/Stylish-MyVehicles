@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -38,6 +39,7 @@ import com.segnities007.stylish_myvehicles.presentation.components.atoms.Stylish
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedListItemColumn
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishEmptyState
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedListItem
+import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishBottomBar
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishHeader
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishPageContent
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishScaffold
@@ -54,6 +56,8 @@ fun RecordsListScreen(
     onNavigateToFuel: (Long) -> Unit,
     onNavigateToMaintenance: (Long) -> Unit,
     onNavigateToCost: (Long) -> Unit,
+    onNavigateToHome: () -> Unit,
+    onNavigateToNotifications: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -70,52 +74,54 @@ fun RecordsListScreen(
     }
 
     StylishScaffold(modifier = modifier) {
-        when {
-            state.isLoading ->
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-
-            else -> StylishPageContent(
-                header = {
-                    StylishHeader(
-                        title = { Text("記録一覧") },
-                        navigation = {
-                            StylishIconButton(
-                                Icons.AutoMirrored.Filled.ArrowBack, "戻る",
-                                onClick = { viewModel.accept(RecordsListIntent.NavigateBack) },
-                            )
-                        },
-                    )
-                },
-            ) {
-                if (state.sections.isEmpty()) {
-                    item {
-                        StylishEmptyState(
-                            icon = Icons.AutoMirrored.Filled.ReceiptLong,
-                            title = "記録がありません",
-                            description = "給油・整備・費用を記録しましょう",
-                        )
+        Box(Modifier.fillMaxSize()) {
+            when {
+                state.isLoading ->
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
                     }
-                }
-                else {
-                    state.sections.forEach { section ->
-                        item(key = "header_${section.month}") {
-                            MonthHeader(section)
-                        }
-                        item(key = "list_${section.month}") {
-                            Column {
-                                StylishConnectedListItemColumn(
-                                    spacing = 4.dp,
-                                    items = section.entries.map { entry ->
-                                        toListItem(entry, viewModel::accept)
-                                    },
+
+                else -> StylishPageContent(
+                    header = {
+                        StylishHeader(
+                            title = { Text("記録一覧") },
+                            navigation = {
+                                StylishIconButton(
+                                    Icons.AutoMirrored.Filled.ArrowBack, "戻る",
+                                    onClick = { viewModel.accept(RecordsListIntent.NavigateBack) },
                                 )
-                                Spacer(Modifier.height(16.dp))
+                            },
+                        )
+                    },
+                ) {
+                    if (state.sections.isEmpty()) {
+                        item {
+                            StylishEmptyState(
+                                icon = Icons.AutoMirrored.Filled.ReceiptLong,
+                                title = "記録がありません",
+                                description = "給油・整備・費用を記録しましょう",
+                            )
+                        }
+                    }
+                    else {
+                        state.sections.forEach { section ->
+                            item(key = "header_${section.month}") {
+                                MonthHeader(section)
+                            }
+                            item(key = "list_${section.month}") {
+                                Column {
+                                    StylishConnectedListItemColumn(
+                                        spacing = 4.dp,
+                                        items = section.entries.map { entry ->
+                                            toListItem(entry, viewModel::accept)
+                                        },
+                                    )
+                                    Spacer(Modifier.height(16.dp))
+                                }
                             }
                         }
+                        item { Spacer(Modifier.height(80.dp)) }
                     }
-                    item { Spacer(Modifier.height(24.dp)) }
                 }
             }
         }

@@ -58,6 +58,7 @@ import com.segnities007.stylish_myvehicles.presentation.components.organisms.Sty
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishPageContent
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishScaffold
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishSectionTitle
+import com.segnities007.stylish_myvehicles.presentation.screen.vehiclepager.components.PagerIndicator
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 import kotlinx.coroutines.launch
 import java.time.YearMonth
@@ -106,29 +107,39 @@ fun RecordsScreen(
                     description = "給油・整備・費用を記録しましょう",
                     modifier = Modifier.align(Alignment.Center),
                 )
-                else -> HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier.fillMaxSize(),
-            ) { page ->
-                val month = state.months.getOrNull(page) ?: return@HorizontalPager
-                MonthPage(
-                    month = month,
-                    state = state,
-                    fuels = state.fuelByMonth[month].orEmpty(),
-                    maintenances = state.maintenanceByMonth[month].orEmpty(),
-                    costs = state.costByMonth[month].orEmpty(),
-                    onNavigateBack = { viewModel.accept(RecordsIntent.NavigateBack) },
-                    onAddFuel = { onNavigateToFuel(state.vehicleId, null) },
-                    onEditFuel = { onNavigateToFuel(state.vehicleId, it) },
-                    onAddMaintenance = { onNavigateToMaintenance(state.vehicleId, null) },
-                    onEditMaintenance = { onNavigateToMaintenance(state.vehicleId, it) },
-                    onAddCost = { onNavigateToCost(state.vehicleId, null) },
-                    onEditCost = { onNavigateToCost(state.vehicleId, it) },
-                )
+                else -> {
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier.fillMaxSize(),
+                    ) { page ->
+                        val month = state.months.getOrNull(page) ?: return@HorizontalPager
+                        MonthPage(
+                            month = month,
+                            state = state,
+                            fuels = state.fuelByMonth[month].orEmpty(),
+                            maintenances = state.maintenanceByMonth[month].orEmpty(),
+                            costs = state.costByMonth[month].orEmpty(),
+                            onNavigateBack = { viewModel.accept(RecordsIntent.NavigateBack) },
+                            onAddFuel = { onNavigateToFuel(state.vehicleId, null) },
+                            onEditFuel = { onNavigateToFuel(state.vehicleId, it) },
+                            onAddMaintenance = { onNavigateToMaintenance(state.vehicleId, null) },
+                            onEditMaintenance = { onNavigateToMaintenance(state.vehicleId, it) },
+                            onAddCost = { onNavigateToCost(state.vehicleId, null) },
+                            onEditCost = { onNavigateToCost(state.vehicleId, it) },
+                        )
+                    }
+                    if (state.months.size > 1) {
+                        PagerIndicator(
+                            pagerState = pagerState,
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(bottom = 16.dp),
+                        )
+                    }
+                }
+            }
         }
     }
-}
-}
 }
 
 @Composable

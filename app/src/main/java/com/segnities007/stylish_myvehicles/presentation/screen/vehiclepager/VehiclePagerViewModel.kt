@@ -2,10 +2,12 @@ package com.segnities007.stylish_myvehicles.presentation.screen.vehiclepager
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.segnities007.stylish_myvehicles.domain.model.CostCategory
 import com.segnities007.stylish_myvehicles.domain.model.CostRecord
 import com.segnities007.stylish_myvehicles.domain.model.FuelRecord
 import com.segnities007.stylish_myvehicles.domain.model.MaintenanceSchedule
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
+import com.segnities007.stylish_myvehicles.domain.service.CostStatisticsCalculator
 import com.segnities007.stylish_myvehicles.domain.usecase.cost.GetCostRecordsUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.fuel.GetFuelRecordsUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.GetMaintenanceSchedulesUseCase
@@ -21,7 +23,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 
 class VehiclePagerViewModel(
     private val getVehiclesUseCase: GetVehiclesUseCase,
@@ -124,12 +125,12 @@ class VehiclePagerViewModel(
         else 0
 
         val nextMaintenance = schedules.mapNotNull { schedule ->
-            val days = daysUntilScheduleDue(schedule, now)
+            val days = schedule.daysUntilDue(now)
             if (days != null) schedule.category.label to days else null
         }
             .minByOrNull { it.second }
 
-        val costByCategory = com.segnities007.stylish_myvehicles.domain.model.CostCategory.entries
+        val costByCategory = CostCategory.entries
             .mapNotNull { cat ->
                 val total = costs.filter { it.category == cat }
                     .sumOf { it.amount }
@@ -154,22 +155,17 @@ class VehiclePagerViewModel(
             monthlyCost = monthlyCost,
             yearlyCost = yearlyCost,
             totalCost = totalCost,
-            averageMonthlyCost = com.segnities007.stylish_myvehicles.domain.service.CostStatisticsCalculator
+            averageMonthlyCost = CostStatisticsCalculator
                 .averageMonthlyCost(costs, now),
             averageFuelEconomy = avgEconomy,
             totalDistance = totalDistance,
+            costPerKm = CostStatisticsCalculator.costPerKm(totalCost, totalDistance),
             nextMaintenanceLabel = nextMaintenance?.first,
             nextMaintenanceDays = nextMaintenance?.second,
             costByCategory = costByCategory,
             monthlyCostTrend = monthlyCostTrend,
             fuelEconomyTrend = fuelEconomyTrend,
         )
-    }
-
-    private fun daysUntilScheduleDue(schedule: MaintenanceSchedule, now: LocalDate): Long? {
-        val interval = schedule.intervalMonths ?: return null
-        val lastDone = schedule.lastDoneDate ?: return null
-        return ChronoUnit.DAYS.between(now, lastDone.plusMonths(interval.toLong()))
     }
 }
 

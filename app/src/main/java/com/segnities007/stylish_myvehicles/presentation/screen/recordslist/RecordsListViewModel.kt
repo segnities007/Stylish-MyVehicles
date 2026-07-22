@@ -2,6 +2,7 @@ package com.segnities007.stylish_myvehicles.presentation.screen.recordslist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.segnities007.stylish_myvehicles.domain.model.CostCategory
 import com.segnities007.stylish_myvehicles.domain.usecase.cost.GetCostRecordsUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.fuel.GetFuelRecordsUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.GetMaintenanceRecordsUseCase
@@ -40,7 +41,10 @@ class RecordsListViewModel(
                 val entries: List<RecordEntry> = buildList {
                     fuels.forEach { add(FuelEntry(it)) }
                     maintenances.forEach { add(MaintenanceEntry(it)) }
-                    costs.forEach { add(CostEntry(it)) }
+                    // FUEL/MAINTENANCEカテゴリのCostRecordは給油・整備で自動作成されるため除外（二重計上防止）
+                    costs.filter {
+                        it.category != CostCategory.FUEL && it.category != CostCategory.MAINTENANCE
+                    }.forEach { add(CostEntry(it)) }
                 }
                 val sections = entries
                     .groupBy { YearMonth.from(it.date) }

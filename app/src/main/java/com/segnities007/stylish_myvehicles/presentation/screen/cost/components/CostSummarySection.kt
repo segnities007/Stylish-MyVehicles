@@ -73,6 +73,16 @@ fun CostSummarySection(
                     "${String.format("%,d", state.monthlyTotal)}円",
                     style = MaterialTheme.typography.headlineMedium,
                 )
+                if (state.previousMonthTotal > 0) {
+                    val diff = state.monthlyTotal - state.previousMonthTotal
+                    val pct = (diff.toDouble() / state.previousMonthTotal * 100).toInt()
+                    Text(
+                        if (diff >= 0) "前月比 +${pct}%" else "前月比 ${pct}%",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (diff > 0) MaterialTheme.colorScheme.error
+                        else MaterialTheme.colorScheme.primary,
+                    )
+                }
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text(

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.segnities007.stylish_myvehicles.domain.model.CostCategory
 import com.segnities007.stylish_myvehicles.domain.usecase.ExportDataUseCase
+import com.segnities007.stylish_myvehicles.domain.usecase.ExportDocument
 import com.segnities007.stylish_myvehicles.domain.usecase.cost.GetCostRecordsUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.fuel.GetFuelRecordsUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.GetMaintenanceRecordsUseCase
@@ -208,6 +209,6 @@ sealed interface VehicleDetailEffect {
     data class NavigateToFuel(val vehicleId: Long) : VehicleDetailEffect
     data class NavigateToMaintenance(val vehicleId: Long) : VehicleDetailEffect
     data class NavigateToCost(val vehicleId: Long) : VehicleDetailEffect
-    data class SaveDocument(val document: com.segnities007.stylish_myvehicles.domain.usecase.ExportDocument) :
+    data class SaveDocument(val document: ExportDocument) :
         VehicleDetailEffect
 }

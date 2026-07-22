@@ -34,6 +34,14 @@ data class CostListUiState(
                 .sumOf { it.amount }
         }
 
+    val previousMonthTotal: Int
+        get() {
+            val prev = LocalDate.now().minusMonths(1)
+            return records
+                .filter { it.date.year == prev.year && it.date.month == prev.month }
+                .sumOf { it.amount }
+        }
+
     val isEditing: Boolean
         get() = editingRecordId != null
 
