@@ -47,4 +47,14 @@ data class CostListUiState(
 
     val canSave: Boolean
         get() = inputTitle.isNotBlank() && inputAmount.toIntOrNull() != null
+
+    val titleError: String?
+        get() = if (inputTitle.isBlank()) "項目は必須です" else null
+
+    val amountError: String?
+        get() = when {
+            inputAmount.isBlank() -> "金額は必須です"
+            inputAmount.toIntOrNull() == null -> "数値で入力してください"
+            else -> null
+        }
 }

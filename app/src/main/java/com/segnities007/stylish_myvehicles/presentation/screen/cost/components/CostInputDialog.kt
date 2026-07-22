@@ -59,6 +59,8 @@ fun CostInputDialog(
                 label = { Text("項目 *") },
                 placeholder = { Text("任意保険料") },
                 singleLine = true,
+                isError = state.titleError != null,
+                supportingText = state.titleError?.let { { Text(it) } },
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(12.dp))
@@ -68,6 +70,8 @@ fun CostInputDialog(
                 label = { Text("金額 (円) *") },
                 placeholder = { Text("12000") },
                 singleLine = true,
+                isError = state.amountError != null,
+                supportingText = state.amountError?.let { { Text(it) } },
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(24.dp))

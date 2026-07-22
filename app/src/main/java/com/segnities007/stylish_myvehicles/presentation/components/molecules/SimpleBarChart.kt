@@ -12,6 +12,8 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.semantics.contentDescription
@@ -19,9 +21,17 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
+/** 積み上げ棒グラフの1区間。value と色。 */
+data class BarChartSegment(
+    val value: Float,
+    val color: Color,
+)
+
 data class BarChartData(
     val label: String,
     val value: Float,
+    /** カテゴリ別の内訳。空の場合は単色の棒として描画する。 */
+    val segments: List<BarChartSegment> = emptyList(),
 )
 
 @Composable
@@ -93,6 +103,7 @@ fun SimpleBarChart(
             )
         }
         else {
+            val topRadius = 4.dp.toPx()
             data.forEachIndexed { index, d ->
                 val barHeight = (d.value / maxValue) * usableHeight
                 val barWidth = usableWidth / (data.size * 2f + 1)
@@ -100,12 +111,43 @@ fun SimpleBarChart(
                 val x = leftPadding + spacing + index * (barWidth + spacing)
                 val y = chartHeight - bottomPadding - barHeight
 
-                drawRoundRect(
-                    color = barColor,
-                    topLeft = Offset(x, y),
-                    size = Size(barWidth, barHeight),
-                    cornerRadius = CornerRadius(4.dp.toPx(), 4.dp.toPx()),
-                )
+                if (d.segments.isEmpty()) {
+                    drawRoundRect(
+                        color = barColor,
+                        topLeft = Offset(x, y),
+                        size = Size(barWidth, barHeight),
+                        cornerRadius = CornerRadius(topRadius, topRadius),
+                    )
+                }
+                else {
+                    // セグメントを下から順に積み上げる。最上段のみ上部を角丸にする。
+                    val lastNonZero = d.segments.indexOfLast { it.value > 0f }
+                    var accumulated = 0f
+                    d.segments.forEachIndexed { segIdx, seg ->
+                        val segHeight = (seg.value / maxValue) * usableHeight
+                        if (segHeight > 0f) {
+                            val segTop = chartHeight - bottomPadding - accumulated - segHeight
+                            if (segIdx == lastNonZero) {
+                                drawTopRoundedRect(
+                                    color = seg.color,
+                                    left = x,
+                                    top = segTop,
+                                    width = barWidth,
+                                    height = segHeight,
+                                    radius = topRadius,
+                                )
+                            }
+                            else {
+                                drawRect(
+                                    color = seg.color,
+                                    topLeft = Offset(x, segTop),
+                                    size = Size(barWidth, segHeight),
+                                )
+                            }
+                        }
+                        accumulated += segHeight
+                    }
+                }
 
                 labelPaint.textAlign = Paint.Align.CENTER
                 drawContext.canvas.nativeCanvas.drawText(
@@ -123,6 +165,29 @@ internal fun formatCompact(value: Float): String = when {
     value >= 10_000 -> "%.1f万".format(value / 10_000)
     value >= 1_000 -> "%.1fk".format(value / 1_000)
     else -> "%.0f".format(value)
+}
+
+/** 上部2隅のみ角丸の矩形を描画する（積み上げ棒の最上段用）。 */
+private fun DrawScope.drawTopRoundedRect(
+    color: Color,
+    left: Float,
+    top: Float,
+    width: Float,
+    height: Float,
+    radius: Float,
+) {
+    if (height <= 0f || width <= 0f) return
+    val r = radius.coerceAtMost(height).coerceAtMost(width / 2f)
+    val path = Path().apply {
+        moveTo(left, top + height)
+        lineTo(left, top + r)
+        quadraticTo(left, top, left + r, top)
+        lineTo(left + width - r, top)
+        quadraticTo(left + width, top, left + width, top + r)
+        lineTo(left + width, top + height)
+        close()
+    }
+    drawPath(path, color)
 }
 
 @Preview(name = "Simple bar chart", showBackground = true, widthDp = 393)
@@ -146,5 +211,39 @@ private fun SimpleBarChartPreview() {
 private fun SimpleBarChartEmptyPreview() {
     MaterialTheme {
         SimpleBarChart(data = emptyList())
+    }
+}
+
+@Preview(name = "Stacked bar chart", showBackground = true, widthDp = 393)
+@Composable
+private fun StackedBarChartPreview() {
+    MaterialTheme {
+        SimpleBarChart(
+            data = listOf(
+                BarChartData(
+                    "1月", 45000f,
+                    segments = listOf(
+                        BarChartSegment(25000f, costCategoryColor(0)),
+                        BarChartSegment(12000f, costCategoryColor(1)),
+                        BarChartSegment(8000f, costCategoryColor(2)),
+                    ),
+                ),
+                BarChartData(
+                    "2月", 30000f,
+                    segments = listOf(
+                        BarChartSegment(18000f, costCategoryColor(0)),
+                        BarChartSegment(12000f, costCategoryColor(1)),
+                    ),
+                ),
+                BarChartData(
+                    "3月", 52000f,
+                    segments = listOf(
+                        BarChartSegment(28000f, costCategoryColor(0)),
+                        BarChartSegment(14000f, costCategoryColor(1)),
+                        BarChartSegment(10000f, costCategoryColor(2)),
+                    ),
+                ),
+            ),
+        )
     }
 }

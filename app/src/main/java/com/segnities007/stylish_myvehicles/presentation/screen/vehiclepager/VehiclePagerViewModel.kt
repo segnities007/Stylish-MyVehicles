@@ -136,6 +136,7 @@ class VehiclePagerViewModel(
                     .sumOf { it.amount }
                 if (total > 0) cat to total else null
             }
+            .sortedByDescending { it.second }
 
         val monthlyCostTrend = (5 downTo 0).map { monthsAgo ->
             val month = now.minusMonths(monthsAgo.toLong())
@@ -143,6 +144,20 @@ class VehiclePagerViewModel(
                 .filter { it.date.year == month.year && it.date.month == month.month }
                 .sumOf { it.amount }
             "${month.monthValue}月" to total.toFloat()
+        }
+
+        val monthlyCostByCategory = (5 downTo 0).map { monthsAgo ->
+            val month = now.minusMonths(monthsAgo.toLong())
+            val monthCosts = costs
+                .filter { it.date.year == month.year && it.date.month == month.month }
+            val byCategory = CostCategory.entries
+                .mapNotNull { cat ->
+                    val total = monthCosts.filter { it.category == cat }
+                        .sumOf { it.amount }
+                    if (total > 0) cat to total else null
+                }
+                .sortedByDescending { it.second }
+            MonthlyCostSlice("${month.monthValue}月", byCategory)
         }
 
         val fuelEconomyTrend = fuels
@@ -165,6 +180,7 @@ class VehiclePagerViewModel(
             costByCategory = costByCategory,
             monthlyCostTrend = monthlyCostTrend,
             fuelEconomyTrend = fuelEconomyTrend,
+            monthlyCostByCategory = monthlyCostByCategory,
         )
     }
 }

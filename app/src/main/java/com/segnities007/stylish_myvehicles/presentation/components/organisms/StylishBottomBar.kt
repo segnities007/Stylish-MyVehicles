@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.MaterialTheme
@@ -23,10 +21,8 @@ import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesT
 @Composable
 fun StylishBottomBar(
     onNavigateToHome: () -> Unit,
-    onAddRecord: () -> Unit,
     onNavigateToNotifications: () -> Unit,
     modifier: Modifier = Modifier,
-    onNavigateToRecordsList: (() -> Unit)? = null,
 ) {
     Surface(
         modifier = modifier
@@ -51,18 +47,6 @@ fun StylishBottomBar(
                 contentDescription = "ホーム",
                 onClick = onNavigateToHome,
             )
-            if (onNavigateToRecordsList != null) {
-                StylishRoundedIconButton(
-                    imageVector = Icons.Default.History,
-                    contentDescription = "記録一覧",
-                    onClick = onNavigateToRecordsList,
-                )
-            }
-            StylishRoundedIconButton(
-                imageVector = Icons.Default.Add,
-                contentDescription = "記録を追加",
-                onClick = onAddRecord,
-            )
             StylishRoundedIconButton(
                 imageVector = Icons.Default.Notifications,
                 contentDescription = "通知",
@@ -78,7 +62,6 @@ private fun StylishBottomBarPreview() {
     StylishMyVehiclesTheme {
         StylishBottomBar(
             onNavigateToHome = {},
-            onAddRecord = {},
             onNavigateToNotifications = {},
         )
     }

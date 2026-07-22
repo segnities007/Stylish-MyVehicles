@@ -2,8 +2,6 @@ package com.segnities007.stylish_myvehicles.presentation.screen.records
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.segnities007.stylish_myvehicles.domain.model.CostCategory
-import com.segnities007.stylish_myvehicles.domain.service.CostStatisticsCalculator
 import com.segnities007.stylish_myvehicles.domain.usecase.cost.GetCostRecordsUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.fuel.GetFuelRecordsUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.GetMaintenanceRecordsUseCase
@@ -23,13 +21,19 @@ import java.time.YearMonth
 
 class RecordsViewModel(
     private val vehicleId: Long,
+    private val topic: RecordTopic,
+    initialPeriodMode: PeriodMode,
     private val getFuelRecordsUseCase: GetFuelRecordsUseCase,
     private val getMaintenanceRecordsUseCase: GetMaintenanceRecordsUseCase,
     private val getCostRecordsUseCase: GetCostRecordsUseCase,
     private val getVehiclesUseCase: GetVehiclesUseCase,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(RecordsUiState(vehicleId = vehicleId))
+    private val _uiState = MutableStateFlow(
+        RecordsUiState(vehicleId = vehicleId, topic = topic, periodMode = initialPeriodMode)
+    )
     val uiState: StateFlow<RecordsUiState> = _uiState.asStateFlow()
+
+    private val _periodMode = MutableStateFlow(initialPeriodMode)
 
     private val _effects = Channel<RecordsEffect>(Channel.BUFFERED)
     val effects: Flow<RecordsEffect> = _effects.receiveAsFlow()
@@ -43,70 +47,29 @@ class RecordsViewModel(
                 getFuelRecordsUseCase(vehicleId),
                 getMaintenanceRecordsUseCase(vehicleId),
                 getCostRecordsUseCase(vehicleId),
-            ) { fuels, maintenances, costs ->
-                val allMonths = (fuels.map { YearMonth.from(it.date) } +
-                        maintenances.map { YearMonth.from(it.date) } +
-                        costs.map { YearMonth.from(it.date) })
-                    .distinct()
-                    .sortedDescending()
-                    .takeIf { it.isNotEmpty() }
-                    ?: listOf(YearMonth.now())
-
-                val fuelByMonth = fuels.groupBy { YearMonth.from(it.date) }
-                val maintenanceByMonth = maintenances.groupBy { YearMonth.from(it.date) }
-                val costByMonth = costs.groupBy { YearMonth.from(it.date) }
-
-                val now = LocalDate.now()
-                val monthlyCost =
-                    costs.filter { it.date.year == now.year && it.date.month == now.month }
-                        .sumOf { it.amount }
-                val yearlyCost = costs.filter { it.date.year == now.year }
-                    .sumOf { it.amount }
-                val totalCost = costs.sumOf { it.amount }
-                val averageMonthlyCost =
-                    if (costs.isNotEmpty()) CostStatisticsCalculator.averageMonthlyCost(
-                        costs,
-                        now
-                    )
-                    else null
-                val economies = fuels.mapNotNull { it.fuelEconomy }
-                val avgEconomy = economies.takeIf { it.isNotEmpty() }
-                    ?.average()
-                val totalDistance =
-                    if (fuels.size >= 2) fuels.maxOf { it.odometer } - fuels.minOf { it.odometer } else 0
-                val costByCategory = CostCategory.entries.mapNotNull { cat ->
-                    val total = costs.filter { it.category == cat }
-                        .sumOf { it.amount }
-                    if (total > 0) cat to total else null
+                _periodMode,
+            ) { fuels, maintenances, costs, mode ->
+                val recordDates = when (topic) {
+                    RecordTopic.FUEL -> fuels.map { it.date }
+                    RecordTopic.MAINTENANCE -> maintenances.map { it.date }
+                    RecordTopic.COST -> costs.map { it.date }
                 }
-                val monthlyCostTrend = (5 downTo 0).map { monthsAgo ->
-                    val month = now.minusMonths(monthsAgo.toLong())
-                    val total =
-                        costs.filter { it.date.year == month.year && it.date.month == month.month }
-                            .sumOf { it.amount }
-                    "${month.monthValue}月" to total.toFloat()
-                }
+                val periods = computePeriods(mode, recordDates, LocalDate.now())
 
                 RecordsUiState(
                     vehicleId = vehicleId,
+                    topic = topic,
+                    periodMode = mode,
                     vehicle = vehicle,
-                    months = allMonths,
-                    fuelByMonth = fuelByMonth,
-                    maintenanceByMonth = maintenanceByMonth,
-                    costByMonth = costByMonth,
+                    periods = periods,
+                    fuelRecords = fuels,
+                    maintenanceRecords = maintenances,
+                    costRecords = costs,
                     isLoading = false,
                     currentPage = _uiState.value.currentPage.coerceIn(
                         0,
-                        (allMonths.size - 1).coerceAtLeast(0)
+                        (periods.size - 1).coerceAtLeast(0)
                     ),
-                    monthlyCost = monthlyCost,
-                    yearlyCost = yearlyCost,
-                    totalCost = totalCost,
-                    averageMonthlyCost = averageMonthlyCost,
-                    averageFuelEconomy = avgEconomy,
-                    totalDistance = totalDistance,
-                    costByCategory = costByCategory,
-                    monthlyCostTrend = monthlyCostTrend,
                 )
             }.collect { state ->
                 _uiState.value = state
@@ -119,6 +82,9 @@ class RecordsViewModel(
             is RecordsIntent.PageChanged ->
                 _uiState.update { it.copy(currentPage = intent.page) }
 
+            is RecordsIntent.ChangePeriodMode ->
+                _periodMode.value = intent.mode
+
             is RecordsIntent.NavigateBack ->
                 _effects.trySend(RecordsEffect.NavigateBack)
 
@@ -130,6 +96,22 @@ class RecordsViewModel(
 
             is RecordsIntent.NavigateToCost ->
                 _effects.trySend(RecordsEffect.OpenCost(vehicleId, intent.recordId))
+        }
+    }
+}
+
+internal fun continuousMonths(recordMonths: List<YearMonth>, now: YearMonth): List<YearMonth> {
+    val newest = listOfNotNull(now, recordMonths.maxOrNull()).max()
+    val oldest = listOfNotNull(now, recordMonths.minOrNull()).min()
+    // 記録が今月のみの場合でも前月までページを作り、横スワイプで過去月（記録なし）を閲覧できるようにする
+    val lowerBound = now.minusMonths(1)
+    val boundedOldest = if (oldest.isAfter(lowerBound)) lowerBound else oldest
+    // 昇順（古い月→新しい月）。画面側で新しい月が右側に来る
+    return buildList {
+        var month = boundedOldest
+        while (!month.isAfter(newest)) {
+            add(month)
+            month = month.plusMonths(1)
         }
     }
 }

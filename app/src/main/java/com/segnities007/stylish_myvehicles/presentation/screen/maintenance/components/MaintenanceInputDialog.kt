@@ -59,6 +59,8 @@ fun MaintenanceInputDialog(
                 label = { Text("整備内容 *") },
                 placeholder = { Text("エンジンオイル交換") },
                 singleLine = true,
+                isError = state.titleError != null,
+                supportingText = state.titleError?.let { { Text(it) } },
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(12.dp))

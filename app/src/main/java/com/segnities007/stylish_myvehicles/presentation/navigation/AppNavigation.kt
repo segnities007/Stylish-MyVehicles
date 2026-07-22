@@ -13,10 +13,14 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -32,6 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.segnities007.stylish_myvehicles.domain.usecase.ExportDocument
+import com.segnities007.stylish_myvehicles.presentation.components.atoms.StylishFab
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.LocalBottomBarVisible
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishBottomBar
 import com.segnities007.stylish_myvehicles.presentation.screen.cost.CostListScreen
@@ -44,10 +49,10 @@ import com.segnities007.stylish_myvehicles.presentation.screen.maintenance.Maint
 import com.segnities007.stylish_myvehicles.presentation.screen.notification.NotificationScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.notification.NotificationViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.onboarding.OnboardingScreen
+import com.segnities007.stylish_myvehicles.presentation.screen.records.PeriodPreference
 import com.segnities007.stylish_myvehicles.presentation.screen.records.RecordsScreen
+import com.segnities007.stylish_myvehicles.presentation.screen.records.RecordTopic
 import com.segnities007.stylish_myvehicles.presentation.screen.records.RecordsViewModel
-import com.segnities007.stylish_myvehicles.presentation.screen.recordslist.RecordsListScreen
-import com.segnities007.stylish_myvehicles.presentation.screen.recordslist.RecordsListViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.settings.SettingsScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.vehicledetail.VehicleDetailScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.vehicledetail.VehicleDetailViewModel
@@ -76,14 +81,22 @@ fun AppNavigation(
     }
     val snackbarHostState = remember { SnackbarHostState() }
     val bottomBarVisible = remember { mutableStateOf(true) }
+    val showAddDialog = remember { mutableStateOf(false) }
 
     fun popBack() {
         if (backStack.size > 1) backStack.removeAt(backStack.lastIndex)
     }
 
+    // 下部バーのタブ遷移。ルート（ホーム）まで戻してから選択タブを積み、スタックの積み上がりを防ぐ。
+    fun navigateToTab(tab: AppDestination) {
+        while (backStack.size > 1) backStack.removeAt(backStack.lastIndex)
+        if (tab !is VehiclePagerDestination) {
+            backStack.add(tab)
+        }
+    }
+
     val currentDestination = backStack.lastOrNull()
     val showBottomBar = (currentDestination is VehiclePagerDestination ||
-            currentDestination is RecordsListDestination ||
             currentDestination is NotificationDestination) && bottomBarVisible.value
 
     Scaffold(
@@ -100,29 +113,27 @@ fun AppNavigation(
                 enter = fadeIn(tween(200)) + slideInVertically(tween(200)) { it / 2 },
                 exit = fadeOut(tween(200)) + slideOutVertically(tween(200)) { it / 2 },
             ) {
-                StylishBottomBar(
-                    onNavigateToHome = {
-                        if (currentDestination !is VehiclePagerDestination) popBack()
-                    },
-                    onAddRecord = {
-                        when (val dest = currentDestination) {
-                            is VehiclePagerDestination -> backStack.add(FuelRecordDestination(1, openAdd = true))
-                            is RecordsListDestination -> backStack.add(FuelRecordDestination(dest.vehicleId, openAdd = true))
-                            else -> {}
-                        }
-                    },
-                    onNavigateToNotifications = {
-                        if (currentDestination !is NotificationDestination) {
-                            backStack.add(NotificationDestination)
-                        }
-                    },
-                    onNavigateToRecordsList = {
-                        when (val dest = currentDestination) {
-                            is VehiclePagerDestination -> backStack.add(RecordsListDestination(1))
-                            is NotificationDestination -> popBack()
-                            else -> {}
-                        }
-                    },
+                Box(
+                    Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    StylishBottomBar(
+                        onNavigateToHome = { navigateToTab(VehiclePagerDestination) },
+                        onNavigateToNotifications = { navigateToTab(NotificationDestination) },
+                    )
+                }
+            }
+        },
+        floatingActionButton = {
+            AnimatedVisibility(
+                visible = currentDestination is VehiclePagerDestination && bottomBarVisible.value,
+                enter = fadeIn(tween(200)) + slideInVertically(tween(200)) { it / 2 },
+                exit = fadeOut(tween(200)) + slideOutVertically(tween(200)) { it / 2 },
+            ) {
+                StylishFab(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "記録を追加",
+                    onClick = { showAddDialog.value = true },
                 )
             }
         },
@@ -158,35 +169,23 @@ fun AppNavigation(
                         viewModel = viewModel,
                         onNavigateToEdit = { backStack.add(VehicleEditDestination(it)) },
                         onNavigateToSettings = { backStack.add(SettingsDestination) },
-                        onNavigateToFuel = { backStack.add(RecordsDestination(it)) },
-                        onNavigateToMaintenance = { backStack.add(RecordsDestination(it)) },
-                        onNavigateToCost = { backStack.add(RecordsDestination(it)) },
+                        onNavigateToFuel = { backStack.add(RecordsDestination(it, RecordTopic.FUEL)) },
+                        onNavigateToMaintenance = { backStack.add(RecordsDestination(it, RecordTopic.MAINTENANCE)) },
+                        onNavigateToCost = { backStack.add(RecordsDestination(it, RecordTopic.COST)) },
                         onNavigateToVehicleDetail = { backStack.add(VehicleDetailDestination(it)) },
                         onNavigateToNotifications = { backStack.add(NotificationDestination) },
-                        onNavigateToRecordsList = { backStack.add(RecordsListDestination(it)) },
                         onAddFuel = { backStack.add(FuelRecordDestination(it, openAdd = true)) },
                         onAddMaintenance = { backStack.add(MaintenanceRecordDestination(it, openAdd = true)) },
                         onAddCost = { backStack.add(CostListDestination(it, openAdd = true)) },
                         bottomBarVisible = bottomBarVisible,
-                    )
-                }
-                entry<RecordsListDestination> { dest ->
-                    val viewModel: RecordsListViewModel = koinViewModel(
-                        parameters = { parametersOf(dest.vehicleId) },
-                    )
-                    RecordsListScreen(
-                        viewModel = viewModel,
-                        onNavigateBack = { popBack() },
-                        onNavigateToFuel = { backStack.add(FuelRecordDestination(it)) },
-                        onNavigateToMaintenance = { backStack.add(MaintenanceRecordDestination(it)) },
-                        onNavigateToCost = { backStack.add(CostListDestination(it)) },
-                        onNavigateToHome = { popBack() },
-                        onNavigateToNotifications = { backStack.add(NotificationDestination) },
+                        showAddDialog = showAddDialog,
                     )
                 }
                 entry<RecordsDestination> { dest ->
+                    val context = LocalContext.current
+                    val initialMode = remember { PeriodPreference.getMode(context) }
                     val viewModel: RecordsViewModel = koinViewModel(
-                        parameters = { parametersOf(dest.vehicleId) },
+                        parameters = { parametersOf(dest.vehicleId, dest.topic, initialMode) },
                     )
                     RecordsScreen(
                         viewModel = viewModel,
@@ -210,9 +209,9 @@ fun AppNavigation(
                         viewModel = viewModel,
                         onNavigateBack = { popBack() },
                         onNavigateToEdit = { popBack(); backStack.add(VehicleEditDestination(it)) },
-                        onNavigateToFuel = { backStack.add(RecordsDestination(it)) },
-                        onNavigateToMaintenance = { backStack.add(RecordsDestination(it)) },
-                        onNavigateToCost = { backStack.add(RecordsDestination(it)) },
+                        onNavigateToFuel = { backStack.add(RecordsDestination(it, RecordTopic.FUEL)) },
+                        onNavigateToMaintenance = { backStack.add(RecordsDestination(it, RecordTopic.MAINTENANCE)) },
+                        onNavigateToCost = { backStack.add(RecordsDestination(it, RecordTopic.COST)) },
                         onSaveDocument = onSaveDocument,
                     )
                 }
@@ -274,7 +273,6 @@ fun AppNavigation(
                         onNavigateBack = { popBack() },
                         onAddRecord = { /* TODO: show add record dialog */ },
                         onNavigateToHome = { popBack() },
-                        onNavigateToRecordsList = { popBack() },
                     )
                 }
             },

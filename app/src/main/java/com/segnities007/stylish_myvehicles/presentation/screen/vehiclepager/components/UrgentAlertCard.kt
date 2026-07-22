@@ -20,7 +20,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 import com.segnities007.stylish_myvehicles.domain.service.DeadlineResolver
-import com.segnities007.stylish_myvehicles.presentation.screen.vehiclepager.VehicleDashboard
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 
 /**
@@ -30,15 +29,11 @@ import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesT
 @Composable
 fun UrgentAlertCard(
     vehicle: Vehicle,
-    dashboard: VehicleDashboard,
     modifier: Modifier = Modifier,
 ) {
     val candidates = buildList {
         DeadlineResolver.resolve(vehicle)
             ?.let { add(it.label to it.daysRemaining) }
-        dashboard.nextMaintenanceLabel?.let { label ->
-            dashboard.nextMaintenanceDays?.let { days -> add(label to days) }
-        }
     }
     val (label, days) = candidates.minByOrNull { it.second } ?: return
 
@@ -90,7 +85,6 @@ private fun UrgentAlertCardPreview() {
                         .minusYears(3)
                         .plusDays(20),
                 ),
-                dashboard = VehicleDashboard(),
             )
         }
     }
@@ -107,7 +101,6 @@ private fun UrgentAlertCardCalmPreview() {
                     firstRegistrationDate = java.time.LocalDate.now()
                         .minusYears(1),
                 ),
-                dashboard = VehicleDashboard(),
             )
         }
     }

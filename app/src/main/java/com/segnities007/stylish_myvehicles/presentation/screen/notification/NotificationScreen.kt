@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Notifications
@@ -45,7 +47,6 @@ fun NotificationScreen(
     onNavigateBack: () -> Unit,
     onAddRecord: () -> Unit,
     onNavigateToHome: () -> Unit,
-    onNavigateToRecordsList: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -96,12 +97,19 @@ fun NotificationScreen(
                     }
 
                     else -> {
-                        val expired = state.deadlines.filter { it.deadline.isExpired }
-                        val urgent = state.deadlines.filter {
+                        val mostImportant = state.deadlines.first()
+                        val rest = state.deadlines.drop(1)
+                        val expired = rest.filter { it.deadline.isExpired }
+                        val urgent = rest.filter {
                             !it.deadline.isExpired && it.deadline.isUrgent
                         }
-                        val upcoming = state.deadlines.filter {
+                        val upcoming = rest.filter {
                             !it.deadline.isExpired && !it.deadline.isUrgent
+                        }
+
+                        item {
+                            MostImportantDeadlineCard(item = mostImportant)
+                            Spacer(Modifier.height(16.dp))
                         }
 
                         if (expired.isNotEmpty()) {
@@ -138,6 +146,39 @@ fun NotificationScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun MostImportantDeadlineCard(item: VehicleDeadlineItem) {
+    val daysText = if (item.deadline.isExpired) {
+        "期限切れ（${-item.deadline.daysRemaining}日超過）"
+    } else {
+        "あと${item.deadline.daysRemaining}日"
+    }
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+        tonalElevation = 4.dp,
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text(
+                "最重要",
+                style = MaterialTheme.typography.labelLarge,
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "${item.vehicleName} / ${item.deadline.label}",
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                "${item.deadline.date} （$daysText）",
+                style = MaterialTheme.typography.bodySmall,
+            )
         }
     }
 }

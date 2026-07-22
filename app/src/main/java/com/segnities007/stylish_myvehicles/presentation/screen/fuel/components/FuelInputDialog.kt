@@ -74,27 +74,33 @@ fun FuelInputDialog(
             OutlinedTextField(
                 value = state.inputOdometer,
                 onValueChange = { onIntent(FuelRecordIntent.OdometerChanged(it)) },
-                label = { Text("走行距離 (km)") },
+                label = { Text("走行距離 (km) *") },
                 placeholder = { Text("45230") },
                 singleLine = true,
+                isError = state.odometerError != null,
+                supportingText = state.odometerError?.let { { Text(it) } },
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(12.dp))
             OutlinedTextField(
                 value = state.inputVolume,
                 onValueChange = { onIntent(FuelRecordIntent.VolumeChanged(it)) },
-                label = { Text("給油量 (L)") },
+                label = { Text("給油量 (L) *") },
                 placeholder = { Text("32.5") },
                 singleLine = true,
+                isError = state.volumeError != null,
+                supportingText = state.volumeError?.let { { Text(it) } },
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(12.dp))
             OutlinedTextField(
                 value = state.inputAmount,
                 onValueChange = { onIntent(FuelRecordIntent.AmountChanged(it)) },
-                label = { Text("金額 (円)") },
+                label = { Text("金額 (円) *") },
                 placeholder = { Text("5688") },
                 singleLine = true,
+                isError = state.amountError != null,
+                supportingText = state.amountError?.let { { Text(it) } },
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(12.dp))

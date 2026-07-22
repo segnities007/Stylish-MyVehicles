@@ -50,6 +50,7 @@ import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
 import com.segnities007.stylish_myvehicles.presentation.components.atoms.StylishIconButton
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.BarChartData
+import com.segnities007.stylish_myvehicles.presentation.components.molecules.BarChartSegment
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.LineChartData
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.PieChartData
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedCardGrid
@@ -65,7 +66,6 @@ import com.segnities007.stylish_myvehicles.presentation.components.organisms.Sty
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishPageContent
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishScaffold
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishSectionTitle
-import com.segnities007.stylish_myvehicles.presentation.screen.vehiclepager.components.DashboardStatsGrid
 import com.segnities007.stylish_myvehicles.presentation.screen.vehiclepager.components.PagerIndicator
 import com.segnities007.stylish_myvehicles.presentation.screen.vehiclepager.components.UrgentAlertCard
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
@@ -80,11 +80,11 @@ fun VehiclePagerScreen(
     onNavigateToCost: (Long) -> Unit,
     onNavigateToVehicleDetail: (Long) -> Unit,
     onNavigateToNotifications: () -> Unit,
-    onNavigateToRecordsList: (Long) -> Unit,
     onAddFuel: (Long) -> Unit,
     onAddMaintenance: (Long) -> Unit,
     onAddCost: (Long) -> Unit,
     bottomBarVisible: MutableState<Boolean>? = null,
+    showAddDialog: MutableState<Boolean>? = null,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -105,7 +105,15 @@ fun VehiclePagerScreen(
     val pageCount = state.vehicles.size + 1
     val pagerState = rememberPagerState(pageCount = { pageCount })
     val pageListStates = remember(pageCount) { List(pageCount) { LazyListState() } }
-    var showAddDialog by remember { mutableStateOf(false) }
+    val localShowAddDialog = remember { mutableStateOf(false) }
+    val addDialogState = showAddDialog ?: localShowAddDialog
+    var isAddDialogVisible by remember { mutableStateOf(false) }
+    LaunchedEffect(addDialogState.value) {
+        if (addDialogState.value) {
+            isAddDialogVisible = true
+            addDialogState.value = false
+        }
+    }
 
     val currentListState = pageListStates[pagerState.currentPage]
     val isAtTop by remember(currentListState) {
@@ -154,9 +162,9 @@ fun VehiclePagerScreen(
         }
     }
 
-    if (showAddDialog) {
+    if (isAddDialogVisible) {
         val currentVehicle = state.vehicles.getOrNull(pagerState.currentPage)
-        StylishDialogSurface(onDismiss = { showAddDialog = false }) {
+        StylishDialogSurface(onDismiss = { isAddDialogVisible = false }) {
             Column(Modifier.padding(24.dp)) {
                 Text("記録を追加", style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.height(16.dp))
@@ -167,7 +175,7 @@ fun VehiclePagerScreen(
                         StylishConnectedCardItem(
                             title = "給油",
                             onClick = {
-                                showAddDialog = false
+                                isAddDialogVisible = false
                                 if (currentVehicle != null) onAddFuel(currentVehicle.id)
                             },
                             trailingContent = {
@@ -181,7 +189,7 @@ fun VehiclePagerScreen(
                         StylishConnectedCardItem(
                             title = "整備",
                             onClick = {
-                                showAddDialog = false
+                                isAddDialogVisible = false
                                 if (currentVehicle != null) onAddMaintenance(currentVehicle.id)
                             },
                             trailingContent = {
@@ -195,7 +203,7 @@ fun VehiclePagerScreen(
                         StylishConnectedCardItem(
                             title = "費用",
                             onClick = {
-                                showAddDialog = false
+                                isAddDialogVisible = false
                                 if (currentVehicle != null) onAddCost(currentVehicle.id)
                             },
                             trailingContent = {
@@ -351,16 +359,6 @@ private fun VehiclePage(
         },
         content = {
             item {
-                UrgentAlertCard(vehicle = vehicle, dashboard = dashboard)
-                Spacer(Modifier.height(16.dp))
-                DashboardStatsGrid(
-                    dashboard = dashboard,
-                    showFuelEconomy = vehicle.category.usesFuel,
-                )
-                Spacer(Modifier.height(16.dp))
-            }
-
-            item {
                 if (dashboard.fuelEconomyTrend.size >= 2) {
                     LineChartSection(
                         title = "燃費推移 (km/L)",
@@ -383,8 +381,24 @@ private fun VehiclePage(
                 Spacer(Modifier.height(16.dp))
                 BarChartSection(
                     title = "月次費用",
-                    data = dashboard.monthlyCostTrend.map { BarChartData(it.first, it.second) },
+                    data = dashboard.monthlyCostByCategory.map { slice ->
+                        BarChartData(
+                            label = slice.label,
+                            value = slice.total.toFloat(),
+                            segments = slice.byCategory.map { (category, amount) ->
+                                BarChartSegment(
+                                    amount.toFloat(),
+                                    costCategoryColor(category.ordinal),
+                                )
+                            },
+                        )
+                    },
                 )
+                Spacer(Modifier.height(16.dp))
+            }
+
+            item {
+                UrgentAlertCard(vehicle = vehicle)
                 Spacer(Modifier.height(16.dp))
             }
 
@@ -408,12 +422,7 @@ private fun VehiclePage(
                         },
                         StylishConnectedCardItem(
                             title = "整備",
-                            supportingText = dashboard.nextMaintenanceLabel?.let { label ->
-                                dashboard.nextMaintenanceDays?.let { days ->
-                                    if (days < 0) "$label 期限超過"
-                                    else "$label あと${days}日"
-                                }
-                            } ?: "記録・目安",
+                            supportingText = "記録・目安",
                             onClick = { onIntent(VehiclePagerIntent.OpenMaintenance(vehicle.id)) },
                         ) {
                             Icon(

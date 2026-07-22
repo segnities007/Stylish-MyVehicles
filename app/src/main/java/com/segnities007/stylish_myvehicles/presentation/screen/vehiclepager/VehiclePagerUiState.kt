@@ -30,4 +30,14 @@ data class VehicleDashboard(
     val costByCategory: List<Pair<CostCategory, Int>> = emptyList(),
     val monthlyCostTrend: List<Pair<String, Float>> = emptyList(),
     val fuelEconomyTrend: List<Pair<String, Float>> = emptyList(),
+    /** 月次費用のカテゴリ別内訳（積み上げ棒グラフ用）。 */
+    val monthlyCostByCategory: List<MonthlyCostSlice> = emptyList(),
 )
+
+/** 月次費用グラフの1ヶ月分。label とカテゴリ別金額。 */
+data class MonthlyCostSlice(
+    val label: String,
+    val byCategory: List<Pair<CostCategory, Int>>,
+) {
+    val total: Int get() = byCategory.sumOf { it.second }
+}

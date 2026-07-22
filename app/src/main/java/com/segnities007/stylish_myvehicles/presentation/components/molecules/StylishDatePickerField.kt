@@ -1,6 +1,7 @@
 package com.segnities007.stylish_myvehicles.presentation.components.molecules
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -35,17 +36,21 @@ fun StylishDatePickerField(
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
-    OutlinedTextField(
-        value = value?.format(dateFormatter) ?: "",
-        onValueChange = {},
-        label = { Text(label) },
-        placeholder = { Text(placeholder) },
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .clickable { showDialog = true },
-        readOnly = true,
-        singleLine = true,
-    )
+    ) {
+        OutlinedTextField(
+            value = value?.format(dateFormatter) ?: "",
+            onValueChange = {},
+            label = { Text(label) },
+            placeholder = { Text(placeholder) },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = false,
+            singleLine = true,
+        )
+    }
 
     if (showDialog) {
         val datePickerState = rememberDatePickerState(

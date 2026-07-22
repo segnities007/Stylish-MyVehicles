@@ -46,6 +46,27 @@ data class FuelRecordUiState(
                 && inputVolume.toDoubleOrNull() != null
                 && inputAmount.toIntOrNull() != null
 
+    val odometerError: String?
+        get() = when {
+            inputOdometer.isBlank() -> "走行距離は必須です"
+            inputOdometer.toIntOrNull() == null -> "数値で入力してください"
+            else -> null
+        }
+
+    val volumeError: String?
+        get() = when {
+            inputVolume.isBlank() -> "給油量は必須です"
+            inputVolume.toDoubleOrNull() == null -> "数値で入力してください"
+            else -> null
+        }
+
+    val amountError: String?
+        get() = when {
+            inputAmount.isBlank() -> "金額は必須です"
+            inputAmount.toIntOrNull() == null -> "数値で入力してください"
+            else -> null
+        }
+
     val isEditing: Boolean
         get() = editingRecordId != null
 }

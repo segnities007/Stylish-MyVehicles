@@ -37,6 +37,9 @@ data class MaintenanceRecordUiState(
     val canSave: Boolean
         get() = inputTitle.isNotBlank()
 
+    val titleError: String?
+        get() = if (inputTitle.isBlank()) "整備内容は必須です" else null
+
     val isEditing: Boolean
         get() = editingRecordId != null
 }
