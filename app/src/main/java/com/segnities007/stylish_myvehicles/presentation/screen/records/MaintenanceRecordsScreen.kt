@@ -8,7 +8,9 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -163,13 +165,20 @@ internal fun LazyListScope.MaintenancePeriodContent(
                 items = periodMaintenances.map { record ->
                     StylishConnectedListItem(
                         headline = record.title,
-                        supportingText = buildList {
-                            add(record.date.toString())
-                            if (record.cost > 0) add("${String.format("%,d", record.cost)}円")
-                            add(record.category.label)
-                        }.joinToString(" / "),
+                        supportingLines = listOf(
+                            record.date.toString(),
+                            record.category.label,
+                        ),
                         onClick = { onEditRecord(record.id) },
                         onLongClick = { onRequestDelete(record.id) },
+                        trailingContent = {
+                            if (record.cost > 0) {
+                                Text(
+                                    "${String.format("%,d", record.cost)}円",
+                                    style = MaterialTheme.typography.titleMedium,
+                                )
+                            }
+                        },
                     )
                 },
             )

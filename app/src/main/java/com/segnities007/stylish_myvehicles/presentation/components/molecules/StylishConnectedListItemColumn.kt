@@ -27,8 +27,11 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_myvehicles.presentation.theme.componentColors
 import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedColumnCorners
+import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedColumnEdges
 import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedShape
+import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedOutline
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedListItem
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 
@@ -40,8 +43,12 @@ fun StylishConnectedListItemColumn(
     spacing: Dp = 2.dp,
 ) {
     val haptic = LocalHapticFeedback.current
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing)) {
+    Column(
+        modifier,
+        verticalArrangement = Arrangement.spacedBy(spacing),
+    ) {
         items.forEachIndexed { index, item ->
+            val corners = stylishConnectedColumnCorners(index, items.size)
             Surface(
                 modifier = Modifier
                     .combinedClickable(
@@ -55,9 +62,13 @@ fun StylishConnectedListItemColumn(
                     .semantics {
                         role = Role.Button
                         if (!item.enabled) disabled()
-                    },
-                shape = stylishConnectedShape(stylishConnectedColumnCorners(index, items.size)),
-                color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    }
+                    .stylishConnectedOutline(
+                        edges = stylishConnectedColumnEdges(index, items.size),
+                        corners = corners,
+                    ),
+                shape = stylishConnectedShape(corners),
+                color = MaterialTheme.componentColors.groupedContainer,
                 contentColor = if (item.enabled) MaterialTheme.colorScheme.onSurface
                 else MaterialTheme.colorScheme.onSurfaceVariant,
             ) {
@@ -72,6 +83,13 @@ fun StylishConnectedListItemColumn(
                         item.supportingText?.let {
                             Text(
                                 it,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        item.supportingLines.forEach { line ->
+                            Text(
+                                line,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )

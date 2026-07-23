@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.LocalGasStation
+import androidx.compose.material.icons.filled.Route
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,6 +30,7 @@ fun AddRecordDialog(
     onAddFuel: (Long) -> Unit,
     onAddMaintenance: (Long) -> Unit,
     onAddCost: (Long) -> Unit,
+    onAddTrip: (Long) -> Unit,
 ) {
     StylishDialogSurface(onDismiss = onDismiss) {
         Column(Modifier.padding(24.dp)) {
@@ -75,6 +77,20 @@ fun AddRecordDialog(
                         trailingContent = {
                             Icon(
                                 Icons.Default.AttachMoney,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        },
+                    ),
+                    StylishConnectedCardItem(
+                        title = "移動",
+                        onClick = {
+                            onDismiss()
+                            if (vehicleId != null) onAddTrip(vehicleId)
+                        },
+                        trailingContent = {
+                            Icon(
+                                Icons.Default.Route,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )

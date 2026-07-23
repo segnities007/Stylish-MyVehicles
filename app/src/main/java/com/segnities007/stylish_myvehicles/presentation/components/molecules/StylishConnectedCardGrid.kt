@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedGridCorners
+import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.StylishConnectedEdges
 import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedShape
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedCardItem
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
@@ -27,7 +28,10 @@ fun StylishConnectedCardGrid(
     spacing: Dp = 4.dp,
 ) {
     require(columns > 0) { "columns must be greater than zero" }
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing)) {
+    Column(
+        modifier,
+        verticalArrangement = Arrangement.spacedBy(spacing),
+    ) {
         items.chunked(columns)
             .forEachIndexed { rowIndex, rowItems ->
                 Row(
@@ -37,6 +41,8 @@ fun StylishConnectedCardGrid(
                     val isFullRow = rowItems.size == columns
                     rowItems.forEachIndexed { columnIndex, item ->
                         val index = rowIndex * columns + columnIndex
+                        val corners = stylishConnectedGridCorners(index, items.size, columns)
+                        val isLastRow = rowIndex == (items.size - 1) / columns
                         StylishConnectedCard(
                             title = item.title,
                             supportingText = item.supportingText,
@@ -46,8 +52,15 @@ fun StylishConnectedCardGrid(
                                 .weight(1f)
                                 .fillMaxHeight(),
                             shape = stylishConnectedShape(
-                                stylishConnectedGridCorners(index, items.size, columns),
+                                corners,
                             ),
+                            outlineEdges = StylishConnectedEdges(
+                                top = rowIndex == 0,
+                                end = columnIndex == rowItems.lastIndex,
+                                bottom = isLastRow,
+                                start = columnIndex == 0,
+                            ),
+                            outlineCorners = corners,
                             trailingContent = item.trailingContent,
                         )
                     }

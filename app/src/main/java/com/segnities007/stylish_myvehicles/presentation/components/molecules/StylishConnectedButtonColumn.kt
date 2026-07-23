@@ -27,8 +27,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_myvehicles.presentation.theme.componentColors
 import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedColumnCorners
+import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedColumnEdges
 import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedShape
+import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedOutline
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedButtonItem
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 
@@ -40,7 +43,7 @@ fun StylishConnectedButtonColumn(
     spacing: Dp = 2.dp,
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
     defaultColors: ButtonColors = ButtonDefaults.buttonColors(
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        containerColor = MaterialTheme.componentColors.groupedContainer,
         contentColor = MaterialTheme.colorScheme.onSurface,
         disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
         disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -51,14 +54,20 @@ fun StylishConnectedButtonColumn(
         verticalArrangement = Arrangement.spacedBy(spacing),
     ) {
         items.forEachIndexed { index, item ->
+            val corners = stylishConnectedColumnCorners(index, items.size)
             Button(
                 onClick = item.onClick,
                 enabled = item.enabled,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 52.dp),
+                    .heightIn(min = 52.dp)
+                    .stylishConnectedOutline(
+                        edges = stylishConnectedColumnEdges(index, items.size),
+                        corners = corners,
+                        cornerRadius = cornerRadius,
+                    ),
                 shape = stylishConnectedShape(
-                    stylishConnectedColumnCorners(index, items.size),
+                    corners,
                     cornerRadius = cornerRadius,
                 ),
                 colors = item.colors ?: defaultColors,

@@ -65,25 +65,9 @@ fun RecordsLayout(
         }
     }
 
-    val pagerState = rememberPagerState(
-        initialPage = state.periods.size,
-        pageCount = { state.periods.size + 1 },
-    )
-    LaunchedEffect(pagerState.currentPage) {
-        viewModel.accept(RecordsIntent.PageChanged(pagerState.currentPage))
-    }
-
-    // ホーム画面と同じスクロールUI。現在のページが最上部にいる間だけFABを表示する
-    val pageListStates = remember(state.periods.size) {
-        List(state.periods.size + 1) { LazyListState() }
-    }
-    val currentListState = pageListStates[pagerState.currentPage]
-    val isAtTop by remember(currentListState) {
-        derivedStateOf {
-            currentListState.firstVisibleItemIndex == 0 &&
-                    currentListState.firstVisibleItemScrollOffset <= 0
-        }
-    }
+    // ホーム画面と同じスクロールUI。現在のページが最上部にいる間だけFABを表示する。
+    // isAtTop の実体は RecordsPager 内で計算し、コールバックで受け取る。
+    var isAtTop by remember { mutableStateOf(true) }
 
     val onChangePeriodMode: (PeriodMode) -> Unit = { mode ->
         PeriodPreference.setMode(context, mode)
@@ -112,38 +96,79 @@ fun RecordsLayout(
                     modifier = Modifier.align(Alignment.Center),
                 )
 
-                else -> {
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier.fillMaxSize(),
-                    ) { page ->
-                        if (page == 0) {
-                            NoDataBoundaryPage(
-                                listState = pageListStates[page],
-                                onNavigateBack = { viewModel.accept(RecordsIntent.NavigateBack) },
-                            )
-                        } else {
-                            val period = state.periods.getOrNull(page - 1) ?: return@HorizontalPager
-                            PeriodShell(
-                                period = period,
-                                listState = pageListStates[page],
-                                onNavigateBack = { viewModel.accept(RecordsIntent.NavigateBack) },
-                                onChangePeriodMode = onChangePeriodMode,
-                            ) {
-                                periodContent(period)
-                            }
-                        }
-                    }
-                    if (pagerState.pageCount > 1) {
-                        PagerIndicator(
-                            pagerState = pagerState,
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(bottom = 16.dp),
-                        )
-                    }
+                else -> RecordsPager(
+                    periods = state.periods,
+                    onAtTopChanged = { isAtTop = it },
+                    onPageChanged = { viewModel.accept(RecordsIntent.PageChanged(it)) },
+                    onNavigateBack = { viewModel.accept(RecordsIntent.NavigateBack) },
+                    onChangePeriodMode = onChangePeriodMode,
+                    periodContent = periodContent,
+                )
+            }
+        }
+    }
+}
+
+/**
+ * 期間ページャー本体。データ読み込み完了後（[RecordsLayout] の else 分岐）でのみ合成されるため、
+ * rememberPagerState の initialPage が最新ページ（[periods] の末尾＝今月）で正しく確定する。
+ * ロード前に生成して後からスクロールする方式だと初回レイアウトと競合するため、この構造にしている。
+ */
+@Composable
+private fun RecordsPager(
+    periods: List<Period>,
+    onAtTopChanged: (Boolean) -> Unit,
+    onPageChanged: (Int) -> Unit,
+    onNavigateBack: () -> Unit,
+    onChangePeriodMode: (PeriodMode) -> Unit,
+    periodContent: LazyListScope.(Period) -> Unit,
+) {
+    val pagerState = rememberPagerState(
+        initialPage = periods.size,
+        pageCount = { periods.size + 1 },
+    )
+    val pageListStates = remember(periods.size) {
+        List(periods.size + 1) { LazyListState() }
+    }
+    val currentListState = pageListStates[pagerState.currentPage]
+    val isAtTop by remember(currentListState) {
+        derivedStateOf {
+            currentListState.firstVisibleItemIndex == 0 &&
+                    currentListState.firstVisibleItemScrollOffset <= 0
+        }
+    }
+    LaunchedEffect(isAtTop) { onAtTopChanged(isAtTop) }
+    LaunchedEffect(pagerState.currentPage) { onPageChanged(pagerState.currentPage) }
+
+    Box(Modifier.fillMaxSize()) {
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize(),
+        ) { page ->
+            if (page == 0) {
+                NoDataBoundaryPage(
+                    listState = pageListStates[page],
+                    onNavigateBack = onNavigateBack,
+                )
+            } else {
+                val period = periods.getOrNull(page - 1) ?: return@HorizontalPager
+                PeriodShell(
+                    period = period,
+                    listState = pageListStates[page],
+                    onNavigateBack = onNavigateBack,
+                    onChangePeriodMode = onChangePeriodMode,
+                ) {
+                    periodContent(period)
                 }
             }
+        }
+        if (pagerState.pageCount > 1) {
+            PagerIndicator(
+                pagerState = pagerState,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 16.dp),
+            )
         }
     }
 }

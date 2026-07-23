@@ -16,6 +16,7 @@
 | 08 | [08-multi-vehicle-domain.md](08-multi-vehicle-domain.md) | 複数車両ドメイン設計 |
 | 09 | [09-user-stories.md](09-user-stories.md) | ユーザーストーリー集（全39ストーリー、4ペルソナ） |
 | 10 | [10-ux-evaluation.md](10-ux-evaluation.md) | UX達成度評価（実装調査に基づく全ストーリーの評価） |
+| 12 | [12-competitive-research-2026.md](12-competitive-research-2026.md) | 2026年競合再調査・加重優劣表・改善戦略・ロードマップ |
 
 ## 各ドキュメントの概要
 

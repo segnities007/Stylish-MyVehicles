@@ -12,7 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,6 +36,7 @@ import com.segnities007.stylish_myvehicles.presentation.components.molecules.Sty
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDatePickerField
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDialogActions
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDialogSurface
+import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishFormTextField
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedChipItem
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishHeader
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishScaffold
@@ -110,7 +110,7 @@ fun VehicleEditScreen(
 
                 // ── 基本情報 ──
                 StylishSectionTitle("基本情報")
-                TextField(
+                StylishFormTextField(
                     value = state.maker,
                     onValueChange = { viewModel.accept(VehicleEditIntent.MakerChanged(it)) },
                     label = "メーカー *",
@@ -119,7 +119,7 @@ fun VehicleEditScreen(
                     errorMessage = state.makerError,
                 )
                 Spacer(Modifier.height(12.dp))
-                TextField(
+                StylishFormTextField(
                     value = state.name,
                     onValueChange = { viewModel.accept(VehicleEditIntent.NameChanged(it)) },
                     label = "車種名 *",
@@ -128,14 +128,14 @@ fun VehicleEditScreen(
                     errorMessage = state.nameError,
                 )
                 Spacer(Modifier.height(12.dp))
-                TextField(
+                StylishFormTextField(
                     value = state.grade,
                     onValueChange = { viewModel.accept(VehicleEditIntent.GradeChanged(it)) },
                     label = "グレード",
                     placeholder = "Z",
                 )
                 Spacer(Modifier.height(12.dp))
-                TextField(
+                StylishFormTextField(
                     value = state.year,
                     onValueChange = { viewModel.accept(VehicleEditIntent.YearChanged(it)) },
                     label = "年式",
@@ -144,14 +144,21 @@ fun VehicleEditScreen(
                     errorMessage = state.yearError,
                 )
                 Spacer(Modifier.height(12.dp))
-                TextField(
+                StylishFormTextField(
+                    value = state.modelCode,
+                    onValueChange = { viewModel.accept(VehicleEditIntent.ModelCodeChanged(it)) },
+                    label = "型式",
+                    placeholder = "6AA-MXWH60",
+                )
+                Spacer(Modifier.height(12.dp))
+                StylishFormTextField(
                     value = state.plateNumber,
                     onValueChange = { viewModel.accept(VehicleEditIntent.PlateNumberChanged(it)) },
                     label = "ナンバープレート",
                     placeholder = "品川 330 あ 12-34",
                 )
                 Spacer(Modifier.height(12.dp))
-                TextField(
+                StylishFormTextField(
                     value = state.displacement,
                     onValueChange = { viewModel.accept(VehicleEditIntent.DisplacementChanged(it)) },
                     label = "排気量 (cc)",
@@ -160,7 +167,7 @@ fun VehicleEditScreen(
                     errorMessage = state.displacementError,
                 )
                 Spacer(Modifier.height(12.dp))
-                TextField(
+                StylishFormTextField(
                     value = state.weight,
                     onValueChange = { viewModel.accept(VehicleEditIntent.WeightChanged(it)) },
                     label = "車両重量 (kg)",
@@ -170,7 +177,7 @@ fun VehicleEditScreen(
                 )
                 if (state.category == VehicleCategory.TRUCK) {
                     Spacer(Modifier.height(12.dp))
-                    TextField(
+                    StylishFormTextField(
                         value = state.maxLoadKg,
                         onValueChange = { viewModel.accept(VehicleEditIntent.MaxLoadKgChanged(it)) },
                         label = "最大積載量 (kg)",
@@ -180,7 +187,7 @@ fun VehicleEditScreen(
                     )
                 }
                 Spacer(Modifier.height(12.dp))
-                TextField(
+                StylishFormTextField(
                     value = state.color,
                     onValueChange = { viewModel.accept(VehicleEditIntent.ColorChanged(it)) },
                     label = "カラー",
@@ -202,6 +209,14 @@ fun VehicleEditScreen(
                 )
                 Spacer(Modifier.height(12.dp))
                 StylishDatePickerField(
+                    value = state.inspectionExpiry,
+                    onValueChange = {
+                        viewModel.accept(VehicleEditIntent.InspectionExpiryChanged(it))
+                    },
+                    label = "車検満了日",
+                )
+                Spacer(Modifier.height(12.dp))
+                StylishDatePickerField(
                     value = state.jibaiExpiry,
                     onValueChange = { viewModel.accept(VehicleEditIntent.JibaiExpiryChanged(it)) },
                     label = "自賠責保険 満期日",
@@ -213,18 +228,20 @@ fun VehicleEditScreen(
                     label = "任意保険 満期日",
                 )
                 Spacer(Modifier.height(12.dp))
-                TextField(
+                StylishFormTextField(
                     value = state.insuranceCompany,
                     onValueChange = { viewModel.accept(VehicleEditIntent.InsuranceCompanyChanged(it)) },
                     label = "保険会社",
                     placeholder = "東京海上日動",
                 )
                 Spacer(Modifier.height(12.dp))
-                TextField(
+                StylishFormTextField(
                     value = state.insuranceRank,
                     onValueChange = { viewModel.accept(VehicleEditIntent.InsuranceRankChanged(it)) },
                     label = "等級",
                     placeholder = "20",
+                    isError = state.insuranceRankError != null,
+                    errorMessage = state.insuranceRankError,
                 )
 
                 // ── アクション ──
@@ -263,38 +280,6 @@ fun VehicleEditScreen(
                     onCancel = { viewModel.accept(VehicleEditIntent.DismissDeleteDialog) },
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun TextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    placeholder: String,
-    minLines: Int = 1,
-    isError: Boolean = false,
-    errorMessage: String? = null,
-) {
-    Column {
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            label = { Text(label) },
-            placeholder = { Text(placeholder) },
-            minLines = minLines,
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = minLines == 1,
-            isError = isError,
-        )
-        if (errorMessage != null) {
-            Text(
-                errorMessage,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(start = 16.dp, top = 4.dp),
-            )
         }
     }
 }

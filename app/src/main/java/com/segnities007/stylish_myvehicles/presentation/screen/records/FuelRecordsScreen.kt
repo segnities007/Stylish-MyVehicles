@@ -303,13 +303,19 @@ internal fun LazyListScope.FuelPeriodContent(
                 spacing = 4.dp,
                 items = periodFuels.map { fuel ->
                     StylishConnectedListItem(
-                        headline = "${fuel.volume}L / ${String.format("%,d", fuel.amount)}円",
-                        supportingText = buildList {
-                            add(fuel.date.toString())
-                            fuel.fuelEconomy?.let { add("%.1f km/L".format(it)) }
-                        }.joinToString(" / "),
+                        headline = "${fuel.volume}L",
+                        supportingLines = listOfNotNull(
+                            fuel.date.toString(),
+                            fuel.fuelEconomy?.let { "%.1f km/L".format(it) },
+                        ),
                         onClick = { onEditRecord(fuel.id) },
                         onLongClick = { onRequestDelete(fuel.id) },
+                        trailingContent = {
+                            Text(
+                                "${String.format("%,d", fuel.amount)}円",
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                        },
                     )
                 },
             )

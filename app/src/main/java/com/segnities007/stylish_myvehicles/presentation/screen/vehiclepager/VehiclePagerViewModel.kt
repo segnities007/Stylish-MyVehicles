@@ -63,6 +63,8 @@ class VehiclePagerViewModel(
 
             is VehiclePagerIntent.OpenCost ->
                 _effects.trySend(VehiclePagerEffect.NavigateToCost(intent.vehicleId))
+            is VehiclePagerIntent.OpenTrip ->
+                _effects.trySend(VehiclePagerEffect.NavigateToTrip(intent.vehicleId))
 
             is VehiclePagerIntent.OpenVehicleDetail ->
                 _effects.trySend(VehiclePagerEffect.NavigateToVehicleDetail(intent.vehicleId))
@@ -187,5 +189,6 @@ sealed interface VehiclePagerEffect {
     data class NavigateToFuel(val vehicleId: Long) : VehiclePagerEffect
     data class NavigateToMaintenance(val vehicleId: Long) : VehiclePagerEffect
     data class NavigateToCost(val vehicleId: Long) : VehiclePagerEffect
+    data class NavigateToTrip(val vehicleId: Long) : VehiclePagerEffect
     data class NavigateToVehicleDetail(val vehicleId: Long) : VehiclePagerEffect
 }

@@ -71,7 +71,7 @@ fun LicensesScreen(
                 items = libraries.map { library ->
                     StylishConnectedListItem(
                         headline = library.name,
-                        supportingText = buildSupportingText(library),
+                        supportingLines = buildSupportingLines(library),
                         onClick = { selected = library },
                         trailingContent = {
                             Text(
@@ -91,13 +91,13 @@ fun LicensesScreen(
     }
 }
 
-private fun buildSupportingText(library: Library): String {
+private fun buildSupportingLines(library: Library): List<String> {
     val parts = mutableListOf<String>()
     library.artifactVersion?.let { parts.add("v$it") }
     val author = library.organization?.name
         ?: library.developers.firstOrNull()?.name
     author?.let { parts.add(it) }
-    return parts.joinToString(" / ")
+    return parts.toList()
 }
 
 private fun licenseLabel(library: Library): String? =

@@ -20,6 +20,7 @@ data class VehicleEditUiState(
     val color: String = "",
     // 期限・保険
     val firstRegistrationDate: LocalDate? = null,
+    val inspectionExpiry: LocalDate? = null,
     val jibaiExpiry: LocalDate? = null,
     val insuranceExpiry: LocalDate? = null,
     val insuranceCompany: String = "",
@@ -30,7 +31,14 @@ data class VehicleEditUiState(
     val showDeleteDialog: Boolean = false,
 ) {
     val canSave: Boolean
-        get() = maker.isNotBlank() && name.isNotBlank() && !isSaving
+        get() = maker.isNotBlank() &&
+            name.isNotBlank() &&
+            yearError == null &&
+            displacementError == null &&
+            weightError == null &&
+            (category != VehicleCategory.TRUCK || maxLoadKgError == null) &&
+            insuranceRankError == null &&
+            !isSaving
 
     val makerError: String?
         get() = if (maker.isBlank()) "メーカーは必須です" else null
@@ -39,30 +47,33 @@ data class VehicleEditUiState(
         get() = if (name.isBlank()) "車種名は必須です" else null
 
     val yearError: String?
-        get() = year.toIntOrNull()
-            ?.let {
-                if (it < 1900 || it > 2100) "1900〜2100の範囲で入力してください" else null
-            } ?: year.takeIf { it.isNotBlank() }
-            ?.let { "数値で入力してください" }
+        get() = validateOptionalInt(year) {
+            if (it !in 1900..2100) "1900〜2100の範囲で入力してください" else null
+        }
 
     val displacementError: String?
-        get() = displacement.toIntOrNull()
-            ?.let {
-                if (it <= 0) "0より大きい値を入力してください" else null
-            } ?: displacement.takeIf { it.isNotBlank() }
-            ?.let { "数値で入力してください" }
+        get() = validateOptionalInt(displacement, ::positiveValueError)
 
     val weightError: String?
-        get() = weight.toIntOrNull()
-            ?.let {
-                if (it <= 0) "0より大きい値を入力してください" else null
-            } ?: weight.takeIf { it.isNotBlank() }
-            ?.let { "数値で入力してください" }
+        get() = validateOptionalInt(weight, ::positiveValueError)
 
     val maxLoadKgError: String?
-        get() = maxLoadKg.toIntOrNull()
-            ?.let {
-                if (it <= 0) "0より大きい値を入力してください" else null
-            } ?: maxLoadKg.takeIf { it.isNotBlank() }
-            ?.let { "数値で入力してください" }
+        get() = validateOptionalInt(maxLoadKg, ::positiveValueError)
+
+    val insuranceRankError: String?
+        get() = validateOptionalInt(insuranceRank) {
+            if (it !in 1..20) "1〜20の範囲で入力してください" else null
+        }
 }
+
+private fun validateOptionalInt(
+    input: String,
+    validate: (Int) -> String?,
+): String? {
+    if (input.isBlank()) return null
+    val value = input.toIntOrNull() ?: return "数値で入力してください"
+    return validate(value)
+}
+
+private fun positiveValueError(value: Int): String? =
+    if (value <= 0) "0より大きい値を入力してください" else null

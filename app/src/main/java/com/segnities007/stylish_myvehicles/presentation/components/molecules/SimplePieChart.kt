@@ -10,6 +10,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_myvehicles.presentation.theme.chartColors
 
 data class PieChartData(
     val label: String,
@@ -67,14 +68,7 @@ fun SimplePieChart(
 
 @Composable
 fun costCategoryColor(index: Int): Color {
-    val colors = listOf(
-        MaterialTheme.colorScheme.primary,
-        MaterialTheme.colorScheme.tertiary,
-        MaterialTheme.colorScheme.secondary,
-        MaterialTheme.colorScheme.error,
-        MaterialTheme.colorScheme.onSurfaceVariant,
-        MaterialTheme.colorScheme.outline,
-    )
+    val colors = MaterialTheme.chartColors.categorical
     return colors[index % colors.size]
 }
 

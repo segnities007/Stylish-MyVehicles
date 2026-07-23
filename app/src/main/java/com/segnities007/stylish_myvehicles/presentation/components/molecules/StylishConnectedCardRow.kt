@@ -13,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedRowCorners
+import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedRowEdges
 import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedShape
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedCardItem
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
@@ -37,6 +38,8 @@ fun StylishConnectedCardRow(
                     .weight(1f)
                     .fillMaxHeight(),
                 shape = stylishConnectedShape(stylishConnectedRowCorners(index, items.size)),
+                outlineEdges = stylishConnectedRowEdges(index, items.size),
+                outlineCorners = stylishConnectedRowCorners(index, items.size),
                 trailingContent = item.trailingContent,
             )
         }

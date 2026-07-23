@@ -29,8 +29,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_myvehicles.presentation.theme.componentColors
 import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedGridCorners
+import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.StylishConnectedEdges
 import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedShape
+import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedOutline
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedButtonItem
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 
@@ -39,15 +42,19 @@ fun StylishConnectedButtonGrid(
     items: List<StylishConnectedButtonItem>,
     columns: Int,
     modifier: Modifier = Modifier,
+    cornerRadius: Dp = 12.dp,
     spacing: Dp = 2.dp,
     contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
     defaultColors: ButtonColors = ButtonDefaults.buttonColors(
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        containerColor = MaterialTheme.componentColors.groupedContainer,
         contentColor = MaterialTheme.colorScheme.onSurface,
     ),
 ) {
     require(columns > 0) { "columns must be greater than zero" }
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing)) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(spacing),
+    ) {
         items.chunked(columns)
             .forEachIndexed { rowIndex, rowItems ->
                 Row(
@@ -56,15 +63,28 @@ fun StylishConnectedButtonGrid(
                 ) {
                     rowItems.forEachIndexed { columnIndex, item ->
                         val index = rowIndex * columns + columnIndex
+                        val corners = stylishConnectedGridCorners(index, items.size, columns)
+                        val isLastRow = rowIndex == (items.size - 1) / columns
                         Button(
                             onClick = item.onClick,
                             enabled = item.enabled,
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxHeight()
-                                .heightIn(min = 52.dp),
+                                .heightIn(min = 52.dp)
+                                .stylishConnectedOutline(
+                                    edges = StylishConnectedEdges(
+                                        top = rowIndex == 0,
+                                        end = columnIndex == rowItems.lastIndex,
+                                        bottom = isLastRow,
+                                        start = columnIndex == 0,
+                                    ),
+                                    corners = corners,
+                                    cornerRadius = cornerRadius,
+                                ),
                             shape = stylishConnectedShape(
-                                stylishConnectedGridCorners(index, items.size, columns),
+                                corners,
+                                cornerRadius = cornerRadius,
                             ),
                             colors = item.colors ?: defaultColors,
                             contentPadding = contentPadding,

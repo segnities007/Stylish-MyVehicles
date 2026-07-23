@@ -21,6 +21,7 @@ sealed interface VehicleEditIntent {
 
     // 期限・保険
     data class FirstRegistrationDateChanged(val value: LocalDate?) : VehicleEditIntent
+    data class InspectionExpiryChanged(val value: LocalDate?) : VehicleEditIntent
     data class JibaiExpiryChanged(val value: LocalDate?) : VehicleEditIntent
     data class InsuranceExpiryChanged(val value: LocalDate?) : VehicleEditIntent
     data class InsuranceCompanyChanged(val value: String) : VehicleEditIntent

@@ -8,7 +8,9 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -174,10 +176,19 @@ internal fun LazyListScope.CostPeriodContent(
                 spacing = 4.dp,
                 items = periodCosts.map { cost ->
                     StylishConnectedListItem(
-                        headline = "${cost.title} / ${String.format("%,d", cost.amount)}円",
-                        supportingText = "${cost.date} / ${cost.category.label}",
+                        headline = cost.title,
+                        supportingLines = listOf(
+                            cost.date.toString(),
+                            cost.category.label,
+                        ),
                         onClick = { onEditRecord(cost.id) },
                         onLongClick = { onRequestDelete(cost.id) },
+                        trailingContent = {
+                            Text(
+                                "${String.format("%,d", cost.amount)}円",
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                        },
                     )
                 },
             )

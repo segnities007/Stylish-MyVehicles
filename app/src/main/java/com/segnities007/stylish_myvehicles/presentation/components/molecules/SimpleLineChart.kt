@@ -70,7 +70,10 @@ fun SimpleLineChart(
             val minValue = data.minOfOrNull { it.value } ?: 0f
             val range = (maxValue - minValue).coerceAtLeast(1f)
             val padding = range * 0.1f
-            val gridValue = maxValue + padding - (range + padding * 2) * i / 4
+            val axisMax = maxValue + padding
+            // データが非負なら値軸の下端を 0 未満にしない（燃費・費用などでマイナス目盛りが出ないよう）
+            val axisMin = if (minValue >= 0f) (minValue - padding).coerceAtLeast(0f) else minValue - padding
+            val gridValue = axisMax - (axisMax - axisMin) * i / 4
             drawContext.canvas.nativeCanvas.drawText(
                 "%.1f".format(gridValue),
                 2.dp.toPx(),
@@ -94,6 +97,8 @@ fun SimpleLineChart(
             val maxValue = values.max()
             val range = (maxValue - minValue).coerceAtLeast(1f)
             val padding = range * 0.1f
+            val axisMax = maxValue + padding
+            val axisMin = if (minValue >= 0f) (minValue - padding).coerceAtLeast(0f) else minValue - padding
 
             val points = data.mapIndexed { index, d ->
                 val x = if (data.size > 1) {
@@ -102,7 +107,7 @@ fun SimpleLineChart(
                 else {
                     leftPadding + usableWidth / 2
                 }
-                val normalized = (d.value - minValue + padding) / (range + padding * 2)
+                val normalized = (d.value - axisMin) / (axisMax - axisMin)
                 val y = topPadding + usableHeight * (1 - normalized)
                 Offset(x, y)
             }

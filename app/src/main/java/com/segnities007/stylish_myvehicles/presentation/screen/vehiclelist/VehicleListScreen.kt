@@ -131,7 +131,7 @@ private fun VehicleList(
         items = vehicles.map { vehicle ->
             StylishConnectedListItem(
                 headline = "${vehicle.maker} ${vehicle.name}",
-                supportingText = buildSupportingText(vehicle),
+                supportingLines = buildSupportingLines(vehicle),
                 onClick = { onVehicleClick(vehicle) },
             )
         },
@@ -187,7 +187,7 @@ private fun NoSearchResultState() {
     }
 }
 
-private fun buildSupportingText(vehicle: Vehicle): String {
+private fun buildSupportingLines(vehicle: Vehicle): List<String> {
     val parts = mutableListOf<String>()
     vehicle.plateNumber.takeIf { it.isNotBlank() }
         ?.let { parts.add(it) }
@@ -201,8 +201,7 @@ private fun buildSupportingText(vehicle: Vehicle): String {
         }
         parts.add(label)
     }
-    return parts.joinToString(" / ")
-        .ifEmpty { "詳細を登録" }
+    return if (parts.isEmpty()) listOf("詳細を登録") else parts.toList()
 }
 
 @Preview(name = "VehicleListScreen", showBackground = true, widthDp = 393)

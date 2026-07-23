@@ -13,4 +13,5 @@ data class StylishConnectedListItem(
     val enabled: Boolean = true,
     val leadingContent: (@Composable RowScope.() -> Unit)? = null,
     val trailingContent: (@Composable RowScope.() -> Unit)? = null,
+    val supportingLines: List<String> = emptyList(),
 )

@@ -8,6 +8,7 @@ import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.DeleteVehicleU
 import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.GetVehicleUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.InsertVehicleUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.UpdateVehicleUseCase
+import com.segnities007.stylish_myvehicles.presentation.util.normalizeIntegerInput
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -49,6 +50,7 @@ class VehicleEditViewModel(
                         maxLoadKg = vehicle.maxLoadKg?.toString() ?: "",
                         color = vehicle.color,
                         firstRegistrationDate = vehicle.firstRegistrationDate,
+                        inspectionExpiry = vehicle.inspectionExpiry,
                         jibaiExpiry = vehicle.jibaiExpiry,
                         insuranceExpiry = vehicle.insuranceExpiry,
                         insuranceCompany = vehicle.insuranceCompany,
@@ -76,8 +78,7 @@ class VehicleEditViewModel(
 
             is VehicleEditIntent.YearChanged ->
                 _uiState.update {
-                    it.copy(year = intent.value.filter { c -> c.isDigit() }
-                        .take(4))
+                    it.copy(year = intent.value.normalizeIntegerInput().take(4))
                 }
 
             is VehicleEditIntent.ModelCodeChanged ->
@@ -87,19 +88,24 @@ class VehicleEditViewModel(
                 _uiState.update { it.copy(plateNumber = intent.value) }
 
             is VehicleEditIntent.DisplacementChanged ->
-                _uiState.update { it.copy(displacement = intent.value.filter { c -> c.isDigit() }) }
+                _uiState.update {
+                    it.copy(displacement = intent.value.normalizeIntegerInput())
+                }
 
             is VehicleEditIntent.WeightChanged ->
-                _uiState.update { it.copy(weight = intent.value.filter { c -> c.isDigit() }) }
+                _uiState.update { it.copy(weight = intent.value.normalizeIntegerInput()) }
 
             is VehicleEditIntent.MaxLoadKgChanged ->
-                _uiState.update { it.copy(maxLoadKg = intent.value.filter { c -> c.isDigit() }) }
+                _uiState.update { it.copy(maxLoadKg = intent.value.normalizeIntegerInput()) }
 
             is VehicleEditIntent.ColorChanged ->
                 _uiState.update { it.copy(color = intent.value) }
 
             is VehicleEditIntent.FirstRegistrationDateChanged ->
                 _uiState.update { it.copy(firstRegistrationDate = intent.value) }
+
+            is VehicleEditIntent.InspectionExpiryChanged ->
+                _uiState.update { it.copy(inspectionExpiry = intent.value) }
 
             is VehicleEditIntent.JibaiExpiryChanged ->
                 _uiState.update { it.copy(jibaiExpiry = intent.value) }
@@ -112,8 +118,7 @@ class VehicleEditViewModel(
 
             is VehicleEditIntent.InsuranceRankChanged ->
                 _uiState.update {
-                    it.copy(insuranceRank = intent.value.filter { c -> c.isDigit() }
-                        .take(2))
+                    it.copy(insuranceRank = intent.value.normalizeIntegerInput().take(2))
                 }
 
             is VehicleEditIntent.Save -> save()
@@ -135,7 +140,7 @@ class VehicleEditViewModel(
         _uiState.update { it.copy(isSaving = true) }
 
         viewModelScope.launch {
-            val inspectionExpiry = state.firstRegistrationDate?.let {
+            val calculatedInspectionExpiry = state.firstRegistrationDate?.let {
                 InspectionCalculator.calculateCurrentExpiry(
                     state.category,
                     it,
@@ -156,7 +161,7 @@ class VehicleEditViewModel(
                 maxLoadKg = state.maxLoadKg.toIntOrNull(),
                 color = state.color.trim(),
                 firstRegistrationDate = state.firstRegistrationDate,
-                inspectionExpiry = inspectionExpiry,
+                inspectionExpiry = state.inspectionExpiry ?: calculatedInspectionExpiry,
                 jibaiExpiry = state.jibaiExpiry,
                 insuranceExpiry = state.insuranceExpiry,
                 insuranceCompany = state.insuranceCompany.trim(),

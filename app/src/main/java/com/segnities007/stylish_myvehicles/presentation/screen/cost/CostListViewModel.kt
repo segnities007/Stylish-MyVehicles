@@ -8,6 +8,7 @@ import com.segnities007.stylish_myvehicles.domain.usecase.cost.DeleteCostRecordU
 import com.segnities007.stylish_myvehicles.domain.usecase.cost.GetCostRecordsUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.cost.InsertCostRecordUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.cost.UpdateCostRecordUseCase
+import com.segnities007.stylish_myvehicles.presentation.util.normalizeIntegerInput
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -69,7 +70,7 @@ class CostListViewModel(
                 _uiState.update { it.copy(inputTitle = intent.value) }
 
             is CostListIntent.InputAmountChanged ->
-                _uiState.update { it.copy(inputAmount = intent.value.filter { c -> c.isDigit() }) }
+                _uiState.update { it.copy(inputAmount = intent.value.normalizeIntegerInput()) }
 
             is CostListIntent.Save -> save()
             is CostListIntent.RequestDelete ->

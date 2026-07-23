@@ -52,7 +52,11 @@ import com.segnities007.stylish_myvehicles.presentation.screen.records.Maintenan
 import com.segnities007.stylish_myvehicles.presentation.screen.records.PeriodPreference
 import com.segnities007.stylish_myvehicles.presentation.screen.records.RecordTopic
 import com.segnities007.stylish_myvehicles.presentation.screen.records.RecordsViewModel
+import com.segnities007.stylish_myvehicles.presentation.screen.recordslist.RecordsListScreen
+import com.segnities007.stylish_myvehicles.presentation.screen.recordslist.RecordsListViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.settings.SettingsScreen
+import com.segnities007.stylish_myvehicles.presentation.screen.trip.TripRecordViewModel
+import com.segnities007.stylish_myvehicles.presentation.screen.trip.TripRecordsScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.vehicledetail.VehicleDetailScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.vehicledetail.VehicleDetailViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.vehicleedit.VehicleEditScreen
@@ -96,6 +100,7 @@ fun AppNavigation(
 
     val currentDestination = backStack.lastOrNull()
     val showBottomBar = (currentDestination is VehiclePagerDestination ||
+            currentDestination is RecordsListDestination ||
             currentDestination is NotificationDestination ||
             currentDestination is SettingsDestination) && bottomBarVisible.value
 
@@ -121,6 +126,7 @@ fun AppNavigation(
                         onNavigateToHome = { navigateToTab(VehiclePagerDestination) },
                         onNavigateToNotifications = { navigateToTab(NotificationDestination) },
                         onNavigateToSettings = { backStack.add(SettingsDestination) },
+                        onNavigateToRecordsList = { navigateToTab(RecordsListDestination) },
                     )
                 }
             }
@@ -172,6 +178,7 @@ fun AppNavigation(
                         onNavigateToFuel = { backStack.add(FuelRecordsDestination(it)) },
                         onNavigateToMaintenance = { backStack.add(MaintenanceRecordsDestination(it)) },
                         onNavigateToCost = { backStack.add(CostRecordsDestination(it)) },
+                        onNavigateToTrip = { backStack.add(TripRecordsDestination(it)) },
                         onNavigateToVehicleDetail = { backStack.add(VehicleDetailDestination(it)) },
                         onNavigateToNotifications = { backStack.add(NotificationDestination) },
                         onAddFuel = {
@@ -183,6 +190,7 @@ fun AppNavigation(
                         onAddCost = {
                             backStack.add(CostRecordsDestination(it, openAdd = true))
                         },
+                        onAddTrip = { backStack.add(TripRecordsDestination(it)) },
                         bottomBarVisible = bottomBarVisible,
                         showAddDialog = showAddDialog,
                     )
@@ -245,6 +253,17 @@ fun AppNavigation(
                         openAddDialog = dest.openAdd,
                     )
                 }
+                entry<TripRecordsDestination> { dest ->
+                    val viewModel: TripRecordViewModel = koinViewModel(
+                        key = "tripRecords-${dest.vehicleId}",
+                        parameters = { parametersOf(dest.vehicleId) },
+                    )
+                    TripRecordsScreen(
+                        vehicleId = dest.vehicleId,
+                        viewModel = viewModel,
+                        onNavigateBack = { popBack() },
+                    )
+                }
                 entry<VehicleDetailDestination> { dest ->
                     val viewModel: VehicleDetailViewModel = koinViewModel(
                         parameters = { parametersOf(dest.vehicleId) },
@@ -259,11 +278,23 @@ fun AppNavigation(
                 }
                 entry<VehicleEditDestination> { dest ->
                     val viewModel: VehicleEditViewModel = koinViewModel(
+                        key = "vehicleEdit-${dest.sessionId}",
                         parameters = { parametersOf(dest.vehicleId) },
                     )
                     VehicleEditScreen(
                         viewModel = viewModel,
                         onNavigateBack = { popBack() },
+                    )
+                }
+                entry<RecordsListDestination> {
+                    val viewModel: RecordsListViewModel = koinViewModel()
+                    RecordsListScreen(
+                        viewModel = viewModel,
+                        onNavigateBack = { popBack() },
+                        onNavigateToFuel = { backStack.add(FuelRecordsDestination(it)) },
+                        onNavigateToMaintenance = { backStack.add(MaintenanceRecordsDestination(it)) },
+                        onNavigateToCost = { backStack.add(CostRecordsDestination(it)) },
+                        onNavigateToTrip = { backStack.add(TripRecordsDestination(it)) },
                     )
                 }
                 entry<SettingsDestination> {

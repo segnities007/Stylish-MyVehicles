@@ -28,8 +28,11 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_myvehicles.presentation.theme.componentColors
 import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedRowCorners
+import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedRowEdges
 import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedShape
+import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedOutline
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedChipItem
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 
@@ -43,15 +46,14 @@ fun StylishConnectedChipRow(
     val haptic = LocalHapticFeedback.current
     Row(
         modifier = if (fillWidth) modifier.fillMaxWidth()
-        else modifier.horizontalScroll(
-            rememberScrollState()
-        ),
+        else modifier.horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(spacing),
     ) {
         items.forEachIndexed { index, item ->
+            val corners = stylishConnectedRowCorners(index, items.size)
             val containerColor by animateColorAsState(
                 targetValue = if (item.selected) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.surfaceContainerHighest,
+                else MaterialTheme.componentColors.groupedContainer,
                 animationSpec = tween(180),
                 label = "chipContainer",
             )
@@ -71,8 +73,12 @@ fun StylishConnectedChipRow(
                     .clickable(enabled = item.enabled) {
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         item.onClick()
-                    },
-                shape = stylishConnectedShape(stylishConnectedRowCorners(index, items.size)),
+                    }
+                    .stylishConnectedOutline(
+                        edges = stylishConnectedRowEdges(index, items.size),
+                        corners = corners,
+                    ),
+                shape = stylishConnectedShape(corners),
                 color = containerColor,
                 contentColor = contentColor,
             ) {

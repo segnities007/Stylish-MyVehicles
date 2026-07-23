@@ -5,11 +5,13 @@ import com.segnities007.stylish_myvehicles.data.repository.CostRecordRepositoryI
 import com.segnities007.stylish_myvehicles.data.repository.FuelRecordRepositoryImpl
 import com.segnities007.stylish_myvehicles.data.repository.MaintenanceRecordRepositoryImpl
 import com.segnities007.stylish_myvehicles.data.repository.MaintenanceScheduleRepositoryImpl
+import com.segnities007.stylish_myvehicles.data.repository.TripRecordRepositoryImpl
 import com.segnities007.stylish_myvehicles.data.repository.VehicleRepositoryImpl
 import com.segnities007.stylish_myvehicles.domain.repository.CostRecordRepository
 import com.segnities007.stylish_myvehicles.domain.repository.FuelRecordRepository
 import com.segnities007.stylish_myvehicles.domain.repository.MaintenanceRecordRepository
 import com.segnities007.stylish_myvehicles.domain.repository.MaintenanceScheduleRepository
+import com.segnities007.stylish_myvehicles.domain.repository.TripRecordRepository
 import com.segnities007.stylish_myvehicles.domain.repository.VehicleRepository
 import com.segnities007.stylish_myvehicles.domain.usecase.ExportDataUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.cost.DeleteCostRecordUseCase
@@ -26,6 +28,10 @@ import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.GetMainten
 import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.InsertMaintenanceRecordUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.UpdateMaintenanceRecordUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.UpdateMaintenanceScheduleUseCase
+import com.segnities007.stylish_myvehicles.domain.usecase.trip.DeleteTripRecordUseCase
+import com.segnities007.stylish_myvehicles.domain.usecase.trip.GetTripRecordsUseCase
+import com.segnities007.stylish_myvehicles.domain.usecase.trip.InsertTripRecordUseCase
+import com.segnities007.stylish_myvehicles.domain.usecase.trip.UpdateTripRecordUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.DeleteVehicleUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.GetVehicleUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.GetVehiclesUseCase
@@ -36,6 +42,8 @@ import com.segnities007.stylish_myvehicles.presentation.screen.fuel.FuelRecordVi
 import com.segnities007.stylish_myvehicles.presentation.screen.maintenance.MaintenanceRecordViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.notification.NotificationViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.records.RecordsViewModel
+import com.segnities007.stylish_myvehicles.presentation.screen.recordslist.RecordsListViewModel
+import com.segnities007.stylish_myvehicles.presentation.screen.trip.TripRecordViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.vehicledetail.VehicleDetailViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.vehicleedit.VehicleEditViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.vehiclelist.VehicleListViewModel
@@ -52,6 +60,7 @@ val appModule = module {
     single { get<AppDatabase>().maintenanceRecordDao() }
     single { get<AppDatabase>().costRecordDao() }
     single { get<AppDatabase>().maintenanceScheduleDao() }
+    single { get<AppDatabase>().tripRecordDao() }
 
     // Repository
     single<VehicleRepository> { VehicleRepositoryImpl(get()) }
@@ -59,6 +68,7 @@ val appModule = module {
     single<MaintenanceRecordRepository> { MaintenanceRecordRepositoryImpl(get()) }
     single<MaintenanceScheduleRepository> { MaintenanceScheduleRepositoryImpl(get()) }
     single<CostRecordRepository> { CostRecordRepositoryImpl(get()) }
+    single<TripRecordRepository> { TripRecordRepositoryImpl(get()) }
 
     // UseCase - Vehicle
     single { GetVehiclesUseCase(get()) }
@@ -86,6 +96,12 @@ val appModule = module {
     single { InsertCostRecordUseCase(get()) }
     single { UpdateCostRecordUseCase(get()) }
     single { DeleteCostRecordUseCase(get()) }
+
+    // UseCase - Trip
+    single { GetTripRecordsUseCase(get()) }
+    single { InsertTripRecordUseCase(get()) }
+    single { UpdateTripRecordUseCase(get()) }
+    single { DeleteTripRecordUseCase(get()) }
 
     // UseCase - Export
     single { ExportDataUseCase() }
@@ -164,6 +180,24 @@ val appModule = module {
         NotificationViewModel(
             getVehiclesUseCase = get(),
             getMaintenanceSchedulesUseCase = get(),
+        )
+    }
+    viewModel {
+        RecordsListViewModel(
+            getVehiclesUseCase = get(),
+            getFuelRecordsUseCase = get(),
+            getMaintenanceRecordsUseCase = get(),
+            getCostRecordsUseCase = get(),
+            getTripRecordsUseCase = get(),
+        )
+    }
+    viewModel { params ->
+        TripRecordViewModel(
+            vehicleId = params.get(),
+            getTripRecordsUseCase = get(),
+            insertTripRecordUseCase = get(),
+            updateTripRecordUseCase = get(),
+            deleteTripRecordUseCase = get(),
         )
     }
 }

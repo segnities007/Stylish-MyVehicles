@@ -28,7 +28,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.StylishConnectedCorners
 import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedShape
+import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.StylishConnectedEdges
+import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedOutline
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
+import com.segnities007.stylish_myvehicles.presentation.theme.componentColors
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -39,12 +42,15 @@ fun StylishConnectedCard(
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
     shape: Shape = stylishConnectedShape(StylishConnectedCorners.Standalone),
+    outlineEdges: StylishConnectedEdges = StylishConnectedEdges.All,
+    outlineCorners: StylishConnectedCorners = StylishConnectedCorners.Standalone,
     trailingContent: @Composable () -> Unit = {},
 ) {
     val haptic = LocalHapticFeedback.current
     Card(
         modifier = modifier
             .fillMaxWidth()
+            .stylishConnectedOutline(outlineEdges, outlineCorners)
             .semantics(mergeDescendants = true) {
                 role = Role.Button
             }
@@ -57,7 +63,7 @@ fun StylishConnectedCard(
             ),
         shape = shape,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            containerColor = MaterialTheme.componentColors.groupedContainer,
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {

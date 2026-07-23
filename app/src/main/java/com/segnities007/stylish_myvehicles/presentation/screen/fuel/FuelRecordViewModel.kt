@@ -8,6 +8,8 @@ import com.segnities007.stylish_myvehicles.domain.usecase.fuel.DeleteFuelRecordU
 import com.segnities007.stylish_myvehicles.domain.usecase.fuel.GetFuelRecordsUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.fuel.InsertFuelRecordUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.fuel.UpdateFuelRecordUseCase
+import com.segnities007.stylish_myvehicles.presentation.util.normalizeDecimalInput
+import com.segnities007.stylish_myvehicles.presentation.util.normalizeIntegerInput
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,17 +56,17 @@ class FuelRecordViewModel(
                 _uiState.update { it.copy(inputDate = intent.value) }
 
             is FuelRecordIntent.OdometerChanged -> {
-                _uiState.update { it.copy(inputOdometer = intent.value.filter { c -> c.isDigit() }) }
+                _uiState.update { it.copy(inputOdometer = intent.value.normalizeIntegerInput()) }
                 recalculateEconomy()
             }
 
             is FuelRecordIntent.VolumeChanged -> {
-                _uiState.update { it.copy(inputVolume = intent.value.filter { c -> c.isDigit() || c == '.' }) }
+                _uiState.update { it.copy(inputVolume = intent.value.normalizeDecimalInput()) }
                 recalculateEconomy()
             }
 
             is FuelRecordIntent.AmountChanged ->
-                _uiState.update { it.copy(inputAmount = intent.value.filter { c -> c.isDigit() }) }
+                _uiState.update { it.copy(inputAmount = intent.value.normalizeIntegerInput()) }
 
             is FuelRecordIntent.FullTankChanged ->
                 _uiState.update { it.copy(inputIsFullTank = intent.value) }

@@ -11,6 +11,7 @@ import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.GetMainten
 import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.InsertMaintenanceRecordUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.UpdateMaintenanceRecordUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.GetVehicleUseCase
+import com.segnities007.stylish_myvehicles.presentation.util.normalizeIntegerInput
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -92,7 +93,7 @@ class MaintenanceRecordViewModel(
                 _uiState.update { it.copy(inputDate = intent.value) }
 
             is MaintenanceRecordIntent.OdometerChanged ->
-                _uiState.update { it.copy(inputOdometer = intent.value.filter { c -> c.isDigit() }) }
+                _uiState.update { it.copy(inputOdometer = intent.value.normalizeIntegerInput()) }
 
             is MaintenanceRecordIntent.CategoryChanged ->
                 _uiState.update {
@@ -110,7 +111,7 @@ class MaintenanceRecordViewModel(
                 _uiState.update { it.copy(inputTitle = intent.value) }
 
             is MaintenanceRecordIntent.CostChanged ->
-                _uiState.update { it.copy(inputCost = intent.value.filter { c -> c.isDigit() }) }
+                _uiState.update { it.copy(inputCost = intent.value.normalizeIntegerInput()) }
 
             is MaintenanceRecordIntent.ShopNameChanged ->
                 _uiState.update { it.copy(inputShopName = intent.value) }

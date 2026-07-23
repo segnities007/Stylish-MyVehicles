@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocalGasStation
+import androidx.compose.material.icons.filled.Route
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -57,6 +58,7 @@ import com.segnities007.stylish_myvehicles.presentation.components.molecules.Sty
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.costCategoryColor
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedCardItem
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.BarChartSection
+import com.segnities007.stylish_myvehicles.presentation.components.organisms.AddRecordDialog
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.LineChartSection
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.PieChartSection
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.LocalBottomBarVisible
@@ -66,7 +68,6 @@ import com.segnities007.stylish_myvehicles.presentation.components.organisms.Sty
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishScaffold
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishSectionTitle
 import com.segnities007.stylish_myvehicles.presentation.screen.vehiclepager.components.PagerIndicator
-import com.segnities007.stylish_myvehicles.presentation.screen.vehiclepager.components.UrgentAlertCard
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 
 @Composable
@@ -76,11 +77,13 @@ fun VehiclePagerScreen(
     onNavigateToFuel: (Long) -> Unit,
     onNavigateToMaintenance: (Long) -> Unit,
     onNavigateToCost: (Long) -> Unit,
+    onNavigateToTrip: (Long) -> Unit,
     onNavigateToVehicleDetail: (Long) -> Unit,
     onNavigateToNotifications: () -> Unit,
     onAddFuel: (Long) -> Unit,
     onAddMaintenance: (Long) -> Unit,
     onAddCost: (Long) -> Unit,
+    onAddTrip: (Long) -> Unit,
     bottomBarVisible: MutableState<Boolean>? = null,
     showAddDialog: MutableState<Boolean>? = null,
     modifier: Modifier = Modifier,
@@ -94,6 +97,7 @@ fun VehiclePagerScreen(
                 is VehiclePagerEffect.NavigateToFuel -> onNavigateToFuel(effect.vehicleId)
                 is VehiclePagerEffect.NavigateToMaintenance -> onNavigateToMaintenance(effect.vehicleId)
                 is VehiclePagerEffect.NavigateToCost -> onNavigateToCost(effect.vehicleId)
+                is VehiclePagerEffect.NavigateToTrip -> onNavigateToTrip(effect.vehicleId)
                 is VehiclePagerEffect.NavigateToVehicleDetail -> onNavigateToVehicleDetail(effect.vehicleId)
             }
         }
@@ -160,61 +164,14 @@ fun VehiclePagerScreen(
     }
 
     if (isAddDialogVisible) {
-        val currentVehicle = state.vehicles.getOrNull(pagerState.currentPage)
-        StylishDialogSurface(onDismiss = { isAddDialogVisible = false }) {
-            Column(Modifier.padding(24.dp)) {
-                Text("記録を追加", style = MaterialTheme.typography.titleLarge)
-                Spacer(Modifier.height(16.dp))
-                StylishConnectedCardGrid(
-                    columns = 2,
-                    spacing = 4.dp,
-                    items = listOf(
-                        StylishConnectedCardItem(
-                            title = "給油",
-                            onClick = {
-                                isAddDialogVisible = false
-                                if (currentVehicle != null) onAddFuel(currentVehicle.id)
-                            },
-                            trailingContent = {
-                                Icon(
-                                    Icons.Default.LocalGasStation,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            },
-                        ),
-                        StylishConnectedCardItem(
-                            title = "整備",
-                            onClick = {
-                                isAddDialogVisible = false
-                                if (currentVehicle != null) onAddMaintenance(currentVehicle.id)
-                            },
-                            trailingContent = {
-                                Icon(
-                                    Icons.Default.Build,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            },
-                        ),
-                        StylishConnectedCardItem(
-                            title = "費用",
-                            onClick = {
-                                isAddDialogVisible = false
-                                if (currentVehicle != null) onAddCost(currentVehicle.id)
-                            },
-                            trailingContent = {
-                                Icon(
-                                    Icons.Default.AttachMoney,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            },
-                        ),
-                    ),
-                )
-            }
-        }
+        AddRecordDialog(
+            vehicleId = state.vehicles.getOrNull(pagerState.currentPage)?.id,
+            onDismiss = { isAddDialogVisible = false },
+            onAddFuel = onAddFuel,
+            onAddMaintenance = onAddMaintenance,
+            onAddCost = onAddCost,
+            onAddTrip = onAddTrip,
+        )
     }
 }
 
@@ -389,11 +346,6 @@ private fun VehiclePage(
             }
 
             item {
-                UrgentAlertCard(vehicle = vehicle)
-                Spacer(Modifier.height(16.dp))
-            }
-
-            item {
                 StylishSectionTitle("記録")
                 StylishConnectedCardGrid(
                     columns = 2,
@@ -437,6 +389,17 @@ private fun VehiclePage(
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         },
+                        StylishConnectedCardItem(
+                            title = "移動",
+                            supportingText = "ルート・距離・時間",
+                            onClick = { onIntent(VehiclePagerIntent.OpenTrip(vehicle.id)) },
+                        ) {
+                            Icon(
+                                Icons.Default.Route,
+                                null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        },
                     ),
                 )
             }
@@ -448,9 +411,7 @@ private fun VehiclePage(
                     items = listOf(
                         StylishConnectedCardItem(
                             title = "車両情報",
-                            supportingText = vehicle.currentInspectionExpiry?.let {
-                                "車検: $it"
-                            } ?: "車検・諸元・保険",
+                            supportingText = "諸元・保険",
                             onClick = { onIntent(VehiclePagerIntent.OpenVehicleDetail(vehicle.id)) },
                         ),
                     ),

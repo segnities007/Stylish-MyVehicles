@@ -10,6 +10,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedColumnCorners
+import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedColumnEdges
 import com.segnities007.stylish_myvehicles.presentation.components.atoms.utils.stylishConnectedShape
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedCardItem
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
@@ -20,7 +21,10 @@ fun StylishConnectedCardColumn(
     modifier: Modifier = Modifier,
     spacing: Dp = 4.dp,
 ) {
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(spacing)) {
+    Column(
+        modifier,
+        verticalArrangement = Arrangement.spacedBy(spacing),
+    ) {
         items.forEachIndexed { index, item ->
             StylishConnectedCard(
                 title = item.title,
@@ -28,6 +32,8 @@ fun StylishConnectedCardColumn(
                 onClick = item.onClick,
                 onLongClick = item.onLongClick,
                 shape = stylishConnectedShape(stylishConnectedColumnCorners(index, items.size)),
+                outlineEdges = stylishConnectedColumnEdges(index, items.size),
+                outlineCorners = stylishConnectedColumnCorners(index, items.size),
                 trailingContent = item.trailingContent,
             )
         }
