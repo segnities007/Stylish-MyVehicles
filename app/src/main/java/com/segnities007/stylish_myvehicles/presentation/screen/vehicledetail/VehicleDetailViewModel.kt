@@ -8,9 +8,10 @@ import com.segnities007.stylish_myvehicles.domain.usecase.ExportDocument
 import com.segnities007.stylish_myvehicles.domain.usecase.cost.GetCostRecordsUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.fuel.GetFuelRecordsUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.GetMaintenanceRecordsUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.GetMaintenanceSchedulesUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.UpdateMaintenanceScheduleUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.GetVehicleUseCase
+import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.UpdateVehicleUseCase
+import com.segnities007.stylish_myvehicles.presentation.components.organisms.VehicleField
+import com.segnities007.stylish_myvehicles.presentation.components.organisms.VehicleFieldInputType
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,8 +28,7 @@ class VehicleDetailViewModel(
     private val getFuelRecordsUseCase: GetFuelRecordsUseCase,
     private val getMaintenanceRecordsUseCase: GetMaintenanceRecordsUseCase,
     private val getCostRecordsUseCase: GetCostRecordsUseCase,
-    private val getMaintenanceSchedulesUseCase: GetMaintenanceSchedulesUseCase,
-    private val updateMaintenanceScheduleUseCase: UpdateMaintenanceScheduleUseCase,
+    private val updateVehicleUseCase: UpdateVehicleUseCase,
     private val exportDataUseCase: ExportDataUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(VehicleDetailUiState())
@@ -44,49 +44,11 @@ class VehicleDetailViewModel(
             }
         }
         viewModelScope.launch {
-            getFuelRecordsUseCase(vehicleId).collect { records ->
-                val economies = records.mapNotNull { it.fuelEconomy }
-                val avg = economies.takeIf { it.isNotEmpty() }
-                    ?.average()
-                val totalDist = if (records.size >= 2) {
-                    records.maxOf { it.odometer } - records.minOf { it.odometer }
-                }
-                else 0
-                _uiState.update {
-                    it.copy(
-                        recentFuelRecords = records.take(3),
-                        averageFuelEconomy = avg,
-                        totalDistance = totalDist,
-                    )
-                }
-            }
-        }
-        viewModelScope.launch {
-            getMaintenanceRecordsUseCase(vehicleId).collect { records ->
-                _uiState.update { it.copy(recentMaintenanceRecords = records.take(3)) }
-            }
-        }
-        viewModelScope.launch {
             getCostRecordsUseCase(vehicleId).collect { records ->
                 val now = java.time.LocalDate.now()
-                val monthly = records
-                    .filter { it.date.year == now.year && it.date.month == now.month }
-                    .sumOf { it.amount }
-                val total = records.sumOf { it.amount }
                 val taxPaidThisYear = records
                     .any { it.category == CostCategory.TAX && it.date.year == now.year }
-                _uiState.update {
-                    it.copy(
-                        monthlyCost = monthly,
-                        totalCost = total,
-                        taxPaidThisYear = taxPaidThisYear,
-                    )
-                }
-            }
-        }
-        viewModelScope.launch {
-            getMaintenanceSchedulesUseCase(vehicleId).collect { schedules ->
-                _uiState.update { it.copy(schedules = schedules) }
+                _uiState.update { it.copy(taxPaidThisYear = taxPaidThisYear) }
             }
         }
     }
@@ -99,67 +61,109 @@ class VehicleDetailViewModel(
             is VehicleDetailIntent.EditVehicle ->
                 _effects.trySend(VehicleDetailEffect.NavigateToEdit(vehicleId))
 
-            is VehicleDetailIntent.OpenFuelRecords ->
-                _effects.trySend(VehicleDetailEffect.NavigateToFuel(vehicleId))
-
-            is VehicleDetailIntent.OpenMaintenanceRecords ->
-                _effects.trySend(VehicleDetailEffect.NavigateToMaintenance(vehicleId))
-
             is VehicleDetailIntent.OpenCostList ->
                 _effects.trySend(VehicleDetailEffect.NavigateToCost(vehicleId))
 
             is VehicleDetailIntent.ExportFuelCsv -> exportFuel()
             is VehicleDetailIntent.ExportMaintenanceCsv -> exportMaintenance()
             is VehicleDetailIntent.ExportCostCsv -> exportCost()
-            is VehicleDetailIntent.EditSchedule -> openScheduleDialog(intent.scheduleId)
-            is VehicleDetailIntent.CloseScheduleDialog ->
-                _uiState.update { it.copy(isScheduleDialogOpen = false, editingScheduleId = null) }
 
-            is VehicleDetailIntent.ScheduleIntervalKmChanged ->
-                _uiState.update { it.copy(scheduleInputKm = intent.value.filter { c -> c.isDigit() }) }
+            is VehicleDetailIntent.OpenFieldEditor -> openFieldEditor(intent.field)
+            is VehicleDetailIntent.CloseFieldEditor ->
+                _uiState.update { it.copy(editingField = null) }
 
-            is VehicleDetailIntent.ScheduleIntervalMonthsChanged ->
-                _uiState.update { it.copy(scheduleInputMonths = intent.value.filter { c -> c.isDigit() }) }
+            is VehicleDetailIntent.FieldTextChanged ->
+                _uiState.update { it.copy(fieldInputText = intent.value) }
 
-            is VehicleDetailIntent.ScheduleLastDoneDateChanged ->
-                _uiState.update { it.copy(scheduleInputLastDoneDate = intent.value) }
+            is VehicleDetailIntent.FieldDateChanged ->
+                _uiState.update { it.copy(fieldInputDate = intent.value) }
 
-            is VehicleDetailIntent.ScheduleLastDoneOdometerChanged ->
-                _uiState.update { it.copy(scheduleInputLastDoneOdo = intent.value.filter { c -> c.isDigit() }) }
+            is VehicleDetailIntent.FieldCategoryChanged ->
+                _uiState.update { it.copy(fieldInputCategory = intent.value) }
 
-            is VehicleDetailIntent.SaveSchedule -> saveSchedule()
+            is VehicleDetailIntent.SaveField -> saveField()
         }
     }
 
-    private fun openScheduleDialog(scheduleId: Long) {
-        val schedule = _uiState.value.schedules.find { it.id == scheduleId } ?: return
-        _uiState.update {
-            it.copy(
-                isScheduleDialogOpen = true,
-                editingScheduleId = scheduleId,
-                scheduleInputKm = schedule.intervalKm?.toString() ?: "",
-                scheduleInputMonths = schedule.intervalMonths?.toString() ?: "",
-                scheduleInputLastDoneDate = schedule.lastDoneDate,
-                scheduleInputLastDoneOdo = schedule.lastDoneOdometer?.toString() ?: "",
-            )
+    private fun openFieldEditor(field: VehicleField) {
+        val vehicle = _uiState.value.vehicle ?: return
+        _uiState.update { state ->
+            when (field.inputType) {
+                VehicleFieldInputType.DATE -> state.copy(
+                    editingField = field,
+                    fieldInputDate = when (field) {
+                        VehicleField.FIRST_REGISTRATION_DATE -> vehicle.firstRegistrationDate
+                        VehicleField.INSPECTION_EXPIRY -> vehicle.inspectionExpiry
+                        VehicleField.JIBAI_EXPIRY -> vehicle.jibaiExpiry
+                        VehicleField.INSURANCE_EXPIRY -> vehicle.insuranceExpiry
+                        else -> null
+                    },
+                )
+
+                VehicleFieldInputType.SELECTION -> state.copy(
+                    editingField = field,
+                    fieldInputCategory = vehicle.category,
+                )
+
+                else -> state.copy(
+                    editingField = field,
+                    fieldInputText = when (field) {
+                        VehicleField.MAKER -> vehicle.maker
+                        VehicleField.NAME -> vehicle.name
+                        VehicleField.GRADE -> vehicle.grade
+                        VehicleField.YEAR -> vehicle.year?.toString() ?: ""
+                        VehicleField.MODEL_CODE -> vehicle.modelCode
+                        VehicleField.PLATE_NUMBER -> vehicle.plateNumber
+                        VehicleField.VIN -> vehicle.vin
+                        VehicleField.DISPLACEMENT -> vehicle.displacement?.toString() ?: ""
+                        VehicleField.WEIGHT -> vehicle.weight?.toString() ?: ""
+                        VehicleField.MAX_LOAD -> vehicle.maxLoadKg?.toString() ?: ""
+                        VehicleField.COLOR -> vehicle.color
+                        VehicleField.INSURANCE_COMPANY -> vehicle.insuranceCompany
+                        VehicleField.INSURANCE_RANK -> vehicle.insuranceRank?.toString() ?: ""
+                        VehicleField.MEMO -> vehicle.memo
+                        else -> ""
+                    },
+                )
+            }
         }
     }
 
-    private fun saveSchedule() {
+    private fun saveField() {
         val state = _uiState.value
-        val scheduleId = state.editingScheduleId ?: return
-        val existing = state.schedules.find { it.id == scheduleId } ?: return
+        val vehicle = state.vehicle ?: return
+        val field = state.editingField ?: return
+        val text = state.fieldInputText.trim()
+
+        val updated = when (field) {
+            VehicleField.CATEGORY -> vehicle.copy(category = state.fieldInputCategory)
+            VehicleField.MAKER -> vehicle.copy(maker = text)
+            VehicleField.NAME -> vehicle.copy(name = text)
+            VehicleField.GRADE -> vehicle.copy(grade = text)
+            VehicleField.YEAR -> vehicle.copy(year = text.toIntOrNull())
+            VehicleField.MODEL_CODE -> vehicle.copy(modelCode = text)
+            VehicleField.PLATE_NUMBER -> vehicle.copy(plateNumber = text)
+            VehicleField.VIN -> vehicle.copy(vin = text)
+            VehicleField.DISPLACEMENT -> vehicle.copy(displacement = text.toIntOrNull())
+            VehicleField.WEIGHT -> vehicle.copy(weight = text.toIntOrNull())
+            VehicleField.MAX_LOAD -> vehicle.copy(maxLoadKg = text.toIntOrNull())
+            VehicleField.COLOR -> vehicle.copy(color = text)
+            VehicleField.FIRST_REGISTRATION_DATE ->
+                vehicle.copy(firstRegistrationDate = state.fieldInputDate)
+
+            VehicleField.INSPECTION_EXPIRY ->
+                vehicle.copy(inspectionExpiry = state.fieldInputDate)
+
+            VehicleField.JIBAI_EXPIRY -> vehicle.copy(jibaiExpiry = state.fieldInputDate)
+            VehicleField.INSURANCE_EXPIRY -> vehicle.copy(insuranceExpiry = state.fieldInputDate)
+            VehicleField.INSURANCE_COMPANY -> vehicle.copy(insuranceCompany = text)
+            VehicleField.INSURANCE_RANK -> vehicle.copy(insuranceRank = text.toIntOrNull())
+            VehicleField.MEMO -> vehicle.copy(memo = text)
+        }
 
         viewModelScope.launch {
-            updateMaintenanceScheduleUseCase(
-                existing.copy(
-                    intervalKm = state.scheduleInputKm.toIntOrNull(),
-                    intervalMonths = state.scheduleInputMonths.toIntOrNull(),
-                    lastDoneDate = state.scheduleInputLastDoneDate,
-                    lastDoneOdometer = state.scheduleInputLastDoneOdo.toIntOrNull(),
-                ),
-            )
-            _uiState.update { it.copy(isScheduleDialogOpen = false, editingScheduleId = null) }
+            updateVehicleUseCase(updated)
+            _uiState.update { it.copy(editingField = null) }
         }
     }
 
@@ -206,8 +210,6 @@ class VehicleDetailViewModel(
 sealed interface VehicleDetailEffect {
     data object NavigateBack : VehicleDetailEffect
     data class NavigateToEdit(val vehicleId: Long) : VehicleDetailEffect
-    data class NavigateToFuel(val vehicleId: Long) : VehicleDetailEffect
-    data class NavigateToMaintenance(val vehicleId: Long) : VehicleDetailEffect
     data class NavigateToCost(val vehicleId: Long) : VehicleDetailEffect
     data class SaveDocument(val document: ExportDocument) :
         VehicleDetailEffect

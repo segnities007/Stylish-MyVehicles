@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -30,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_myvehicles.domain.service.DeadlineInfo
-import com.segnities007.stylish_myvehicles.presentation.components.atoms.StylishIconButton
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedListItemColumn
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishEmptyState
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedListItem
@@ -44,7 +42,6 @@ import java.time.LocalDate
 @Composable
 fun NotificationScreen(
     viewModel: NotificationViewModel,
-    onNavigateBack: () -> Unit,
     onAddRecord: () -> Unit,
     onNavigateToHome: () -> Unit,
     modifier: Modifier = Modifier,
@@ -62,12 +59,6 @@ fun NotificationScreen(
                 item {
                     StylishHeader(
                         title = { Text("通知") },
-                        navigation = {
-                            StylishIconButton(
-                                Icons.AutoMirrored.Filled.ArrowBack, "戻る",
-                                onClick = onNavigateBack,
-                            )
-                        },
                     )
                     Spacer(Modifier.height(8.dp))
                 }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -22,6 +23,7 @@ import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesT
 fun StylishBottomBar(
     onNavigateToHome: () -> Unit,
     onNavigateToNotifications: () -> Unit,
+    onNavigateToSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -52,6 +54,11 @@ fun StylishBottomBar(
                 contentDescription = "通知",
                 onClick = onNavigateToNotifications,
             )
+            StylishRoundedIconButton(
+                imageVector = Icons.Default.Settings,
+                contentDescription = "設定",
+                onClick = onNavigateToSettings,
+            )
         }
     }
 }
@@ -63,6 +70,7 @@ private fun StylishBottomBarPreview() {
         StylishBottomBar(
             onNavigateToHome = {},
             onNavigateToNotifications = {},
+            onNavigateToSettings = {},
         )
     }
 }

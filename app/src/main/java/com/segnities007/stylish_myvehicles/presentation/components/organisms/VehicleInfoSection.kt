@@ -12,35 +12,105 @@ import com.segnities007.stylish_myvehicles.presentation.components.molecules.mod
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 import java.time.LocalDate
 
-/** 車両の基本情報（年式・ナンバー・排気量など）の一覧。 */
+private const val NOT_REGISTERED = "未登録"
+
+private fun String?.orNotRegistered(): String =
+    this?.takeIf { it.isNotBlank() } ?: NOT_REGISTERED
+
+/**
+ * 車両の基本情報一覧。値が未登録の項目も含めて全て表示し、
+ * 項目タップで [onEditField] 経由で編集ダイアログを開く。
+ */
 @Composable
 fun VehicleInfoSection(
     vehicle: Vehicle,
+    onEditField: (VehicleField) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     StylishConnectedListItemColumn(
         modifier = modifier,
-        items = buildList {
-            vehicle.year?.let { add(StylishConnectedListItem("年式", "${it}年", {})) }
-            vehicle.plateNumber.takeIf { it.isNotBlank() }
-                ?.let { add(StylishConnectedListItem("ナンバー", it, {})) }
-            vehicle.displacement?.let { add(StylishConnectedListItem("排気量", "${it}cc", {})) }
-            vehicle.weight?.let { add(StylishConnectedListItem("車両重量", "${it}kg", {})) }
-            vehicle.maxLoadKg?.let { add(StylishConnectedListItem("最大積載量", "${it}kg", {})) }
-            vehicle.color.takeIf { it.isNotBlank() }
-                ?.let { add(StylishConnectedListItem("カラー", it, {})) }
-            vehicle.firstRegistrationDate?.let {
-                add(
-                    StylishConnectedListItem(
-                        "初度登録",
-                        it.toString(),
-                        {})
-                )
-            }
-            vehicle.insuranceCompany.takeIf { it.isNotBlank() }
-                ?.let { add(StylishConnectedListItem("保険会社", it, {})) }
-            vehicle.insuranceRank?.let { add(StylishConnectedListItem("等級", "${it}等級", {})) }
-        },
+        items = listOf(
+            StylishConnectedListItem(
+                VehicleField.CATEGORY.label,
+                vehicle.category.label,
+                onClick = { onEditField(VehicleField.CATEGORY) },
+            ),
+            StylishConnectedListItem(
+                VehicleField.MAKER.label,
+                vehicle.maker.orNotRegistered(),
+                onClick = { onEditField(VehicleField.MAKER) },
+            ),
+            StylishConnectedListItem(
+                VehicleField.NAME.label,
+                vehicle.name.orNotRegistered(),
+                onClick = { onEditField(VehicleField.NAME) },
+            ),
+            StylishConnectedListItem(
+                VehicleField.GRADE.label,
+                vehicle.grade.orNotRegistered(),
+                onClick = { onEditField(VehicleField.GRADE) },
+            ),
+            StylishConnectedListItem(
+                VehicleField.YEAR.label,
+                vehicle.year?.let { "${it}年" } ?: NOT_REGISTERED,
+                onClick = { onEditField(VehicleField.YEAR) },
+            ),
+            StylishConnectedListItem(
+                VehicleField.MODEL_CODE.label,
+                vehicle.modelCode.orNotRegistered(),
+                onClick = { onEditField(VehicleField.MODEL_CODE) },
+            ),
+            StylishConnectedListItem(
+                VehicleField.PLATE_NUMBER.label,
+                vehicle.plateNumber.orNotRegistered(),
+                onClick = { onEditField(VehicleField.PLATE_NUMBER) },
+            ),
+            StylishConnectedListItem(
+                VehicleField.VIN.label,
+                vehicle.vin.orNotRegistered(),
+                onClick = { onEditField(VehicleField.VIN) },
+            ),
+            StylishConnectedListItem(
+                VehicleField.DISPLACEMENT.label,
+                vehicle.displacement?.let { "${it}cc" } ?: NOT_REGISTERED,
+                onClick = { onEditField(VehicleField.DISPLACEMENT) },
+            ),
+            StylishConnectedListItem(
+                VehicleField.WEIGHT.label,
+                vehicle.weight?.let { "${it}kg" } ?: NOT_REGISTERED,
+                onClick = { onEditField(VehicleField.WEIGHT) },
+            ),
+            StylishConnectedListItem(
+                VehicleField.MAX_LOAD.label,
+                vehicle.maxLoadKg?.let { "${it}kg" } ?: NOT_REGISTERED,
+                onClick = { onEditField(VehicleField.MAX_LOAD) },
+            ),
+            StylishConnectedListItem(
+                VehicleField.COLOR.label,
+                vehicle.color.orNotRegistered(),
+                onClick = { onEditField(VehicleField.COLOR) },
+            ),
+            StylishConnectedListItem(
+                VehicleField.FIRST_REGISTRATION_DATE.label,
+                vehicle.firstRegistrationDate?.toString() ?: NOT_REGISTERED,
+                onClick = { onEditField(VehicleField.FIRST_REGISTRATION_DATE) },
+            ),
+            StylishConnectedListItem(
+                VehicleField.INSURANCE_COMPANY.label,
+                vehicle.insuranceCompany.orNotRegistered(),
+                onClick = { onEditField(VehicleField.INSURANCE_COMPANY) },
+            ),
+            StylishConnectedListItem(
+                VehicleField.INSURANCE_RANK.label,
+                vehicle.insuranceRank?.let { "${it}等級" } ?: NOT_REGISTERED,
+                onClick = { onEditField(VehicleField.INSURANCE_RANK) },
+            ),
+            StylishConnectedListItem(
+                VehicleField.MEMO.label,
+                vehicle.memo.orNotRegistered(),
+                onClick = { onEditField(VehicleField.MEMO) },
+            ),
+        ),
     )
 }
 
@@ -57,6 +127,7 @@ private fun VehicleInfoSectionPreview() {
                     firstRegistrationDate = LocalDate.of(2022, 4, 1),
                     insuranceCompany = "東京海上日動", insuranceRank = 20,
                 ),
+                onEditField = {},
             )
         }
     }

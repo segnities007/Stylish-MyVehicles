@@ -7,12 +7,13 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 
 /**
- * 記録画面のページャー粒度。月/年/週を切り替えられる。
+ * 記録画面のページャー粒度。月/年/週/すべてを切り替えられる。
  */
 enum class PeriodMode(val label: String) {
     MONTHLY("月単位"),
     YEARLY("年単位"),
     WEEKLY("週単位"),
+    ALL("すべて"),
 }
 
 /**
@@ -38,10 +39,19 @@ data class SubPeriod(
  * - 月単位: その月で終わる直近6か月
  * - 年単位: その年の12か月
  * - 週単位: その週の7日
+ * - すべて: 今月で終わる直近6か月
  */
 fun subPeriods(period: Period, mode: PeriodMode): List<SubPeriod> = when (mode) {
     PeriodMode.MONTHLY -> {
         val ym = YearMonth.from(period.start)
+        (5 downTo 0).map { ago ->
+            val m = ym.minusMonths(ago.toLong())
+            SubPeriod("${m.monthValue}月", m.atDay(1), m.atEndOfMonth())
+        }
+    }
+
+    PeriodMode.ALL -> {
+        val ym = YearMonth.now()
         (5 downTo 0).map { ago ->
             val m = ym.minusMonths(ago.toLong())
             SubPeriod("${m.monthValue}月", m.atDay(1), m.atEndOfMonth())
@@ -120,5 +130,16 @@ fun computePeriods(
                 monday = monday.plusWeeks(1)
             }
         }
+    }
+
+    PeriodMode.ALL -> {
+        val oldest = recordDates.minOrNull() ?: now
+        listOf(
+            Period(
+                label = "すべての期間",
+                start = oldest,
+                endInclusive = now,
+            )
+        )
     }
 }

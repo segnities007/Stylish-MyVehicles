@@ -87,15 +87,6 @@ class RecordsViewModel(
 
             is RecordsIntent.NavigateBack ->
                 _effects.trySend(RecordsEffect.NavigateBack)
-
-            is RecordsIntent.NavigateToFuel ->
-                _effects.trySend(RecordsEffect.OpenFuel(vehicleId, intent.recordId))
-
-            is RecordsIntent.NavigateToMaintenance ->
-                _effects.trySend(RecordsEffect.OpenMaintenance(vehicleId, intent.recordId))
-
-            is RecordsIntent.NavigateToCost ->
-                _effects.trySend(RecordsEffect.OpenCost(vehicleId, intent.recordId))
         }
     }
 }

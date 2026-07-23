@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocalGasStation
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -74,7 +73,6 @@ import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesT
 fun VehiclePagerScreen(
     viewModel: VehiclePagerViewModel,
     onNavigateToEdit: (Long?) -> Unit,
-    onNavigateToSettings: () -> Unit,
     onNavigateToFuel: (Long) -> Unit,
     onNavigateToMaintenance: (Long) -> Unit,
     onNavigateToCost: (Long) -> Unit,
@@ -93,7 +91,6 @@ fun VehiclePagerScreen(
         viewModel.effects.collect { effect ->
             when (effect) {
                 is VehiclePagerEffect.NavigateToEdit -> onNavigateToEdit(effect.vehicleId)
-                is VehiclePagerEffect.NavigateToSettings -> onNavigateToSettings()
                 is VehiclePagerEffect.NavigateToFuel -> onNavigateToFuel(effect.vehicleId)
                 is VehiclePagerEffect.NavigateToMaintenance -> onNavigateToMaintenance(effect.vehicleId)
                 is VehiclePagerEffect.NavigateToCost -> onNavigateToCost(effect.vehicleId)
@@ -347,12 +344,6 @@ private fun VehiclePage(
                     StylishIconButton(
                         Icons.Default.Edit, "編集",
                         onClick = { onIntent(VehiclePagerIntent.EditVehicle(vehicle.id)) },
-                    )
-                },
-                actions = {
-                    StylishIconButton(
-                        Icons.Default.Settings, "設定",
-                        onClick = { onIntent(VehiclePagerIntent.OpenSettings) },
                     )
                 },
             )

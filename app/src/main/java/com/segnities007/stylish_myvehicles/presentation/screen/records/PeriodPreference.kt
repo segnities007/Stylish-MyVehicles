@@ -14,8 +14,8 @@ object PeriodPreference {
         context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
     fun getMode(context: Context): PeriodMode {
-        val name = prefs(context).getString(KEY_PERIOD_MODE, PeriodMode.MONTHLY.name)
-        return PeriodMode.entries.find { it.name == name } ?: PeriodMode.MONTHLY
+        val name = prefs(context).getString(KEY_PERIOD_MODE, PeriodMode.ALL.name)
+        return PeriodMode.entries.find { it.name == name } ?: PeriodMode.ALL
     }
 
     fun setMode(context: Context, mode: PeriodMode) {

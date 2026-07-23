@@ -39,18 +39,17 @@ import com.segnities007.stylish_myvehicles.domain.usecase.ExportDocument
 import com.segnities007.stylish_myvehicles.presentation.components.atoms.StylishFab
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.LocalBottomBarVisible
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishBottomBar
-import com.segnities007.stylish_myvehicles.presentation.screen.cost.CostListScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.cost.CostListViewModel
-import com.segnities007.stylish_myvehicles.presentation.screen.fuel.FuelRecordScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.fuel.FuelRecordViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.licenses.LicensesScreen
-import com.segnities007.stylish_myvehicles.presentation.screen.maintenance.MaintenanceRecordScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.maintenance.MaintenanceRecordViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.notification.NotificationScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.notification.NotificationViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.onboarding.OnboardingScreen
+import com.segnities007.stylish_myvehicles.presentation.screen.records.CostRecordsScreen
+import com.segnities007.stylish_myvehicles.presentation.screen.records.FuelRecordsScreen
+import com.segnities007.stylish_myvehicles.presentation.screen.records.MaintenanceRecordsScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.records.PeriodPreference
-import com.segnities007.stylish_myvehicles.presentation.screen.records.RecordsScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.records.RecordTopic
 import com.segnities007.stylish_myvehicles.presentation.screen.records.RecordsViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.settings.SettingsScreen
@@ -97,7 +96,8 @@ fun AppNavigation(
 
     val currentDestination = backStack.lastOrNull()
     val showBottomBar = (currentDestination is VehiclePagerDestination ||
-            currentDestination is NotificationDestination) && bottomBarVisible.value
+            currentDestination is NotificationDestination ||
+            currentDestination is SettingsDestination) && bottomBarVisible.value
 
     Scaffold(
         modifier = modifier,
@@ -120,6 +120,7 @@ fun AppNavigation(
                     StylishBottomBar(
                         onNavigateToHome = { navigateToTab(VehiclePagerDestination) },
                         onNavigateToNotifications = { navigateToTab(NotificationDestination) },
+                        onNavigateToSettings = { backStack.add(SettingsDestination) },
                     )
                 }
             }
@@ -168,37 +169,80 @@ fun AppNavigation(
                     VehiclePagerScreen(
                         viewModel = viewModel,
                         onNavigateToEdit = { backStack.add(VehicleEditDestination(it)) },
-                        onNavigateToSettings = { backStack.add(SettingsDestination) },
-                        onNavigateToFuel = { backStack.add(RecordsDestination(it, RecordTopic.FUEL)) },
-                        onNavigateToMaintenance = { backStack.add(RecordsDestination(it, RecordTopic.MAINTENANCE)) },
-                        onNavigateToCost = { backStack.add(RecordsDestination(it, RecordTopic.COST)) },
+                        onNavigateToFuel = { backStack.add(FuelRecordsDestination(it)) },
+                        onNavigateToMaintenance = { backStack.add(MaintenanceRecordsDestination(it)) },
+                        onNavigateToCost = { backStack.add(CostRecordsDestination(it)) },
                         onNavigateToVehicleDetail = { backStack.add(VehicleDetailDestination(it)) },
                         onNavigateToNotifications = { backStack.add(NotificationDestination) },
-                        onAddFuel = { backStack.add(FuelRecordDestination(it, openAdd = true)) },
-                        onAddMaintenance = { backStack.add(MaintenanceRecordDestination(it, openAdd = true)) },
-                        onAddCost = { backStack.add(CostListDestination(it, openAdd = true)) },
+                        onAddFuel = {
+                            backStack.add(FuelRecordsDestination(it, openAdd = true))
+                        },
+                        onAddMaintenance = {
+                            backStack.add(MaintenanceRecordsDestination(it, openAdd = true))
+                        },
+                        onAddCost = {
+                            backStack.add(CostRecordsDestination(it, openAdd = true))
+                        },
                         bottomBarVisible = bottomBarVisible,
                         showAddDialog = showAddDialog,
                     )
                 }
-                entry<RecordsDestination> { dest ->
+                // Nav3のNavDisplayはエントリーごとのViewModelStoreを持たないため、
+                // keyを明示してトピック/車両ごとに独立したViewModelインスタンスを確保する
+                entry<FuelRecordsDestination> { dest ->
                     val context = LocalContext.current
                     val initialMode = remember { PeriodPreference.getMode(context) }
                     val viewModel: RecordsViewModel = koinViewModel(
-                        parameters = { parametersOf(dest.vehicleId, dest.topic, initialMode) },
+                        key = "fuelRecords-${dest.vehicleId}",
+                        parameters = { parametersOf(dest.vehicleId, RecordTopic.FUEL, initialMode) },
                     )
-                    RecordsScreen(
+                    val dialogViewModel: FuelRecordViewModel = koinViewModel(
+                        key = "fuelDialog-${dest.vehicleId}",
+                        parameters = { parametersOf(dest.vehicleId) },
+                    )
+                    FuelRecordsScreen(
                         viewModel = viewModel,
+                        dialogViewModel = dialogViewModel,
                         onNavigateBack = { popBack() },
-                        onNavigateToFuel = { vehicleId, recordId ->
-                            backStack.add(FuelRecordDestination(vehicleId))
+                        openAddDialog = dest.openAdd,
+                    )
+                }
+                entry<MaintenanceRecordsDestination> { dest ->
+                    val context = LocalContext.current
+                    val initialMode = remember { PeriodPreference.getMode(context) }
+                    val viewModel: RecordsViewModel = koinViewModel(
+                        key = "maintenanceRecords-${dest.vehicleId}",
+                        parameters = {
+                            parametersOf(dest.vehicleId, RecordTopic.MAINTENANCE, initialMode)
                         },
-                        onNavigateToMaintenance = { vehicleId, recordId ->
-                            backStack.add(MaintenanceRecordDestination(vehicleId))
-                        },
-                        onNavigateToCost = { vehicleId, recordId ->
-                            backStack.add(CostListDestination(vehicleId))
-                        },
+                    )
+                    val dialogViewModel: MaintenanceRecordViewModel = koinViewModel(
+                        key = "maintenanceDialog-${dest.vehicleId}",
+                        parameters = { parametersOf(dest.vehicleId) },
+                    )
+                    MaintenanceRecordsScreen(
+                        viewModel = viewModel,
+                        dialogViewModel = dialogViewModel,
+                        onNavigateBack = { popBack() },
+                        openAddDialog = dest.openAdd,
+                    )
+                }
+                entry<CostRecordsDestination> { dest ->
+                    val context = LocalContext.current
+                    val initialMode = remember { PeriodPreference.getMode(context) }
+                    val viewModel: RecordsViewModel = koinViewModel(
+                        key = "costRecords-${dest.vehicleId}",
+                        parameters = { parametersOf(dest.vehicleId, RecordTopic.COST, initialMode) },
+                    )
+                    val dialogViewModel: CostListViewModel = koinViewModel(
+                        key = "costDialog-${dest.vehicleId}",
+                        parameters = { parametersOf(dest.vehicleId) },
+                    )
+                    CostRecordsScreen(
+                        viewModel = viewModel,
+                        dialogViewModel = dialogViewModel,
+                        onNavigateBack = { popBack() },
+                        openAddDialog = dest.openAdd,
                     )
                 }
                 entry<VehicleDetailDestination> { dest ->
@@ -209,9 +253,7 @@ fun AppNavigation(
                         viewModel = viewModel,
                         onNavigateBack = { popBack() },
                         onNavigateToEdit = { popBack(); backStack.add(VehicleEditDestination(it)) },
-                        onNavigateToFuel = { backStack.add(RecordsDestination(it, RecordTopic.FUEL)) },
-                        onNavigateToMaintenance = { backStack.add(RecordsDestination(it, RecordTopic.MAINTENANCE)) },
-                        onNavigateToCost = { backStack.add(RecordsDestination(it, RecordTopic.COST)) },
+                        onNavigateToCost = { backStack.add(CostRecordsDestination(it)) },
                         onSaveDocument = onSaveDocument,
                     )
                 }
@@ -224,39 +266,8 @@ fun AppNavigation(
                         onNavigateBack = { popBack() },
                     )
                 }
-                entry<FuelRecordDestination> { dest ->
-                    val viewModel: FuelRecordViewModel = koinViewModel(
-                        parameters = { parametersOf(dest.vehicleId) },
-                    )
-                    FuelRecordScreen(
-                        viewModel = viewModel,
-                        onNavigateBack = { popBack() },
-                        openAddDialog = dest.openAdd,
-                    )
-                }
-                entry<MaintenanceRecordDestination> { dest ->
-                    val viewModel: MaintenanceRecordViewModel = koinViewModel(
-                        parameters = { parametersOf(dest.vehicleId) },
-                    )
-                    MaintenanceRecordScreen(
-                        viewModel = viewModel,
-                        onNavigateBack = { popBack() },
-                        openAddDialog = dest.openAdd,
-                    )
-                }
-                entry<CostListDestination> { dest ->
-                    val viewModel: CostListViewModel = koinViewModel(
-                        parameters = { parametersOf(dest.vehicleId) },
-                    )
-                    CostListScreen(
-                        viewModel = viewModel,
-                        onNavigateBack = { popBack() },
-                        openAddDialog = dest.openAdd,
-                    )
-                }
                 entry<SettingsDestination> {
                     SettingsScreen(
-                        onNavigateBack = { popBack() },
                         onThemeChanged = onThemeChanged,
                         onNavigateToLicenses = { backStack.add(LicensesDestination) },
                     )
@@ -270,7 +281,6 @@ fun AppNavigation(
                     val viewModel: NotificationViewModel = koinViewModel()
                     NotificationScreen(
                         viewModel = viewModel,
-                        onNavigateBack = { popBack() },
                         onAddRecord = { /* TODO: show add record dialog */ },
                         onNavigateToHome = { popBack() },
                     )

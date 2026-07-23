@@ -72,7 +72,7 @@ fun StylishConnectedListItemColumn(
                         item.supportingText?.let {
                             Text(
                                 it,
-                                style = MaterialTheme.typography.bodySmall,
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }

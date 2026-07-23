@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -23,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.segnities007.stylish_myvehicles.presentation.components.atoms.StylishIconButton
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedListItemColumn
 import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedListItem
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishHeader
@@ -34,7 +32,6 @@ import com.segnities007.stylish_myvehicles.presentation.theme.ThemePreference
 
 @Composable
 fun SettingsScreen(
-    onNavigateBack: () -> Unit,
     onThemeChanged: (ThemeMode) -> Unit,
     onNavigateToLicenses: () -> Unit,
     modifier: Modifier = Modifier,
@@ -53,12 +50,6 @@ fun SettingsScreen(
             StylishHeader(
                 modifier = Modifier.padding(horizontal = 20.dp),
                 title = { Text("設定") },
-                navigation = {
-                    StylishIconButton(
-                        Icons.AutoMirrored.Filled.ArrowBack, "戻る",
-                        onClick = onNavigateBack,
-                    )
-                },
             )
 
             Column(Modifier.padding(horizontal = 20.dp)) {
@@ -115,7 +106,7 @@ fun SettingsScreen(
 private fun SettingsScreenPreview() {
     StylishMyVehiclesTheme {
         Surface(Modifier.padding(20.dp)) {
-            SettingsScreen(onNavigateBack = {}, onThemeChanged = {}, onNavigateToLicenses = {})
+            SettingsScreen(onThemeChanged = {}, onNavigateToLicenses = {})
         }
     }
 }

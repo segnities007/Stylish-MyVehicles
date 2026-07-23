@@ -107,8 +107,7 @@ val appModule = module {
             getFuelRecordsUseCase = get(),
             getMaintenanceRecordsUseCase = get(),
             getCostRecordsUseCase = get(),
-            getMaintenanceSchedulesUseCase = get(),
-            updateMaintenanceScheduleUseCase = get(),
+            updateVehicleUseCase = get(),
             exportDataUseCase = get(),
         )
     }

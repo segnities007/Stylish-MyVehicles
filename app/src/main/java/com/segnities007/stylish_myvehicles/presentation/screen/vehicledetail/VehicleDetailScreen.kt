@@ -1,69 +1,82 @@
 package com.segnities007.stylish_myvehicles.presentation.screen.vehicledetail
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.LocalGasStation
-import androidx.compose.material3.Icon
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
-import com.segnities007.stylish_myvehicles.domain.service.CostStatisticsCalculator
 import com.segnities007.stylish_myvehicles.domain.usecase.ExportDocument
+import com.segnities007.stylish_myvehicles.presentation.components.atoms.StylishFab
 import com.segnities007.stylish_myvehicles.presentation.components.atoms.StylishIconButton
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.LineChartData
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedCardRow
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedListItemColumn
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedCardItem
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedListItem
-import com.segnities007.stylish_myvehicles.presentation.components.organisms.LineChartSection
+import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedButtonColumn
+import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDialogSurface
+import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedButtonItem
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishHeader
+import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishPageContent
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishScaffold
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishSectionTitle
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.VehicleDeadlineSection
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.VehicleInfoSection
-import com.segnities007.stylish_myvehicles.presentation.screen.vehicledetail.components.MaintenanceScheduleSection
-import com.segnities007.stylish_myvehicles.presentation.screen.vehicledetail.components.ScheduleEditDialog
+import com.segnities007.stylish_myvehicles.presentation.screen.vehicledetail.components.VehicleFieldEditDialog
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 
+/**
+ * 車両情報画面。車両についての情報（期限管理・車両情報）のみを表示する。
+ * FABからデータエクスポートを選択できる。
+ */
 @Composable
 fun VehicleDetailScreen(
     viewModel: VehicleDetailViewModel,
     onNavigateBack: () -> Unit,
     onNavigateToEdit: (Long) -> Unit,
-    onNavigateToFuel: (Long) -> Unit,
-    onNavigateToMaintenance: (Long) -> Unit,
     onNavigateToCost: (Long) -> Unit,
     onSaveDocument: (ExportDocument) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsState()
+    var showExportDialog by remember { mutableStateOf(false) }
+
+    // ホーム画面と同じスクロールUI。最上部にいる間だけFABを表示する
+    val listState = rememberLazyListState()
+    val isAtTop by remember {
+        derivedStateOf {
+            listState.firstVisibleItemIndex == 0 &&
+                    listState.firstVisibleItemScrollOffset <= 0
+        }
+    }
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
                 is VehicleDetailEffect.NavigateBack -> onNavigateBack()
                 is VehicleDetailEffect.NavigateToEdit -> onNavigateToEdit(effect.vehicleId)
-                is VehicleDetailEffect.NavigateToFuel -> onNavigateToFuel(effect.vehicleId)
-                is VehicleDetailEffect.NavigateToMaintenance -> onNavigateToMaintenance(effect.vehicleId)
                 is VehicleDetailEffect.NavigateToCost -> onNavigateToCost(effect.vehicleId)
                 is VehicleDetailEffect.SaveDocument -> onSaveDocument(effect.document)
             }
@@ -72,219 +85,116 @@ fun VehicleDetailScreen(
 
     StylishScaffold(
         modifier = modifier,
+        floatingActionButton = {
+            AnimatedVisibility(
+                visible = isAtTop,
+                enter = fadeIn(tween(200)) + slideInVertically(tween(200)) { it / 2 },
+                exit = fadeOut(tween(200)) + slideOutVertically(tween(200)) { it / 2 },
+            ) {
+                StylishFab(
+                    imageVector = Icons.Default.FileDownload,
+                    contentDescription = "データエクスポート",
+                    onClick = { showExportDialog = true },
+                )
+            }
+        },
     ) {
-        Column(
-            Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+        val vehicle = state.vehicle
+        StylishPageContent(
+            listState = listState,
+            header = {
+                StylishHeader(
+                    title = {
+                        Text(if (vehicle != null) "${vehicle.maker} ${vehicle.name}" else "車両詳細")
+                    },
+                    navigation = {
+                        StylishIconButton(
+                            Icons.AutoMirrored.Filled.ArrowBack, "戻る",
+                            onClick = { viewModel.accept(VehicleDetailIntent.NavigateBack) },
+                        )
+                    },
+                    actions = {
+                        StylishIconButton(
+                            Icons.Default.Edit, "編集",
+                            onClick = { viewModel.accept(VehicleDetailIntent.EditVehicle) },
+                        )
+                    },
+                )
+            },
         ) {
-            val vehicle = state.vehicle
-            StylishHeader(
-                modifier = Modifier.padding(horizontal = 20.dp),
-                title = {
-                    Text(if (vehicle != null) "${vehicle.maker} ${vehicle.name}" else "車両詳細")
-                },
-                navigation = {
-                    StylishIconButton(
-                        Icons.AutoMirrored.Filled.ArrowBack, "戻る",
-                        onClick = { viewModel.accept(VehicleDetailIntent.NavigateBack) },
-                    )
-                },
-                actions = {
-                    StylishIconButton(
-                        Icons.Default.Edit, "編集",
-                        onClick = { viewModel.accept(VehicleDetailIntent.EditVehicle) },
-                    )
-                },
-            )
-
             if (vehicle != null) {
-                Column(Modifier.padding(horizontal = 20.dp)) {
-                    StylishSectionTitle("記録")
-                    StylishConnectedCardRow(
-                        items = buildList {
-                            if (vehicle.category.usesFuel) {
-                                add(
-                                    StylishConnectedCardItem(
-                                        title = "給油",
-                                        supportingText = "${state.recentFuelRecords.size}件",
-                                        onClick = { viewModel.accept(VehicleDetailIntent.OpenFuelRecords) },
-                                    ) {
-                                        Icon(
-                                            Icons.Default.LocalGasStation,
-                                            null,
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    },
-                                )
-                            }
-                            add(
-                                StylishConnectedCardItem(
-                                    title = "整備",
-                                    supportingText = "${state.recentMaintenanceRecords.size}件",
-                                    onClick = { viewModel.accept(VehicleDetailIntent.OpenMaintenanceRecords) },
-                                ) {
-                                    Icon(
-                                        Icons.Default.Build,
-                                        null,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                },
-                            )
-                        },
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    StylishConnectedListItemColumn(
-                        items = listOf(
-                            StylishConnectedListItem(
-                                headline = "費用",
-                                supportingText = "今月: ${
-                                    String.format(
-                                        "%,d",
-                                        state.monthlyCost
-                                    )
-                                }円 / 合計: ${String.format("%,d", state.totalCost)}円",
-                                onClick = { viewModel.accept(VehicleDetailIntent.OpenCostList) },
-                                trailingContent = {
-                                    Icon(
-                                        Icons.AutoMirrored.Filled.ArrowForward,
-                                        null,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                },
-                            ),
-                        ),
-                    )
-
-                    // レポート
-                    StylishSectionTitle("レポート")
-                    StylishConnectedListItemColumn(
-                        items = buildList {
-                            state.averageFuelEconomy?.let {
-                                add(
-                                    StylishConnectedListItem(
-                                        "平均燃費",
-                                        "%.1f km/L".format(it),
-                                        {})
-                                )
-                            }
-                            if (state.totalDistance > 0) {
-                                add(
-                                    StylishConnectedListItem(
-                                        "総走行距離",
-                                        "${String.format("%,d", state.totalDistance)}km",
-                                        {})
-                                )
-                            }
-                            add(
-                                StylishConnectedListItem(
-                                    "総費用",
-                                    "${String.format("%,d", state.totalCost)}円",
-                                    {})
-                            )
-                            state.averageFuelEconomy?.let { avg ->
-                                if (state.totalDistance > 0 && avg > 0) {
-                                    val costPerKm = CostStatisticsCalculator.costPerKm(state.totalCost, state.totalDistance)
-                                    if (costPerKm != null) {
-                                        add(
-                                            StylishConnectedListItem(
-                                                "1kmあたりコスト",
-                                                "%.1f円/km".format(costPerKm),
-                                                {})
-                                        )
-                                    }
-                                }
-                            }
-                        },
-                    )
-
-                    val economyData = state.recentFuelRecords
-                        .filter { it.fuelEconomy != null }
-                        .take(20)
-                        .reversed()
-                        .map { r ->
-                            LineChartData(
-                                "${r.date.monthValue}/${r.date.dayOfMonth}",
-                                r.fuelEconomy!!.toFloat(),
-                            )
-                        }
-                    if (economyData.size >= 2) {
-                        Spacer(Modifier.height(12.dp))
-                        LineChartSection(
-                            title = "燃費推移 (km/L)",
-                            data = economyData,
-                        )
-                    }
-
-                    // 整備スケジュール
-                    if (state.schedules.isNotEmpty()) {
-                        StylishSectionTitle("メンテナンス目安")
-                        MaintenanceScheduleSection(
-                            schedules = state.schedules,
-                            onEdit = { scheduleId ->
-                                viewModel.accept(VehicleDetailIntent.EditSchedule(scheduleId))
-                            },
-                        )
-                    }
-
-                    // 期限管理
+                // 期限管理
+                item {
                     StylishSectionTitle("期限管理")
                     VehicleDeadlineSection(
                         vehicle = vehicle,
                         taxPaidThisYear = state.taxPaidThisYear,
-                        onEdit = { viewModel.accept(VehicleDetailIntent.EditVehicle) },
+                        onEditField = {
+                            viewModel.accept(VehicleDetailIntent.OpenFieldEditor(it))
+                        },
                         onTaxClick = { viewModel.accept(VehicleDetailIntent.OpenCostList) },
                     )
+                }
 
-                    // 車両情報
+                // 車両情報
+                item {
                     StylishSectionTitle("車両情報")
-                    VehicleInfoSection(vehicle)
-
-                    // エクスポート
-                    StylishSectionTitle("データエクスポート")
-                    StylishConnectedListItemColumn(
-                        items = listOf(
-                            StylishConnectedListItem(
-                                "給油記録をCSV出力",
-                                onClick = { viewModel.accept(VehicleDetailIntent.ExportFuelCsv) },
-                                trailingContent = {
-                                    Icon(
-                                        Icons.AutoMirrored.Filled.ArrowForward,
-                                        null,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }),
-                            StylishConnectedListItem(
-                                "整備記録をCSV出力",
-                                onClick = { viewModel.accept(VehicleDetailIntent.ExportMaintenanceCsv) },
-                                trailingContent = {
-                                    Icon(
-                                        Icons.AutoMirrored.Filled.ArrowForward,
-                                        null,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }),
-                            StylishConnectedListItem(
-                                "費用記録をCSV出力",
-                                onClick = { viewModel.accept(VehicleDetailIntent.ExportCostCsv) },
-                                trailingContent = {
-                                    Icon(
-                                        Icons.AutoMirrored.Filled.ArrowForward,
-                                        null,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }),
-                        ),
+                    VehicleInfoSection(
+                        vehicle = vehicle,
+                        onEditField = {
+                            viewModel.accept(VehicleDetailIntent.OpenFieldEditor(it))
+                        },
                     )
-
-                    Spacer(Modifier.height(32.dp))
+                    // FABの裏にコンテンツが隠れないよう余白を確保する
+                    Spacer(Modifier.height(96.dp))
                 }
             }
         }
     }
 
-    if (state.isScheduleDialogOpen) {
-        ScheduleEditDialog(state = state, onIntent = viewModel::accept)
+    state.editingField?.let { field ->
+        VehicleFieldEditDialog(
+            field = field,
+            inputText = state.fieldInputText,
+            inputDate = state.fieldInputDate,
+            inputCategory = state.fieldInputCategory,
+            onTextChanged = { viewModel.accept(VehicleDetailIntent.FieldTextChanged(it)) },
+            onDateChanged = { viewModel.accept(VehicleDetailIntent.FieldDateChanged(it)) },
+            onCategoryChanged = { viewModel.accept(VehicleDetailIntent.FieldCategoryChanged(it)) },
+            onSave = { viewModel.accept(VehicleDetailIntent.SaveField) },
+            onDismiss = { viewModel.accept(VehicleDetailIntent.CloseFieldEditor) },
+        )
+    }
+
+    if (showExportDialog) {
+        StylishDialogSurface(onDismiss = { showExportDialog = false }) {
+            Column(Modifier.padding(24.dp)) {
+                Text("データエクスポート", style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.height(16.dp))
+                StylishConnectedButtonColumn(
+                    items = listOf(
+                        StylishConnectedButtonItem(
+                            onClick = {
+                                showExportDialog = false
+                                viewModel.accept(VehicleDetailIntent.ExportFuelCsv)
+                            },
+                        ) { Text("給油記録をCSV出力") },
+                        StylishConnectedButtonItem(
+                            onClick = {
+                                showExportDialog = false
+                                viewModel.accept(VehicleDetailIntent.ExportMaintenanceCsv)
+                            },
+                        ) { Text("整備記録をCSV出力") },
+                        StylishConnectedButtonItem(
+                            onClick = {
+                                showExportDialog = false
+                                viewModel.accept(VehicleDetailIntent.ExportCostCsv)
+                            },
+                        ) { Text("費用記録をCSV出力") },
+                    ),
+                )
+            }
+        }
     }
 }
 
@@ -308,7 +218,7 @@ private fun VehicleDetailScreenPreview() {
     StylishMyVehiclesTheme {
         Surface(Modifier.padding(20.dp)) {
             Column(Modifier.fillMaxSize()) {
-                VehicleInfoSection(vehicle)
+                VehicleInfoSection(vehicle = vehicle, onEditField = {})
             }
         }
     }
