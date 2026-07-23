@@ -22,17 +22,17 @@ import com.segnities007.stylish_myvehicles.domain.model.CostCategory
 import com.segnities007.stylish_myvehicles.domain.model.CostRecord
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
-import com.segnities007.stylish_myvehicles.presentation.components.atoms.StylishFab
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.BarChartData
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.PieChartData
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedCardGrid
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedListItemColumn
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDeleteConfirmDialog
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishEmptyState
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.costCategoryColor
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedCardItem
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedListItem
-import com.segnities007.stylish_myvehicles.presentation.components.organisms.BarChartSection
+import com.segnities007.stylishui.components.atoms.StylishFab
+import com.segnities007.stylishui.components.charts.BarChartData
+import com.segnities007.stylishui.components.charts.PieChartData
+import com.segnities007.stylishui.components.molecules.StylishConnectedCardGrid
+import com.segnities007.stylishui.components.molecules.StylishConnectedListItemColumn
+import com.segnities007.stylishui.components.molecules.StylishDeleteConfirmDialog
+import com.segnities007.stylishui.components.molecules.StylishEmptyState
+import com.segnities007.stylishui.components.charts.stylishChartColor
+import com.segnities007.stylishui.components.models.StylishConnectedCardItem
+import com.segnities007.stylishui.components.models.StylishConnectedListItem
+import com.segnities007.stylishui.components.patterns.BarChartSection
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.PieChartSection
 import com.segnities007.stylish_myvehicles.presentation.screen.cost.CostListIntent
 import com.segnities007.stylish_myvehicles.presentation.screen.cost.CostListViewModel
@@ -90,6 +90,8 @@ fun CostRecordsScreen(
         StylishDeleteConfirmDialog(
             title = "費用記録を削除",
             message = "この費用記録を削除しますか？この操作は取り消せません。",
+            confirmLabel = "削除",
+            cancelLabel = "キャンセル",
             onConfirm = { dialogViewModel.accept(CostListIntent.ConfirmDelete) },
             onDismiss = { dialogViewModel.accept(CostListIntent.DismissDelete) },
         )
@@ -133,13 +135,15 @@ internal fun LazyListScope.CostPeriodContent(
         PieChartSection(
             title = "費用カテゴリ",
             data = costByCategory.map { (cat, total) ->
-                PieChartData(cat.label, total.toFloat(), costCategoryColor(cat.ordinal))
+                PieChartData(cat.label, total.toFloat(), stylishChartColor(cat.ordinal))
             },
         )
         Spacer(Modifier.height(8.dp))
         BarChartSection(
             title = "費用の推移",
             data = costTrend.map { BarChartData(it.first, it.second) },
+            contentDescriptionPrefix = "棒グラフ",
+            emptyLabel = "データがありません",
         )
         Spacer(Modifier.height(12.dp))
         StylishConnectedCardGrid(

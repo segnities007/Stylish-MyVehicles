@@ -13,11 +13,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_myvehicles.domain.model.CostCategory
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedChipRow
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDatePickerField
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDialogActions
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDialogSurface
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedChipItem
+import com.segnities007.stylishui.components.molecules.StylishConnectedChipRow
+import com.segnities007.stylishui.components.molecules.StylishDatePickerField
+import com.segnities007.stylishui.components.molecules.StylishDialogActions
+import com.segnities007.stylishui.components.molecules.StylishDialogSurface
+import com.segnities007.stylishui.components.models.StylishConnectedChipItem
 import com.segnities007.stylish_myvehicles.presentation.screen.cost.CostListIntent
 import com.segnities007.stylish_myvehicles.presentation.screen.cost.CostListUiState
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
@@ -51,6 +51,9 @@ fun CostInputDialog(
                 value = state.inputDate,
                 onValueChange = { it?.let { d -> onIntent(CostListIntent.InputDateChanged(d)) } },
                 label = "日付",
+                confirmLabel = "OK",
+                dismissLabel = "キャンセル",
+                placeholder = "日付を選択",
             )
             Spacer(Modifier.height(12.dp))
             OutlinedTextField(

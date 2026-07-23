@@ -31,16 +31,16 @@ import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.DeleteVehicleU
 import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.GetVehicleUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.InsertVehicleUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.UpdateVehicleUseCase
-import com.segnities007.stylish_myvehicles.presentation.components.atoms.StylishIconButton
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedChipRow
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDatePickerField
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDialogActions
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDialogSurface
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishFormTextField
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedChipItem
-import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishHeader
-import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishScaffold
-import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishSectionTitle
+import com.segnities007.stylishui.components.atoms.StylishIconButton
+import com.segnities007.stylishui.components.molecules.StylishConnectedChipRow
+import com.segnities007.stylishui.components.molecules.StylishDatePickerField
+import com.segnities007.stylishui.components.molecules.StylishDialogActions
+import com.segnities007.stylishui.components.molecules.StylishDialogSurface
+import com.segnities007.stylishui.components.molecules.StylishFormTextField
+import com.segnities007.stylishui.components.models.StylishConnectedChipItem
+import com.segnities007.stylishui.components.patterns.StylishHeader
+import com.segnities007.stylishui.components.patterns.StylishScaffold
+import com.segnities007.stylishui.components.patterns.StylishSectionTitle
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 import kotlinx.coroutines.flow.flowOf
 import java.time.LocalDate
@@ -206,6 +206,9 @@ fun VehicleEditScreen(
                         )
                     },
                     label = "初度登録日（車検計算に使用）",
+                    confirmLabel = "OK",
+                    dismissLabel = "キャンセル",
+                    placeholder = "日付を選択",
                 )
                 Spacer(Modifier.height(12.dp))
                 StylishDatePickerField(
@@ -214,18 +217,27 @@ fun VehicleEditScreen(
                         viewModel.accept(VehicleEditIntent.InspectionExpiryChanged(it))
                     },
                     label = "車検満了日",
+                    confirmLabel = "OK",
+                    dismissLabel = "キャンセル",
+                    placeholder = "日付を選択",
                 )
                 Spacer(Modifier.height(12.dp))
                 StylishDatePickerField(
                     value = state.jibaiExpiry,
                     onValueChange = { viewModel.accept(VehicleEditIntent.JibaiExpiryChanged(it)) },
                     label = "自賠責保険 満期日",
+                    confirmLabel = "OK",
+                    dismissLabel = "キャンセル",
+                    placeholder = "日付を選択",
                 )
                 Spacer(Modifier.height(12.dp))
                 StylishDatePickerField(
                     value = state.insuranceExpiry,
                     onValueChange = { viewModel.accept(VehicleEditIntent.InsuranceExpiryChanged(it)) },
                     label = "任意保険 満期日",
+                    confirmLabel = "OK",
+                    dismissLabel = "キャンセル",
+                    placeholder = "日付を選択",
                 )
                 Spacer(Modifier.height(12.dp))
                 StylishFormTextField(

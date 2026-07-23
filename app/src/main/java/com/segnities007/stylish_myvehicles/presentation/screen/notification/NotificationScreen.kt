@@ -29,13 +29,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_myvehicles.domain.service.DeadlineInfo
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedListItemColumn
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishEmptyState
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedListItem
+import com.segnities007.stylishui.components.molecules.StylishConnectedListItemColumn
+import com.segnities007.stylishui.components.molecules.StylishEmptyState
+import com.segnities007.stylishui.components.models.StylishConnectedListItem
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishBottomBar
-import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishHeader
-import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishScaffold
-import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishSectionTitle
+import com.segnities007.stylishui.components.patterns.StylishHeader
+import com.segnities007.stylishui.components.patterns.StylishScaffold
+import com.segnities007.stylishui.components.patterns.StylishSectionTitle
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 import java.time.LocalDate
 
@@ -187,7 +187,6 @@ private fun DeadlineList(items: List<VehicleDeadlineItem>) {
             StylishConnectedListItem(
                 headline = "${item.vehicleName} / ${item.deadline.label}",
                 supportingText = "${item.deadline.date} （$daysText）",
-                onClick = {},
                 trailingContent = {
                     Text(
                         daysText,

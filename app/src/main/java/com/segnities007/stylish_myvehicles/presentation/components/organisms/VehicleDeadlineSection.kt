@@ -15,8 +15,8 @@ import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
 import com.segnities007.stylish_myvehicles.domain.service.InspectionCalculator
 import com.segnities007.stylish_myvehicles.domain.service.VehicleTaxCalculator
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedListItemColumn
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedListItem
+import com.segnities007.stylishui.components.molecules.StylishConnectedListItemColumn
+import com.segnities007.stylishui.components.models.StylishConnectedListItem
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 import java.time.LocalDate
 

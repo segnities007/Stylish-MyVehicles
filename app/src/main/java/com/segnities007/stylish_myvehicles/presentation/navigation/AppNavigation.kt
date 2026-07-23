@@ -36,7 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.segnities007.stylish_myvehicles.domain.usecase.ExportDocument
-import com.segnities007.stylish_myvehicles.presentation.components.atoms.StylishFab
+import com.segnities007.stylishui.components.atoms.StylishFab
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.LocalBottomBarVisible
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishBottomBar
 import com.segnities007.stylish_myvehicles.presentation.screen.cost.CostListViewModel

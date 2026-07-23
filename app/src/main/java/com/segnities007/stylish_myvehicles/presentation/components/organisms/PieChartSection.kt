@@ -18,8 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.PieChartData
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.SimplePieChart
+import com.segnities007.stylishui.components.charts.PieChartData
+import com.segnities007.stylishui.components.charts.SimplePieChart
+import com.segnities007.stylishui.components.patterns.StylishSectionTitle
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 
 @Composable
@@ -36,7 +37,10 @@ fun PieChartSection(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
-            SimplePieChart(data = data)
+            SimplePieChart(
+                data = data,
+                contentDescriptionPrefix = "円グラフ",
+            )
             if (data.isNotEmpty()) {
                 Legend(data = data, spacing = legendSpacing)
             }

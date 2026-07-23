@@ -17,8 +17,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.segnities007.stylish_myvehicles.presentation.components.atoms.StylishRoundedIconButton
+import com.segnities007.stylishui.components.atoms.StylishRoundedIconButton
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
+import com.segnities007.stylishui.tokens.StylishDimensions
 
 @Composable
 fun StylishBottomBar(
@@ -32,14 +33,14 @@ fun StylishBottomBar(
         modifier = modifier
             .padding(horizontal = 20.dp)
             .border(
-                width = 1.dp,
+                width = StylishDimensions.outlineWidth,
                 color = MaterialTheme.colorScheme.outlineVariant,
                 shape = RoundedCornerShape(28.dp),
             ),
         shape = RoundedCornerShape(28.dp),
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         tonalElevation = 4.dp,
-        shadowElevation = 4.dp,
+        shadowElevation = StylishDimensions.floatingElevation,
     ) {
         Row(
             modifier = Modifier.padding(8.dp),

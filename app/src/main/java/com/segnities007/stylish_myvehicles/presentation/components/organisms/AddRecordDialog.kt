@@ -15,9 +15,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedCardGrid
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDialogSurface
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedCardItem
+import com.segnities007.stylishui.components.molecules.StylishConnectedCardGrid
+import com.segnities007.stylishui.components.molecules.StylishDialogSurface
+import com.segnities007.stylishui.components.models.StylishConnectedCardItem
 
 /**
  * 「記録を追加」選択Dialog。給油/整備/費用のいずれかを選んで記録画面へ遷移する。

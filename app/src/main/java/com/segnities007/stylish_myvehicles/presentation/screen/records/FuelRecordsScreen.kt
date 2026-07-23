@@ -35,18 +35,18 @@ import com.segnities007.stylish_myvehicles.data.ocr.ReceiptScanner
 import com.segnities007.stylish_myvehicles.domain.model.FuelRecord
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
-import com.segnities007.stylish_myvehicles.presentation.components.atoms.StylishFab
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.BarChartData
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.LineChartData
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedCardGrid
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedListItemColumn
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDeleteConfirmDialog
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDialogSurface
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishEmptyState
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedCardItem
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedListItem
-import com.segnities007.stylish_myvehicles.presentation.components.organisms.BarChartSection
-import com.segnities007.stylish_myvehicles.presentation.components.organisms.LineChartSection
+import com.segnities007.stylishui.components.atoms.StylishFab
+import com.segnities007.stylishui.components.charts.BarChartData
+import com.segnities007.stylishui.components.charts.LineChartData
+import com.segnities007.stylishui.components.molecules.StylishConnectedCardGrid
+import com.segnities007.stylishui.components.molecules.StylishConnectedListItemColumn
+import com.segnities007.stylishui.components.molecules.StylishDeleteConfirmDialog
+import com.segnities007.stylishui.components.molecules.StylishDialogSurface
+import com.segnities007.stylishui.components.molecules.StylishEmptyState
+import com.segnities007.stylishui.components.models.StylishConnectedCardItem
+import com.segnities007.stylishui.components.models.StylishConnectedListItem
+import com.segnities007.stylishui.components.patterns.BarChartSection
+import com.segnities007.stylishui.components.patterns.LineChartSection
 import com.segnities007.stylish_myvehicles.presentation.screen.fuel.FuelRecordIntent
 import com.segnities007.stylish_myvehicles.presentation.screen.fuel.FuelRecordViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.fuel.components.FuelInputDialog
@@ -193,6 +193,8 @@ fun FuelRecordsScreen(
         StylishDeleteConfirmDialog(
             title = "給油記録を削除",
             message = "この給油記録を削除しますか？この操作は取り消せません。",
+            confirmLabel = "削除",
+            cancelLabel = "キャンセル",
             onConfirm = { dialogViewModel.accept(FuelRecordIntent.ConfirmDelete) },
             onDismiss = { dialogViewModel.accept(FuelRecordIntent.DismissDelete) },
         )
@@ -248,11 +250,15 @@ internal fun LazyListScope.FuelPeriodContent(
         LineChartSection(
             title = "燃費推移 (km/L)",
             data = fuelEconomyTrend.map { LineChartData(it.first, it.second) },
+            contentDescriptionPrefix = "折れ線グラフ",
+            emptyLabel = "データがありません",
         )
         Spacer(Modifier.height(8.dp))
         BarChartSection(
             title = "給油費用の推移",
             data = fuelCostTrend.map { BarChartData(it.first, it.second) },
+            contentDescriptionPrefix = "棒グラフ",
+            emptyLabel = "データがありません",
         )
         Spacer(Modifier.height(12.dp))
         StylishConnectedCardGrid(

@@ -16,8 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedCardGrid
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedCardItem
+import com.segnities007.stylishui.components.molecules.StylishConnectedCardGrid
+import com.segnities007.stylishui.components.models.StylishConnectedCardItem
 import com.segnities007.stylish_myvehicles.presentation.screen.vehiclepager.VehicleDashboard
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 
@@ -36,7 +36,6 @@ fun DashboardStatsGrid(
                 StylishConnectedCardItem(
                     title = "${String.format("%,d", dashboard.monthlyCost)}円",
                     supportingText = "今月の費用",
-                    onClick = {},
                     trailingContent = {
                         Icon(
                             Icons.Default.AccountBalanceWallet,
@@ -51,7 +50,6 @@ fun DashboardStatsGrid(
                 StylishConnectedCardItem(
                     title = "${String.format("%,d", dashboard.yearlyCost)}円",
                     supportingText = "年間費用",
-                    onClick = {},
                     trailingContent = {
                         Icon(
                             Icons.Default.CalendarMonth,
@@ -66,7 +64,6 @@ fun DashboardStatsGrid(
                 StylishConnectedCardItem(
                     title = "${String.format("%,d", dashboard.totalCost)}円",
                     supportingText = "総費用",
-                    onClick = {},
                     trailingContent = {
                         Icon(
                             Icons.Default.Payments,
@@ -88,7 +85,6 @@ fun DashboardStatsGrid(
                         }円"
                     } ?: "--",
                     supportingText = "月平均",
-                    onClick = {},
                     trailingContent = {
                         Icon(
                             Icons.AutoMirrored.Filled.TrendingUp,
@@ -105,7 +101,6 @@ fun DashboardStatsGrid(
                         title = dashboard.averageFuelEconomy?.let { "%.1f km/L".format(it) }
                             ?: "--",
                         supportingText = "平均燃費",
-                        onClick = {},
                         trailingContent = {
                             Icon(
                                 Icons.Default.LocalGasStation,
@@ -122,7 +117,6 @@ fun DashboardStatsGrid(
                     StylishConnectedCardItem(
                         title = "${String.format("%,d", dashboard.totalDistance)}km",
                         supportingText = "総走行距離",
-                        onClick = {},
                         trailingContent = {
                             Icon(
                                 Icons.Default.Speed,
@@ -139,7 +133,6 @@ fun DashboardStatsGrid(
                     StylishConnectedCardItem(
                         title = "%.1f円/km".format(cpk),
                         supportingText = "1kmあたりコスト",
-                        onClick = {},
                         trailingContent = {
                             Icon(
                                 Icons.AutoMirrored.Filled.TrendingUp,

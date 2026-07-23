@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -50,18 +50,21 @@ import androidx.core.content.ContextCompat
 import com.segnities007.stylish_myvehicles.data.trip.TripTrackingService
 import com.segnities007.stylish_myvehicles.domain.model.TripPurpose
 import com.segnities007.stylish_myvehicles.domain.model.TripRecord
-import com.segnities007.stylish_myvehicles.presentation.components.atoms.StylishIconButton
-import com.segnities007.stylish_myvehicles.presentation.components.atoms.StylishFab
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedCard
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDialogActions
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDialogSurface
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishEmptyState
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishFormTextField
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDatePickerField
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedChipRow
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedChipItem
-import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishHeader
-import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishScaffold
+import com.segnities007.stylishui.components.atoms.StylishIconButton
+import com.segnities007.stylishui.components.atoms.StylishFab
+import com.segnities007.stylishui.foundation.connectedColumnCorners
+import com.segnities007.stylishui.foundation.connectedColumnEdges
+import com.segnities007.stylishui.foundation.connectedShape
+import com.segnities007.stylishui.components.molecules.StylishConnectedCard
+import com.segnities007.stylishui.components.molecules.StylishDialogActions
+import com.segnities007.stylishui.components.molecules.StylishDialogSurface
+import com.segnities007.stylishui.components.molecules.StylishEmptyState
+import com.segnities007.stylishui.components.molecules.StylishFormTextField
+import com.segnities007.stylishui.components.molecules.StylishDatePickerField
+import com.segnities007.stylishui.components.molecules.StylishConnectedChipRow
+import com.segnities007.stylishui.components.models.StylishConnectedChipItem
+import com.segnities007.stylishui.components.patterns.StylishHeader
+import com.segnities007.stylishui.components.patterns.StylishScaffold
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 import java.time.Duration
 import java.time.format.DateTimeFormatter
@@ -146,7 +149,7 @@ fun TripRecordsScreen(
                     end = 20.dp,
                     bottom = 120.dp,
                 ),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 item {
                     TripTrackingCard(
@@ -163,6 +166,7 @@ fun TripRecordsScreen(
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary,
                     )
+                    Spacer(Modifier.height(8.dp))
                 }
 
                 if (state.records.none { !it.isRecording }) {
@@ -174,12 +178,15 @@ fun TripRecordsScreen(
                         )
                     }
                 } else {
-                    items(
-                        items = state.records.filterNot { it.isRecording },
-                        key = { it.id },
-                    ) { record ->
+                    val completedRecords = state.records.filterNot { it.isRecording }
+                    itemsIndexed(
+                        items = completedRecords,
+                        key = { _, record -> record.id },
+                    ) { index, record ->
                         TripHistoryCard(
                             record = record,
+                            index = index,
+                            count = completedRecords.size,
                             onEdit = { viewModel.accept(TripRecordIntent.Edit(record.id)) },
                         )
                     }
@@ -292,7 +299,12 @@ private fun TripTrackingCard(
 }
 
 @Composable
-private fun TripHistoryCard(record: TripRecord, onEdit: () -> Unit) {
+private fun TripHistoryCard(
+    record: TripRecord,
+    index: Int,
+    count: Int,
+    onEdit: () -> Unit,
+) {
     val duration = record.endedAt?.let { Duration.between(record.startedAt, it) }
     val title = record.title.ifBlank { record.purpose.label }
     val details = buildList {
@@ -300,11 +312,15 @@ private fun TripHistoryCard(record: TripRecord, onEdit: () -> Unit) {
         duration?.let { add("${it.toMinutes() / 60}時間${it.toMinutes() % 60}分") }
         add(record.startedAt.format(DateTimeFormatter.ofPattern("M月d日 H:mm")))
     }.joinToString(" ・ ")
+    val corners = connectedColumnCorners(index, count)
     StylishConnectedCard(
         title = title,
         supportingText = details,
         onClick = onEdit,
         onLongClick = onEdit,
+        shape = connectedShape(corners),
+        outlineEdges = connectedColumnEdges(index, count),
+        outlineCorners = corners,
         trailingContent = {
             Icon(
                 Icons.Default.Edit,
@@ -358,6 +374,9 @@ private fun TripEditDialog(
                     date?.let { onIntent(TripRecordIntent.DateChanged(it)) }
                 },
                 label = "日付",
+                confirmLabel = "OK",
+                dismissLabel = "キャンセル",
+                placeholder = "日付を選択",
             )
             Spacer(Modifier.height(12.dp))
             Text(

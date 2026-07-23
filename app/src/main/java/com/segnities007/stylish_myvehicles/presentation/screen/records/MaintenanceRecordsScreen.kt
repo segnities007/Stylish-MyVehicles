@@ -22,15 +22,15 @@ import com.segnities007.stylish_myvehicles.domain.model.MaintenanceCategory
 import com.segnities007.stylish_myvehicles.domain.model.MaintenanceRecord
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
-import com.segnities007.stylish_myvehicles.presentation.components.atoms.StylishFab
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.BarChartData
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedCardGrid
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedListItemColumn
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDeleteConfirmDialog
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishEmptyState
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedCardItem
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedListItem
-import com.segnities007.stylish_myvehicles.presentation.components.organisms.BarChartSection
+import com.segnities007.stylishui.components.atoms.StylishFab
+import com.segnities007.stylishui.components.charts.BarChartData
+import com.segnities007.stylishui.components.molecules.StylishConnectedCardGrid
+import com.segnities007.stylishui.components.molecules.StylishConnectedListItemColumn
+import com.segnities007.stylishui.components.molecules.StylishDeleteConfirmDialog
+import com.segnities007.stylishui.components.molecules.StylishEmptyState
+import com.segnities007.stylishui.components.models.StylishConnectedCardItem
+import com.segnities007.stylishui.components.models.StylishConnectedListItem
+import com.segnities007.stylishui.components.patterns.BarChartSection
 import com.segnities007.stylish_myvehicles.presentation.screen.maintenance.MaintenanceRecordIntent
 import com.segnities007.stylish_myvehicles.presentation.screen.maintenance.MaintenanceRecordViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.maintenance.components.MaintenanceInputDialog
@@ -87,6 +87,8 @@ fun MaintenanceRecordsScreen(
         StylishDeleteConfirmDialog(
             title = "整備記録を削除",
             message = "この整備記録を削除しますか？この操作は取り消せません。",
+            confirmLabel = "削除",
+            cancelLabel = "キャンセル",
             onConfirm = { dialogViewModel.accept(MaintenanceRecordIntent.ConfirmDelete) },
             onDismiss = { dialogViewModel.accept(MaintenanceRecordIntent.DismissDelete) },
         )
@@ -128,6 +130,8 @@ internal fun LazyListScope.MaintenancePeriodContent(
         BarChartSection(
             title = "整備費用の推移",
             data = maintenanceCostTrend.map { BarChartData(it.first, it.second) },
+            contentDescriptionPrefix = "棒グラフ",
+            emptyLabel = "データがありません",
         )
         Spacer(Modifier.height(12.dp))
         StylishConnectedCardGrid(

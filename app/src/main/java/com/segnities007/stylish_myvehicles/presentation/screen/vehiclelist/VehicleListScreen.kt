@@ -31,11 +31,11 @@ import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
 import com.segnities007.stylish_myvehicles.domain.service.InspectionCalculator
-import com.segnities007.stylish_myvehicles.presentation.components.atoms.StylishIconButton
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedListItemColumn
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedListItem
-import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishHeader
-import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishScaffold
+import com.segnities007.stylishui.components.atoms.StylishIconButton
+import com.segnities007.stylishui.components.molecules.StylishConnectedListItemColumn
+import com.segnities007.stylishui.components.models.StylishConnectedListItem
+import com.segnities007.stylishui.components.patterns.StylishHeader
+import com.segnities007.stylishui.components.patterns.StylishScaffold
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 
 @Composable

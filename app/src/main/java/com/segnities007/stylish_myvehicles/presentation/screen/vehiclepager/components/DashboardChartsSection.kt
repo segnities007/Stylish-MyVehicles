@@ -10,12 +10,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_myvehicles.domain.model.CostCategory
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.BarChartData
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.LineChartData
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.PieChartData
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.costCategoryColor
-import com.segnities007.stylish_myvehicles.presentation.components.organisms.BarChartSection
-import com.segnities007.stylish_myvehicles.presentation.components.organisms.LineChartSection
+import com.segnities007.stylishui.components.charts.BarChartData
+import com.segnities007.stylishui.components.charts.LineChartData
+import com.segnities007.stylishui.components.charts.PieChartData
+import com.segnities007.stylishui.components.charts.stylishChartColor
+import com.segnities007.stylishui.components.patterns.BarChartSection
+import com.segnities007.stylishui.components.patterns.LineChartSection
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.PieChartSection
 import com.segnities007.stylish_myvehicles.presentation.screen.vehiclepager.VehicleDashboard
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
@@ -30,13 +30,15 @@ fun DashboardChartsSection(
         LineChartSection(
             title = "燃費推移 (km/L)",
             data = dashboard.fuelEconomyTrend.map { LineChartData(it.first, it.second) },
+            contentDescriptionPrefix = "折れ線グラフ",
+            emptyLabel = "データがありません",
         )
         Spacer(Modifier.height(20.dp))
 
         PieChartSection(
             title = "費用カテゴリ",
             data = dashboard.costByCategory.map { (category, total) ->
-                PieChartData(category.label, total.toFloat(), costCategoryColor(category.ordinal))
+                PieChartData(category.label, total.toFloat(), stylishChartColor(category.ordinal))
             },
         )
         Spacer(Modifier.height(20.dp))
@@ -44,6 +46,8 @@ fun DashboardChartsSection(
         BarChartSection(
             title = "月次費用",
             data = dashboard.monthlyCostTrend.map { BarChartData(it.first, it.second) },
+            contentDescriptionPrefix = "棒グラフ",
+            emptyLabel = "データがありません",
         )
     }
 }

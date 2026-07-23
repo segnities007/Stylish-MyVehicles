@@ -15,11 +15,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedChipRow
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDatePickerField
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDialogActions
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDialogSurface
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedChipItem
+import com.segnities007.stylishui.components.molecules.StylishConnectedChipRow
+import com.segnities007.stylishui.components.molecules.StylishDatePickerField
+import com.segnities007.stylishui.components.molecules.StylishDialogActions
+import com.segnities007.stylishui.components.molecules.StylishDialogSurface
+import com.segnities007.stylishui.components.models.StylishConnectedChipItem
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.VehicleField
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.VehicleFieldInputType
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
@@ -71,6 +71,9 @@ fun VehicleFieldEditDialog(
                     value = inputDate,
                     onValueChange = onDateChanged,
                     label = field.label,
+                    confirmLabel = "OK",
+                    dismissLabel = "キャンセル",
+                    placeholder = "日付を選択",
                 )
 
                 VehicleFieldInputType.SELECTION -> StylishConnectedChipRow(

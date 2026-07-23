@@ -48,25 +48,25 @@ import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_myvehicles.domain.model.CostCategory
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
-import com.segnities007.stylish_myvehicles.presentation.components.atoms.StylishIconButton
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.BarChartData
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.BarChartSegment
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.LineChartData
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.PieChartData
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishConnectedCardGrid
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.StylishDialogSurface
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.costCategoryColor
-import com.segnities007.stylish_myvehicles.presentation.components.molecules.models.StylishConnectedCardItem
-import com.segnities007.stylish_myvehicles.presentation.components.organisms.BarChartSection
+import com.segnities007.stylishui.components.atoms.StylishIconButton
+import com.segnities007.stylishui.components.charts.BarChartData
+import com.segnities007.stylishui.components.charts.BarChartSegment
+import com.segnities007.stylishui.components.charts.LineChartData
+import com.segnities007.stylishui.components.charts.PieChartData
+import com.segnities007.stylishui.components.molecules.StylishConnectedCardGrid
+import com.segnities007.stylishui.components.molecules.StylishDialogSurface
+import com.segnities007.stylishui.components.charts.stylishChartColor
+import com.segnities007.stylishui.components.models.StylishConnectedCardItem
+import com.segnities007.stylishui.components.patterns.BarChartSection
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.AddRecordDialog
-import com.segnities007.stylish_myvehicles.presentation.components.organisms.LineChartSection
+import com.segnities007.stylishui.components.patterns.LineChartSection
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.PieChartSection
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.LocalBottomBarVisible
-import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishHeader
+import com.segnities007.stylishui.components.patterns.StylishHeader
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishBottomBar
-import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishPageContent
-import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishScaffold
-import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishSectionTitle
+import com.segnities007.stylishui.components.patterns.StylishPageContent
+import com.segnities007.stylishui.components.patterns.StylishScaffold
+import com.segnities007.stylishui.components.patterns.StylishSectionTitle
 import com.segnities007.stylish_myvehicles.presentation.screen.vehiclepager.components.PagerIndicator
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 
@@ -313,6 +313,8 @@ private fun VehiclePage(
                         data = dashboard.fuelEconomyTrend.map {
                             LineChartData(it.first, it.second)
                         },
+                        contentDescriptionPrefix = "折れ線グラフ",
+                        emptyLabel = "データがありません",
                     )
                     Spacer(Modifier.height(16.dp))
                 }
@@ -322,13 +324,15 @@ private fun VehiclePage(
                         PieChartData(
                             category.label,
                             total.toFloat(),
-                            costCategoryColor(category.ordinal)
+                            stylishChartColor(category.ordinal)
                         )
                     },
                 )
                 Spacer(Modifier.height(16.dp))
                 BarChartSection(
                     title = "月次費用",
+                    contentDescriptionPrefix = "棒グラフ",
+                    emptyLabel = "データがありません",
                     data = dashboard.monthlyCostByCategory.map { slice ->
                         BarChartData(
                             label = slice.label,
@@ -336,7 +340,7 @@ private fun VehiclePage(
                             segments = slice.byCategory.map { (category, amount) ->
                                 BarChartSegment(
                                     amount.toFloat(),
-                                    costCategoryColor(category.ordinal),
+                                    stylishChartColor(category.ordinal),
                                 )
                             },
                         )
