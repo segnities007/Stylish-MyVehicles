@@ -1,0 +1,20 @@
+<lint-module
+    format="1"
+    dir="/home/segnities007/Projects/StylishMyVehicles/stylish-ui"
+    name=":stylish-ui"
+    type="LIBRARY"
+    maven="Stylish-MyVehicles:stylish-ui:unspecified"
+    agpVersion="9.2.1"
+    buildFolder="build"
+    bootClassPath="/home/segnities007/Android/Sdk/platforms/android-37.0/android.jar:/home/segnities007/Android/Sdk/build-tools/36.0.0/core-lambda-stubs.jar"
+    javaSourceLevel="11"
+    compileTarget="android-37.0"
+    neverShrinking="true"
+    highlightGradualR8Api="false">
+  <lintOptions
+      abortOnError="true"
+      absolutePaths="true"
+      checkReleaseBuilds="true"
+      explainIssues="true"/>
+  <variant name="debug"/>
+</lint-module>

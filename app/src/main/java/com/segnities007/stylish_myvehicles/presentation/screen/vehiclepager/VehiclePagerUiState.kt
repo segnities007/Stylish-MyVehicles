@@ -1,0 +1,47 @@
+package com.segnities007.stylish_myvehicles.presentation.screen.vehiclepager
+
+import androidx.compose.runtime.Immutable
+import com.segnities007.stylish_myvehicles.domain.model.CostCategory
+import com.segnities007.stylish_myvehicles.domain.model.Vehicle
+
+@Immutable
+data class VehiclePagerUiState(
+    val vehicles: List<Vehicle> = emptyList(),
+    val isLoading: Boolean = true,
+    val currentPage: Int = 0,
+    val dashboardByVehicle: Map<Long, VehicleDashboard> = emptyMap(),
+) {
+    val currentVehicle: Vehicle?
+        get() = vehicles.getOrNull(currentPage)
+
+    fun dashboardFor(vehicleId: Long): VehicleDashboard =
+        dashboardByVehicle[vehicleId] ?: VehicleDashboard()
+}
+
+@Immutable
+data class VehicleDashboard(
+    val monthlyCost: Int = 0,
+    val yearlyCost: Int = 0,
+    val totalCost: Int = 0,
+    val averageMonthlyCost: Double? = null,
+    val averageFuelEconomy: Double? = null,
+    val totalDistance: Int = 0,
+    val costPerKm: Double? = null,
+    val nextMaintenanceLabel: String? = null,
+    val nextMaintenanceDays: Long? = null,
+    // グラフ用（label と値のペア。色はComposable側でテーマから解決する）
+    val costByCategory: List<Pair<CostCategory, Int>> = emptyList(),
+    val monthlyCostTrend: List<Pair<String, Float>> = emptyList(),
+    val fuelEconomyTrend: List<Pair<String, Float>> = emptyList(),
+    /** 月次費用のカテゴリ別内訳（積み上げ棒グラフ用）。 */
+    val monthlyCostByCategory: List<MonthlyCostSlice> = emptyList(),
+)
+
+/** 月次費用グラフの1ヶ月分。label とカテゴリ別金額。 */
+@Immutable
+data class MonthlyCostSlice(
+    val label: String,
+    val byCategory: List<Pair<CostCategory, Int>>,
+) {
+    val total: Int get() = byCategory.sumOf { it.second }
+}

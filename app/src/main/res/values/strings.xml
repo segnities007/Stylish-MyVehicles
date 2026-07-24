@@ -1,6 +1,305 @@
 <resources>
-    <string name="app_name">Stylish-MyCars</string>
+    <string name="app_name">Stylish-MyVehicles</string>
     <string name="export_saved">エクスポートしました</string>
     <string name="export_failed">エクスポートに失敗しました</string>
     <string name="widget_description">最も緊急な車検・保険の期限を表示します</string>
+
+    <!-- Common -->
+    <string name="back">戻る</string>
+    <string name="cancel">キャンセル</string>
+    <string name="delete">削除</string>
+    <string name="save">保存</string>
+    <string name="update">更新</string>
+    <string name="register">登録</string>
+    <string name="edit">編集</string>
+    <string name="close">閉じる</string>
+    <string name="settings">設定</string>
+    <string name="select_date">日付を選択</string>
+    <string name="date_label">日付</string>
+    <string name="no_data">データがありません</string>
+    <string name="no_records">記録なし</string>
+    <string name="not_registered">未登録</string>
+
+    <!-- Vehicle List Screen -->
+    <string name="my_cars">マイカー</string>
+    <string name="add_vehicle">車両を追加</string>
+    <string name="search_by_maker_model_plate">メーカー・車種・ナンバーで検索</string>
+    <string name="no_vehicles_registered">まだ車両が登録されていません</string>
+    <string name="register_first_car_prompt">下の＋ボタンから最初の車を登録しましょう</string>
+    <string name="register_vehicle">車両を登録する</string>
+    <string name="no_matching_vehicles">該当する車両が見つかりません</string>
+    <string name="inspection_expired">⚠️ 車検切れ</string>
+    <string name="inspection_days_remaining">⚠️ 車検: あと%1$d日</string>
+    <string name="inspection_months_remaining">車検: あと%1$dヶ月</string>
+    <string name="inspection_expiry_date">車検: %1$s</string>
+    <string name="register_details">詳細を登録</string>
+
+    <!-- Vehicle Edit Screen -->
+    <string name="edit_vehicle">車両を編集</string>
+    <string name="register_vehicle_title">車両を登録</string>
+    <string name="vehicle_type">種別</string>
+    <string name="basic_info">基本情報</string>
+    <string name="maker_label">メーカー *</string>
+    <string name="model_name_label">車種名 *</string>
+    <string name="grade_label">グレード</string>
+    <string name="year_label">年式</string>
+    <string name="model_code_label">型式</string>
+    <string name="plate_number_label">ナンバープレート</string>
+    <string name="displacement_label">排気量 (cc)</string>
+    <string name="vehicle_weight_label">車両重量 (kg)</string>
+    <string name="max_load_label">最大積載量 (kg)</string>
+    <string name="color_label">カラー</string>
+    <string name="deadline_insurance_section">期限・保険</string>
+    <string name="first_registration_date_label">初度登録日（車検計算に使用）</string>
+    <string name="inspection_expiry_label">車検満了日</string>
+    <string name="jibai_insurance_expiry_label">自賠責保険 満期日</string>
+    <string name="voluntary_insurance_expiry_label">任意保険 満期日</string>
+    <string name="insurance_company_label">保険会社</string>
+    <string name="insurance_rank_label">等級</string>
+    <string name="delete_vehicle">車両を削除</string>
+    <string name="delete_vehicle_message">この車両と関連するすべての記録（給油・整備・費用）が削除されます。この操作は取り消せません。</string>
+
+    <!-- Vehicle Detail Screen -->
+    <string name="vehicle_detail">車両詳細</string>
+    <string name="data_export">データエクスポート</string>
+    <string name="deadline_management">期限管理</string>
+    <string name="vehicle_info">車両情報</string>
+    <string name="export_fuel_csv">給油記録をCSV出力</string>
+    <string name="export_maintenance_csv">整備記録をCSV出力</string>
+    <string name="export_cost_csv">費用記録をCSV出力</string>
+
+    <!-- Vehicle Pager Screen / Dashboard -->
+    <string name="fuel_economy_trend">燃費推移 (km/L)</string>
+    <string name="line_chart">折れ線グラフ</string>
+    <string name="cost_category">費用カテゴリ</string>
+    <string name="monthly_cost">月次費用</string>
+    <string name="bar_chart">棒グラフ</string>
+    <string name="records_section">記録</string>
+    <string name="fuel_label">給油</string>
+    <string name="fuel_economy_avg">平均 %1$.1f km/L</string>
+    <string name="fuel_record_economy">記録・燃費</string>
+    <string name="maintenance_label">整備</string>
+    <string name="maintenance_record_guide">記録・目安</string>
+    <string name="cost_label">費用</string>
+    <string name="this_month_cost">今月 %1$s円</string>
+    <string name="cost_list_graph">一覧・グラフ</string>
+    <string name="trip_label">移動</string>
+    <string name="trip_route_distance_time">ルート・距離・時間</string>
+    <string name="vehicle_info_label">車両情報</string>
+    <string name="vehicle_info_specs_insurance">諸元・保険</string>
+    <string name="add_vehicle_prompt">車両を追加しましょう</string>
+    <string name="add_vehicle_description">車検・保険・税金の期限管理、給油記録、整備履歴を一元管理できます</string>
+    <string name="add_record">記録を追加</string>
+    <string name="pie_chart">円グラフ</string>
+
+    <!-- Dashboard Stats Grid -->
+    <string name="this_month_cost_label">今月の費用</string>
+    <string name="yearly_cost_label">年間費用</string>
+    <string name="total_cost_label">総費用</string>
+    <string name="monthly_average_label">月平均</string>
+    <string name="average_fuel_economy_label">平均燃費</string>
+    <string name="total_distance_label">総走行距離</string>
+    <string name="cost_per_km_label">1kmあたりコスト</string>
+    <string name="cost_per_km_format">%1$.1f円/km</string>
+
+    <!-- Urgent Alert Card -->
+    <string name="deadline_expired_alert">⚠️ %1$s が期限切れです</string>
+    <string name="deadline_days_alert">%1$s まであと%2$d日</string>
+    <string name="next_action_needed">次の対応が必要な項目です</string>
+
+    <!-- Vehicle Deadline Section -->
+    <string name="inspection_label">車検</string>
+    <string name="jibai_label">自賠責</string>
+    <string name="voluntary_insurance_label">任意保険</string>
+    <string name="deadline_expired_status">⚠️ 期限切れ</string>
+    <string name="deadline_days_status">⚠️ あと%1$d日</string>
+    <string name="deadline_months_status">あと%1$dヶ月</string>
+    <string name="deadline_years_months_status">あと%1$d年%2$dヶ月</string>
+    <string name="tax_paid"> ✓ 納付済み</string>
+    <string name="tax_unpaid"> 未納付</string>
+    <string name="vehicle_tax">自動車税</string>
+    <string name="kei_vehicle_tax">軽自動車税</string>
+    <string name="tax_per_year">%1$s円/年%2$s</string>
+
+    <!-- Vehicle Info Section -->
+    <string name="year_format">%1$s年</string>
+    <string name="insurance_rank_format">%1$s等級</string>
+
+    <!-- Fuel Records Screen -->
+    <string name="record_fuel">給油を記録</string>
+    <string name="read_receipt">レシートを読み取る</string>
+    <string name="camera">カメラ</string>
+    <string name="photo">写真</string>
+    <string name="delete_fuel_record">給油記録を削除</string>
+    <string name="delete_fuel_record_message">この給油記録を削除しますか？この操作は取り消せません。</string>
+    <string name="this_month_prefix">この月</string>
+    <string name="this_year_prefix">この年</string>
+    <string name="this_week_prefix">この週</string>
+    <string name="all_period_prefix">全期間</string>
+    <string name="fuel_cost_trend">給油費用の推移</string>
+    <string name="period_fuel_label">%1$sの給油</string>
+    <string name="yearly_fuel_cost">年間給油費用</string>
+    <string name="total_fuel_cost">総給油費用</string>
+    <string name="no_fuel_records">給油の記録がありません</string>
+    <string name="fuel_amount_format">%1$s円</string>
+
+    <!-- Maintenance Records Screen -->
+    <string name="record_maintenance">整備を記録</string>
+    <string name="delete_maintenance_record">整備記録を削除</string>
+    <string name="delete_maintenance_record_message">この整備記録を削除しますか？この操作は取り消せません。</string>
+    <string name="maintenance_cost_trend">整備費用の推移</string>
+    <string name="period_maintenance_label">%1$sの整備</string>
+    <string name="yearly_maintenance_cost">年間整備費用</string>
+    <string name="total_maintenance_cost">総整備費用</string>
+    <string name="no_maintenance_records">整備の記録がありません</string>
+
+    <!-- Cost Records Screen -->
+    <string name="record_cost">費用を記録</string>
+    <string name="delete_cost_record">費用記録を削除</string>
+    <string name="delete_cost_record_message">この費用記録を削除しますか？この操作は取り消せません。</string>
+    <string name="cost_trend">費用の推移</string>
+    <string name="period_cost_label">%1$sの費用</string>
+    <string name="yearly_cost">年間費用</string>
+    <string name="total_cost">総費用</string>
+    <string name="no_cost_records">費用の記録がありません</string>
+
+    <!-- Records Layout -->
+    <string name="no_records_title">記録がありません</string>
+    <string name="no_records_description">給油・整備・費用を記録しましょう</string>
+    <string name="display_settings">表示設定</string>
+    <string name="no_older_data">これより過去のデータはありません</string>
+    <string name="no_older_records">古い記録はありません</string>
+
+    <!-- Records List Screen -->
+    <string name="records_list_title">履歴一覧</string>
+    <string name="no_records_list_description">給油・整備・費用・移動を記録しましょう</string>
+    <string name="fuel_volume_format">給油 %1$sL</string>
+
+    <!-- Trip Records Screen -->
+    <string name="trip_records_title">移動記録</string>
+    <string name="manual_record_trip">移動を手動で記録</string>
+    <string name="trip_history">履歴</string>
+    <string name="no_trip_records_title">移動記録はまだありません</string>
+    <string name="no_trip_records_description">ドライブを開始すると、距離と時間をここに記録します</string>
+    <string name="delete_trip_record">移動記録を削除</string>
+    <string name="delete_trip_record_message">保存されたルートを含め、この移動記録を削除します。</string>
+    <string name="drive_recording">ドライブを記録中</string>
+    <string name="another_vehicle_recording">別の車両で記録中</string>
+    <string name="start_drive_recording">ドライブを記録</string>
+    <string name="drive_distance_start_format">%1$.1f km ・ %2$s開始</string>
+    <string name="location_only_while_recording">記録中だけ位置情報を使用します</string>
+    <string name="stop_recording"> 記録を終了</string>
+    <string name="start_drive"> ドライブを開始</string>
+    <string name="duration_format">%1$d時間%2$d分</string>
+    <string name="edit_trip_record">移動記録を編集</string>
+    <string name="odometer_hint">車のメーターに表示されている総走行距離です（任意）</string>
+    <string name="start_time_label">開始時刻</string>
+    <string name="end_time_label">終了時刻</string>
+    <string name="distance_km_label">走行距離 (km)</string>
+    <string name="title_label">タイトル</string>
+    <string name="trip_title_placeholder">週末のドライブ</string>
+    <string name="start_odometer_label">出発時の総走行距離 (km)</string>
+    <string name="end_odometer_label">到着時の総走行距離 (km)</string>
+
+    <!-- Notification Screen -->
+    <string name="notifications_title">通知</string>
+    <string name="no_notifications_title">通知はありません</string>
+    <string name="no_notifications_description">期限が設定されるとここに表示されます</string>
+    <string name="expired_section">期限切れ</string>
+    <string name="expiring_soon_section">まもなく期限</string>
+    <string name="upcoming_section">今後の予定</string>
+    <string name="most_important">最重要</string>
+    <string name="expired_days_over">期限切れ（%1$d日超過）</string>
+    <string name="days_remaining">あと%1$d日</string>
+
+    <!-- Settings Screen -->
+    <string name="theme_section">テーマ</string>
+    <string name="theme_selected">✓ 選択中</string>
+    <string name="app_info_section">アプリ情報</string>
+    <string name="app_name_label">アプリ名</string>
+    <string name="version_label">バージョン</string>
+    <string name="open_source_licenses">オープンソースライセンス</string>
+
+    <!-- Licenses Screen -->
+    <string name="version_format">バージョン %1$s</string>
+    <string name="license_format">ライセンス: %1$s</string>
+
+    <!-- Onboarding Screen -->
+    <string name="onboarding_page1_title">あらゆる乗り物を管理</string>
+    <string name="onboarding_page1_description">車・バイク・自転車・トラックに対応。\n種別ごとに車検・保険・税金の期限を\n自動計算して通知でお知らせします。</string>
+    <string name="onboarding_page2_title">給油記録で燃費を可視化</string>
+    <string name="onboarding_page2_description">満タン法で実燃費を自動計算。\n推移グラフで愛車の調子を把握できます。\nレシートのカメラ読み取りにも対応。</string>
+    <string name="onboarding_page3_title">整備・費用を一元管理</string>
+    <string name="onboarding_page3_description">種別ごとの整備目安で履歴を記録。\nカテゴリ別の費用グラフで\n年間維持費がひと目でわかります。</string>
+    <string name="onboarding_manage_title">あらゆる乗り物を管理</string>
+    <string name="onboarding_manage_description">車・バイク・自転車・トラックに対応。\n種別ごとに車検・保険・税金の期限を\n自動計算して通知でお知らせします。</string>
+    <string name="onboarding_fuel_title">給油記録で燃費を可視化</string>
+    <string name="onboarding_fuel_description">満タン法で実燃費を自動計算。\n推移グラフで愛車の調子を把握できます。\nレシートのカメラ読み取りにも対応。</string>
+    <string name="onboarding_maintenance_title">整備・費用を一元管理</string>
+    <string name="onboarding_maintenance_description">種別ごとの整備目安で履歴を記録。\nカテゴリ別の費用グラフで\n年間維持費がひと目でわかります。</string>
+    <string name="skip">スキップ</string>
+    <string name="next">次へ</string>
+    <string name="get_started">はじめる</string>
+
+    <!-- Fuel Input Dialog -->
+    <string name="edit_fuel_record">給油記録を編集</string>
+    <string name="add_fuel_record">給油を記録</string>
+    <string name="reading_receipt">読み取り中…</string>
+    <string name="scan_receipt_auto_input">レシートを読み取って自動入力</string>
+    <string name="odometer_km_label">走行距離 (km) *</string>
+    <string name="fuel_volume_label">給油量 (L) *</string>
+    <string name="amount_yen_label">金額 (円) *</string>
+    <string name="full_tank">満タン</string>
+    <string name="fuel_economy_display">燃費: %1$s</string>
+
+    <!-- Maintenance Input Dialog -->
+    <string name="edit_maintenance_record">整備記録を編集</string>
+    <string name="add_maintenance_record">整備を記録</string>
+    <string name="maintenance_content_label">整備内容 *</string>
+    <string name="maintenance_odometer_label">走行距離 (km)</string>
+    <string name="maintenance_cost_label">費用 (円)</string>
+    <string name="maintenance_shop_label">整備工場</string>
+
+    <!-- Cost Input Dialog -->
+    <string name="edit_cost_record">費用記録を編集</string>
+    <string name="add_cost_record">費用を記録</string>
+    <string name="cost_item_label">項目 *</string>
+    <string name="cost_amount_label">金額 (円) *</string>
+
+    <!-- Vehicle Field Edit Dialog -->
+    <string name="field_edit_save">保存</string>
+
+    <!-- Bottom Bar -->
+    <string name="home">ホーム</string>
+    <string name="history_list">履歴一覧</string>
+    <string name="notifications">通知</string>
+
+    <!-- AppNavigation -->
+    <string name="add_record_cd">記録を追加</string>
+
+    <!-- TripTrackingService -->
+    <string name="trip_notification_title">ドライブを記録中</string>
+    <string name="trip_notification_distance">%1$.1f km 走行</string>
+    <string name="trip_notification_stop">記録を終了</string>
+    <string name="trip_channel_name">ドライブ記録</string>
+    <string name="trip_channel_description">GPSを使用したドライブ記録の状態を表示します</string>
+
+    <!-- DeadlineCheckWorker -->
+    <string name="deadline_notification_title">%1$sの期限</string>
+    <string name="deadline_notification_text">%1$s の%2$sは %3$s まであと%4$d日です</string>
+    <string name="vehicle_tax_payment_title">自動車税の納付</string>
+    <string name="vehicle_tax_payment_text">%1$s の自動車税の納付時期です</string>
+
+    <!-- NotificationHelper -->
+    <string name="channel_inspection_name">車検・自賠責</string>
+    <string name="channel_inspection_description">車検・自賠責保険の期限通知</string>
+    <string name="channel_insurance_name">任意保険</string>
+    <string name="channel_insurance_description">任意保険の満期通知</string>
+    <string name="channel_tax_name">税金</string>
+    <string name="channel_tax_description">自動車税の納付通知</string>
+    <string name="channel_maintenance_name">メンテナンス</string>
+    <string name="channel_maintenance_description">整備の目安通知</string>
+
+    <!-- Pie Chart Legend -->
+    <string name="pie_legend_format">%1$s: %2$s円</string>
 </resources>

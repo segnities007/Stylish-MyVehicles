@@ -1,0 +1,29 @@
+package com.segnities007.stylish_myvehicles.domain.model
+
+import androidx.compose.runtime.Immutable
+import java.time.LocalDate
+
+@Immutable
+data class Vehicle(
+    val id: Long = 0,
+    val category: VehicleCategory = VehicleCategory.CAR,
+    val maker: String,
+    val name: String,
+    val grade: String = "",
+    val year: Int? = null,
+    val modelCode: String = "",
+    val plateNumber: String = "",
+    val vin: String = "",
+    val displacement: Int? = null,
+    val weight: Int? = null,
+    val maxLoadKg: Int? = null,
+    val color: String = "",
+    val firstRegistrationDate: LocalDate? = null,
+    val inspectionExpiry: LocalDate? = null,
+    val jibaiExpiry: LocalDate? = null,
+    val insuranceExpiry: LocalDate? = null,
+    val insuranceCompany: String = "",
+    val insuranceRank: Int? = null,
+    val photoUri: String? = null,
+    val memo: String = "",
+)

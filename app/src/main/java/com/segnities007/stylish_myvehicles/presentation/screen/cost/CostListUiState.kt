@@ -1,0 +1,62 @@
+package com.segnities007.stylish_myvehicles.presentation.screen.cost
+
+import androidx.compose.runtime.Immutable
+import com.segnities007.stylish_myvehicles.domain.model.CostCategory
+import com.segnities007.stylish_myvehicles.domain.model.CostRecord
+import java.time.LocalDate
+
+@Immutable
+data class CostListUiState(
+    val vehicleId: Long = 0,
+    val records: List<CostRecord> = emptyList(),
+    val isLoading: Boolean = true,
+    val selectedCategory: CostCategory? = null,
+    val deletingRecordId: Long? = null,
+    // 入力ダイアログ
+    val isDialogOpen: Boolean = false,
+    val editingRecordId: Long? = null,
+    val inputCategory: CostCategory = CostCategory.OTHER,
+    val inputDate: LocalDate = LocalDate.now(),
+    val inputTitle: String = "",
+    val inputAmount: String = "",
+) {
+    val filteredRecords: List<CostRecord>
+        get() = selectedCategory?.let { cat ->
+            records.filter { it.category == cat }
+        } ?: records
+
+    val totalAmount: Int
+        get() = filteredRecords.sumOf { it.amount }
+
+    val monthlyTotal: Int
+        get() {
+            val now = LocalDate.now()
+            return records
+                .filter { it.date.year == now.year && it.date.month == now.month }
+                .sumOf { it.amount }
+        }
+
+    val previousMonthTotal: Int
+        get() {
+            val prev = LocalDate.now().minusMonths(1)
+            return records
+                .filter { it.date.year == prev.year && it.date.month == prev.month }
+                .sumOf { it.amount }
+        }
+
+    val isEditing: Boolean
+        get() = editingRecordId != null
+
+    val canSave: Boolean
+        get() = inputTitle.isNotBlank() && inputAmount.toIntOrNull() != null
+
+    val titleError: String?
+        get() = if (inputTitle.isBlank()) "項目は必須です" else null
+
+    val amountError: String?
+        get() = when {
+            inputAmount.isBlank() -> "金額は必須です"
+            inputAmount.toIntOrNull() == null -> "数値で入力してください"
+            else -> null
+        }
+}
