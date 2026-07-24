@@ -1,8 +1,10 @@
 package com.segnities007.stylish_myvehicles.presentation.screen.vehicleedit
 
+import androidx.compose.runtime.Immutable
 import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
 import java.time.LocalDate
 
+@Immutable
 data class VehicleEditUiState(
     val vehicleId: Long? = null,
     // 種別

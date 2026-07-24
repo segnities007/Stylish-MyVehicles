@@ -1,8 +1,10 @@
 package com.segnities007.stylish_myvehicles.domain.model
 
+import androidx.compose.runtime.Immutable
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
+@Immutable
 data class MaintenanceSchedule(
     val id: Long = 0,
     val vehicleId: Long,

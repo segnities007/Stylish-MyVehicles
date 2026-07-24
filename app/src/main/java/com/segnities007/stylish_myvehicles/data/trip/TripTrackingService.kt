@@ -28,13 +28,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import java.time.LocalDateTime
 import kotlin.math.roundToLong
 
-class TripTrackingService : Service(), LocationListener {
+class TripTrackingService : Service(), LocationListener, KoinComponent {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private lateinit var locationManager: LocationManager
-    private lateinit var database: AppDatabase
+    private val database: AppDatabase by inject()
     private val preferences by lazy {
         getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
@@ -45,7 +47,6 @@ class TripTrackingService : Service(), LocationListener {
 
     override fun onCreate() {
         super.onCreate()
-        database = AppDatabase.create(applicationContext)
         locationManager = getSystemService(LocationManager::class.java)
         createNotificationChannel()
     }
@@ -166,7 +167,11 @@ class TripTrackingService : Service(), LocationListener {
                     distanceMeters = distanceMeters.roundToLong(),
                 )
             }
-            preferences.edit().clear().apply()
+            preferences.edit()
+                .remove(KEY_TRIP_ID)
+                .remove(KEY_VEHICLE_ID)
+                .remove(KEY_DISTANCE_METERS)
+                .apply()
             stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelf()
         }
@@ -187,22 +192,22 @@ class TripTrackingService : Service(), LocationListener {
         )
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("ドライブを記録中")
-            .setContentText("%.1f km 走行".format(distance / 1000.0))
+            .setContentTitle(getString(R.string.trip_notification_title))
+            .setContentText(getString(R.string.trip_notification_distance, distance / 1000.0))
             .setContentIntent(openIntent)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .addAction(0, "記録を終了", stopIntent)
+            .addAction(0, getString(R.string.trip_notification_stop), stopIntent)
             .build()
     }
 
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
             CHANNEL_ID,
-            "ドライブ記録",
+            getString(R.string.trip_channel_name),
             NotificationManager.IMPORTANCE_LOW,
         ).apply {
-            description = "GPSを使用したドライブ記録の状態を表示します"
+            description = getString(R.string.trip_channel_description)
         }
         getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
     }
@@ -210,7 +215,6 @@ class TripTrackingService : Service(), LocationListener {
     override fun onDestroy() {
         locationManager.removeUpdates(this)
         serviceScope.cancel()
-        database.close()
         super.onDestroy()
     }
 

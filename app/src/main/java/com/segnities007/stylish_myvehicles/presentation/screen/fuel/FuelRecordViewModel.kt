@@ -3,11 +3,9 @@ package com.segnities007.stylish_myvehicles.presentation.screen.fuel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.segnities007.stylish_myvehicles.domain.model.FuelRecord
+import com.segnities007.stylish_myvehicles.domain.repository.FuelRecordRepository
 import com.segnities007.stylish_myvehicles.domain.service.FuelEconomyCalculator
-import com.segnities007.stylish_myvehicles.domain.usecase.fuel.DeleteFuelRecordUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.fuel.GetFuelRecordsUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.fuel.InsertFuelRecordUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.fuel.UpdateFuelRecordUseCase
 import com.segnities007.stylish_myvehicles.presentation.util.normalizeDecimalInput
 import com.segnities007.stylish_myvehicles.presentation.util.normalizeIntegerInput
 import kotlinx.coroutines.channels.Channel
@@ -21,10 +19,8 @@ import kotlinx.coroutines.launch
 
 class FuelRecordViewModel(
     private val vehicleId: Long,
-    private val getFuelRecordsUseCase: GetFuelRecordsUseCase,
+    private val fuelRecordRepository: FuelRecordRepository,
     private val insertFuelRecordUseCase: InsertFuelRecordUseCase,
-    private val updateFuelRecordUseCase: UpdateFuelRecordUseCase,
-    private val deleteFuelRecordUseCase: DeleteFuelRecordUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(FuelRecordUiState(vehicleId = vehicleId))
     val uiState: StateFlow<FuelRecordUiState> = _uiState.asStateFlow()
@@ -34,7 +30,7 @@ class FuelRecordViewModel(
 
     init {
         viewModelScope.launch {
-            getFuelRecordsUseCase(vehicleId).collect { records ->
+            fuelRecordRepository.getByVehicleId(vehicleId).collect { records ->
                 _uiState.update { it.copy(records = records, isLoading = false) }
             }
         }
@@ -183,7 +179,7 @@ class FuelRecordViewModel(
             if (state.isEditing) {
                 val existing =
                     state.records.find { it.id == state.editingRecordId } ?: return@launch
-                updateFuelRecordUseCase(
+                fuelRecordRepository.update(
                     existing.copy(
                         date = state.inputDate,
                         odometer = currentOdo,
@@ -219,7 +215,7 @@ class FuelRecordViewModel(
         val recordId = _uiState.value.deletingRecordId ?: return
         viewModelScope.launch {
             val record = _uiState.value.records.find { it.id == recordId } ?: return@launch
-            deleteFuelRecordUseCase(record)
+            fuelRecordRepository.delete(record)
             _uiState.update { it.copy(deletingRecordId = null) }
         }
     }

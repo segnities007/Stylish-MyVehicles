@@ -15,9 +15,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylishui.components.charts.PieChartData
 import com.segnities007.stylishui.components.charts.SimplePieChart
 import com.segnities007.stylishui.components.patterns.StylishSectionTitle
@@ -39,7 +41,7 @@ fun PieChartSection(
         ) {
             SimplePieChart(
                 data = data,
-                contentDescriptionPrefix = "円グラフ",
+                contentDescriptionPrefix = stringResource(R.string.pie_chart),
             )
             if (data.isNotEmpty()) {
                 Legend(data = data, spacing = legendSpacing)
@@ -63,7 +65,7 @@ private fun Legend(
                         .background(slice.color, CircleShape),
                 )
                 Text(
-                    "${slice.label}: ${String.format("%,d", slice.value.toInt())}円",
+                    stringResource(R.string.pie_legend_format, slice.label, String.format("%,d", slice.value.toInt())),
                     style = MaterialTheme.typography.labelSmall,
                 )
             }

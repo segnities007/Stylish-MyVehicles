@@ -38,15 +38,17 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.data.trip.TripTrackingService
 import com.segnities007.stylish_myvehicles.domain.model.TripPurpose
 import com.segnities007.stylish_myvehicles.domain.model.TripRecord
@@ -76,7 +78,7 @@ fun TripRecordsScreen(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val listState = rememberLazyListState()
     val isAtTop by androidx.compose.runtime.remember(listState) {
@@ -122,7 +124,7 @@ fun TripRecordsScreen(
             ) {
                 StylishFab(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "移動を手動で記録",
+                    contentDescription = stringResource(R.string.manual_record_trip),
                     onClick = { viewModel.accept(TripRecordIntent.OpenManualAdd) },
                 )
             }
@@ -131,11 +133,11 @@ fun TripRecordsScreen(
         Column(Modifier.fillMaxSize()) {
             StylishHeader(
                 modifier = Modifier.padding(horizontal = 20.dp),
-                title = { Text("移動記録") },
+                title = { Text(stringResource(R.string.trip_records_title)) },
                 navigation = {
                     StylishIconButton(
                         Icons.AutoMirrored.Filled.ArrowBack,
-                        "戻る",
+                        stringResource(R.string.back),
                         onClick = onNavigateBack,
                     )
                 },
@@ -162,7 +164,7 @@ fun TripRecordsScreen(
                     )
                     Spacer(Modifier.height(12.dp))
                     Text(
-                        "履歴",
+                        stringResource(R.string.trip_history),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary,
                     )
@@ -172,8 +174,8 @@ fun TripRecordsScreen(
                 if (state.records.none { !it.isRecording }) {
                     item {
                         StylishEmptyState(
-                            title = "移動記録はまだありません",
-                            description = "ドライブを開始すると、距離と時間をここに記録します",
+                            title = stringResource(R.string.no_trip_records_title),
+                            description = stringResource(R.string.no_trip_records_description),
                             icon = Icons.Default.Route,
                         )
                     }
@@ -206,16 +208,16 @@ fun TripRecordsScreen(
             onDismiss = { viewModel.accept(TripRecordIntent.DismissDelete) },
         ) {
             Column(Modifier.padding(24.dp)) {
-                Text("移動記録を削除", style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.delete_trip_record), style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    "保存されたルートを含め、この移動記録を削除します。",
+                    stringResource(R.string.delete_trip_record_message),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.height(24.dp))
                 StylishDialogActions(
-                    confirmLabel = "削除",
-                    cancelLabel = "キャンセル",
+                    confirmLabel = stringResource(R.string.delete),
+                    cancelLabel = stringResource(R.string.cancel),
                     onConfirm = { viewModel.accept(TripRecordIntent.ConfirmDelete) },
                     onCancel = { viewModel.accept(TripRecordIntent.DismissDelete) },
                 )
@@ -257,9 +259,9 @@ private fun TripTrackingCard(
             Spacer(Modifier.height(12.dp))
             Text(
                 when {
-                    activeRecord != null -> "ドライブを記録中"
-                    anotherVehicleIsRecording -> "別の車両で記録中"
-                    else -> "ドライブを記録"
+                    activeRecord != null -> stringResource(R.string.drive_recording)
+                    anotherVehicleIsRecording -> stringResource(R.string.another_vehicle_recording)
+                    else -> stringResource(R.string.start_drive_recording)
                 },
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.SemiBold,
@@ -267,12 +269,13 @@ private fun TripTrackingCard(
             Spacer(Modifier.height(6.dp))
             Text(
                 if (activeRecord != null) {
-                    "%.1f km ・ %s開始".format(
+                    stringResource(
+                        R.string.drive_distance_start_format,
                         activeRecord.distanceMeters / 1000.0,
                         activeRecord.startedAt.format(DateTimeFormatter.ofPattern("H:mm")),
                     )
                 } else {
-                    "記録中だけ位置情報を使用します"
+                    stringResource(R.string.location_only_while_recording)
                 },
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -286,12 +289,12 @@ private fun TripTrackingCard(
                     ),
                 ) {
                     Icon(Icons.Default.Stop, contentDescription = null)
-                    Text(" 記録を終了")
+                    Text(stringResource(R.string.stop_recording))
                 }
             } else {
                 Button(onClick = onStart, enabled = !anotherVehicleIsRecording) {
                     Icon(Icons.Default.PlayArrow, contentDescription = null)
-                    Text(" ドライブを開始")
+                    Text(stringResource(R.string.start_drive))
                 }
             }
         }
@@ -309,7 +312,7 @@ private fun TripHistoryCard(
     val title = record.title.ifBlank { record.purpose.label }
     val details = buildList {
         add("%.1f km".format(record.distanceMeters / 1000.0))
-        duration?.let { add("${it.toMinutes() / 60}時間${it.toMinutes() % 60}分") }
+        duration?.let { add(stringResource(R.string.duration_format, it.toMinutes() / 60, it.toMinutes() % 60)) }
         add(record.startedAt.format(DateTimeFormatter.ofPattern("M月d日 H:mm")))
     }.joinToString(" ・ ")
     val corners = connectedColumnCorners(index, count)
@@ -324,7 +327,7 @@ private fun TripHistoryCard(
         trailingContent = {
             Icon(
                 Icons.Default.Edit,
-                contentDescription = "編集",
+                contentDescription = stringResource(R.string.edit),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         },
@@ -340,7 +343,7 @@ private fun TripEditDialog(
         Column(Modifier.padding(24.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    if (state.editingRecordId == null) "移動を手動で記録" else "移動記録を編集",
+                    if (state.editingRecordId == null) stringResource(R.string.manual_record_trip) else stringResource(R.string.edit_trip_record),
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.weight(1f),
                 )
@@ -353,7 +356,7 @@ private fun TripEditDialog(
                         },
                     ) {
                         Icon(Icons.Default.Delete, contentDescription = null)
-                        Text("削除", color = MaterialTheme.colorScheme.error)
+                        Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
                     }
                 }
             }
@@ -373,14 +376,14 @@ private fun TripEditDialog(
                 onValueChange = { date ->
                     date?.let { onIntent(TripRecordIntent.DateChanged(it)) }
                 },
-                label = "日付",
+                label = stringResource(R.string.date_label),
                 confirmLabel = "OK",
-                dismissLabel = "キャンセル",
-                placeholder = "日付を選択",
+                dismissLabel = stringResource(R.string.cancel),
+                placeholder = stringResource(R.string.select_date),
             )
             Spacer(Modifier.height(12.dp))
             Text(
-                "車のメーターに表示されている総走行距離です（任意）",
+                stringResource(R.string.odometer_hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -389,14 +392,14 @@ private fun TripEditDialog(
                 StylishFormTextField(
                     value = state.inputStartTime,
                     onValueChange = { onIntent(TripRecordIntent.StartTimeChanged(it)) },
-                    label = "開始時刻",
+                    label = stringResource(R.string.start_time_label),
                     placeholder = "09:30",
                     modifier = Modifier.weight(1f),
                 )
                 StylishFormTextField(
                     value = state.inputEndTime,
                     onValueChange = { onIntent(TripRecordIntent.EndTimeChanged(it)) },
-                    label = "終了時刻",
+                    label = stringResource(R.string.end_time_label),
                     placeholder = "11:00",
                     modifier = Modifier.weight(1f),
                 )
@@ -405,37 +408,37 @@ private fun TripEditDialog(
             StylishFormTextField(
                 value = state.inputDistanceKm,
                 onValueChange = { onIntent(TripRecordIntent.DistanceChanged(it)) },
-                label = "走行距離 (km)",
+                label = stringResource(R.string.distance_km_label),
                 placeholder = "86.4",
             )
             Spacer(Modifier.height(12.dp))
             StylishFormTextField(
                 value = state.inputTitle,
                 onValueChange = { onIntent(TripRecordIntent.TitleChanged(it)) },
-                label = "タイトル",
-                placeholder = "週末のドライブ",
+                label = stringResource(R.string.title_label),
+                placeholder = stringResource(R.string.trip_title_placeholder),
             )
             Spacer(Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 StylishFormTextField(
                     value = state.inputStartOdometer,
                     onValueChange = { onIntent(TripRecordIntent.StartOdometerChanged(it)) },
-                    label = "出発時の総走行距離 (km)",
+                    label = stringResource(R.string.start_odometer_label),
                     placeholder = "42100",
                     modifier = Modifier.weight(1f),
                 )
                 StylishFormTextField(
                     value = state.inputEndOdometer,
                     onValueChange = { onIntent(TripRecordIntent.EndOdometerChanged(it)) },
-                    label = "到着時の総走行距離 (km)",
+                    label = stringResource(R.string.end_odometer_label),
                     placeholder = "42186",
                     modifier = Modifier.weight(1f),
                 )
             }
             Spacer(Modifier.height(20.dp))
             StylishDialogActions(
-                confirmLabel = "保存",
-                cancelLabel = "キャンセル",
+                confirmLabel = stringResource(R.string.save),
+                cancelLabel = stringResource(R.string.cancel),
                 onConfirm = { onIntent(TripRecordIntent.Save) },
                 onCancel = { onIntent(TripRecordIntent.DismissEdit) },
                 confirmEnabled = state.canSave,

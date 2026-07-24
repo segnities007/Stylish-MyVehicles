@@ -1,8 +1,10 @@
 package com.segnities007.stylish_myvehicles.presentation.screen.vehiclepager
 
+import androidx.compose.runtime.Immutable
 import com.segnities007.stylish_myvehicles.domain.model.CostCategory
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 
+@Immutable
 data class VehiclePagerUiState(
     val vehicles: List<Vehicle> = emptyList(),
     val isLoading: Boolean = true,
@@ -16,6 +18,7 @@ data class VehiclePagerUiState(
         dashboardByVehicle[vehicleId] ?: VehicleDashboard()
 }
 
+@Immutable
 data class VehicleDashboard(
     val monthlyCost: Int = 0,
     val yearlyCost: Int = 0,
@@ -35,6 +38,7 @@ data class VehicleDashboard(
 )
 
 /** 月次費用グラフの1ヶ月分。label とカテゴリ別金額。 */
+@Immutable
 data class MonthlyCostSlice(
     val label: String,
     val byCategory: List<Pair<CostCategory, Int>>,

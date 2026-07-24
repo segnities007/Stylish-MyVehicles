@@ -14,7 +14,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylishui.components.molecules.StylishConnectedCardGrid
 import com.segnities007.stylishui.components.molecules.StylishDialogSurface
 import com.segnities007.stylishui.components.models.StylishConnectedCardItem
@@ -34,14 +36,14 @@ fun AddRecordDialog(
 ) {
     StylishDialogSurface(onDismiss = onDismiss) {
         Column(Modifier.padding(24.dp)) {
-            Text("記録を追加", style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.add_record), style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(16.dp))
             StylishConnectedCardGrid(
                 columns = 2,
                 spacing = 4.dp,
                 items = listOf(
                     StylishConnectedCardItem(
-                        title = "給油",
+                        title = stringResource(R.string.fuel_label),
                         onClick = {
                             onDismiss()
                             if (vehicleId != null) onAddFuel(vehicleId)
@@ -55,7 +57,7 @@ fun AddRecordDialog(
                         },
                     ),
                     StylishConnectedCardItem(
-                        title = "整備",
+                        title = stringResource(R.string.maintenance_label),
                         onClick = {
                             onDismiss()
                             if (vehicleId != null) onAddMaintenance(vehicleId)
@@ -69,7 +71,7 @@ fun AddRecordDialog(
                         },
                     ),
                     StylishConnectedCardItem(
-                        title = "費用",
+                        title = stringResource(R.string.cost_label),
                         onClick = {
                             onDismiss()
                             if (vehicleId != null) onAddCost(vehicleId)
@@ -83,7 +85,7 @@ fun AddRecordDialog(
                         },
                     ),
                     StylishConnectedCardItem(
-                        title = "移動",
+                        title = stringResource(R.string.trip_label),
                         onClick = {
                             onDismiss()
                             if (vehicleId != null) onAddTrip(vehicleId)

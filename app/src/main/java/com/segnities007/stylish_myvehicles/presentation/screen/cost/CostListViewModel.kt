@@ -4,10 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.segnities007.stylish_myvehicles.domain.model.CostCategory
 import com.segnities007.stylish_myvehicles.domain.model.CostRecord
-import com.segnities007.stylish_myvehicles.domain.usecase.cost.DeleteCostRecordUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.cost.GetCostRecordsUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.cost.InsertCostRecordUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.cost.UpdateCostRecordUseCase
+import com.segnities007.stylish_myvehicles.domain.repository.CostRecordRepository
 import com.segnities007.stylish_myvehicles.presentation.util.normalizeIntegerInput
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -20,10 +17,7 @@ import kotlinx.coroutines.launch
 
 class CostListViewModel(
     private val vehicleId: Long,
-    private val getCostRecordsUseCase: GetCostRecordsUseCase,
-    private val insertCostRecordUseCase: InsertCostRecordUseCase,
-    private val updateCostRecordUseCase: UpdateCostRecordUseCase,
-    private val deleteCostRecordUseCase: DeleteCostRecordUseCase,
+    private val costRecordRepository: CostRecordRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(CostListUiState(vehicleId = vehicleId))
     val uiState: StateFlow<CostListUiState> = _uiState.asStateFlow()
@@ -33,7 +27,7 @@ class CostListViewModel(
 
     init {
         viewModelScope.launch {
-            getCostRecordsUseCase(vehicleId).collect { records ->
+            costRecordRepository.getByVehicleId(vehicleId).collect { records ->
                 _uiState.update { it.copy(records = records, isLoading = false) }
             }
         }
@@ -120,7 +114,7 @@ class CostListViewModel(
             if (state.isEditing) {
                 val existing =
                     state.records.find { it.id == state.editingRecordId } ?: return@launch
-                updateCostRecordUseCase(
+                costRecordRepository.update(
                     existing.copy(
                         date = state.inputDate,
                         category = state.inputCategory,
@@ -130,7 +124,7 @@ class CostListViewModel(
                 )
             }
             else {
-                insertCostRecordUseCase(
+                costRecordRepository.insert(
                     CostRecord(
                         vehicleId = vehicleId,
                         date = state.inputDate,
@@ -148,7 +142,7 @@ class CostListViewModel(
         val recordId = _uiState.value.deletingRecordId ?: return
         viewModelScope.launch {
             val record = _uiState.value.records.find { it.id == recordId } ?: return@launch
-            deleteCostRecordUseCase(record)
+            costRecordRepository.delete(record)
             _uiState.update { it.copy(deletingRecordId = null) }
         }
     }

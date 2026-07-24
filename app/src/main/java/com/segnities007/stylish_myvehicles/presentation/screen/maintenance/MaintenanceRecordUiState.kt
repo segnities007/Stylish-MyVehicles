@@ -1,10 +1,12 @@
 package com.segnities007.stylish_myvehicles.presentation.screen.maintenance
 
+import androidx.compose.runtime.Immutable
 import com.segnities007.stylish_myvehicles.domain.model.MaintenanceCategory
 import com.segnities007.stylish_myvehicles.domain.model.MaintenanceRecord
 import com.segnities007.stylish_myvehicles.domain.model.RecordPeriod
 import java.time.LocalDate
 
+@Immutable
 data class MaintenanceRecordUiState(
     val vehicleId: Long = 0,
     val records: List<MaintenanceRecord> = emptyList(),
@@ -44,6 +46,7 @@ data class MaintenanceRecordUiState(
         get() = editingRecordId != null
 }
 
+@Immutable
 data class ScheduleDueItem(
     val categoryLabel: String,
     val dueDate: LocalDate,

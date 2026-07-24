@@ -13,11 +13,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.domain.model.CostCategory
 import com.segnities007.stylish_myvehicles.domain.model.CostRecord
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
@@ -51,8 +53,8 @@ fun CostRecordsScreen(
     openAddDialog: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
-    val state by viewModel.uiState.collectAsState()
-    val dialogState by dialogViewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val dialogState by dialogViewModel.uiState.collectAsStateWithLifecycle()
 
     // ホームの「記録を追加」ダイアログから遷移してきた場合、すぐ入力Dialogを開く
     LaunchedEffect(openAddDialog) {
@@ -66,7 +68,7 @@ fun CostRecordsScreen(
         floatingActionButton = {
             StylishFab(
                 imageVector = Icons.Default.Add,
-                contentDescription = "費用を記録",
+                contentDescription = stringResource(R.string.record_cost),
                 onClick = { dialogViewModel.accept(CostListIntent.OpenAddDialog) },
             )
         },
@@ -88,10 +90,10 @@ fun CostRecordsScreen(
 
     if (dialogState.deletingRecordId != null) {
         StylishDeleteConfirmDialog(
-            title = "費用記録を削除",
-            message = "この費用記録を削除しますか？この操作は取り消せません。",
-            confirmLabel = "削除",
-            cancelLabel = "キャンセル",
+            title = stringResource(R.string.delete_cost_record),
+            message = stringResource(R.string.delete_cost_record_message),
+            confirmLabel = stringResource(R.string.delete),
+            cancelLabel = stringResource(R.string.cancel),
             onConfirm = { dialogViewModel.accept(CostListIntent.ConfirmDelete) },
             onDismiss = { dialogViewModel.accept(CostListIntent.DismissDelete) },
         )
@@ -109,12 +111,6 @@ internal fun LazyListScope.CostPeriodContent(
 ) {
     val mode = state.periodMode
     val periodCosts = state.costRecords.filter { it.date in period.start..period.endInclusive }
-    val periodPrefix = when (mode) {
-        PeriodMode.MONTHLY -> "この月"
-        PeriodMode.YEARLY -> "この年"
-        PeriodMode.WEEKLY -> "この週"
-        PeriodMode.ALL -> "全期間"
-    }
 
     val periodCost = periodCosts.sumOf { it.amount }
     val year = period.start.year
@@ -132,18 +128,24 @@ internal fun LazyListScope.CostPeriodContent(
     }
 
     item {
+        val periodPrefix = when (mode) {
+            PeriodMode.MONTHLY -> stringResource(R.string.this_month_prefix)
+            PeriodMode.YEARLY -> stringResource(R.string.this_year_prefix)
+            PeriodMode.WEEKLY -> stringResource(R.string.this_week_prefix)
+            PeriodMode.ALL -> stringResource(R.string.all_period_prefix)
+        }
         PieChartSection(
-            title = "費用カテゴリ",
+            title = stringResource(R.string.cost_category),
             data = costByCategory.map { (cat, total) ->
                 PieChartData(cat.label, total.toFloat(), stylishChartColor(cat.ordinal))
             },
         )
         Spacer(Modifier.height(8.dp))
         BarChartSection(
-            title = "費用の推移",
+            title = stringResource(R.string.cost_trend),
             data = costTrend.map { BarChartData(it.first, it.second) },
-            contentDescriptionPrefix = "棒グラフ",
-            emptyLabel = "データがありません",
+            contentDescriptionPrefix = stringResource(R.string.bar_chart),
+            emptyLabel = stringResource(R.string.no_data),
         )
         Spacer(Modifier.height(12.dp))
         StylishConnectedCardGrid(
@@ -151,15 +153,15 @@ internal fun LazyListScope.CostPeriodContent(
             items = listOf(
                 StylishConnectedCardItem(
                     title = "${String.format("%,d", periodCost)}円",
-                    supportingText = "${periodPrefix}の費用",
+                    supportingText = stringResource(R.string.period_cost_label, periodPrefix),
                 ),
                 StylishConnectedCardItem(
                     title = "${String.format("%,d", costYearTotal)}円",
-                    supportingText = "年間費用",
+                    supportingText = stringResource(R.string.yearly_cost),
                 ),
                 StylishConnectedCardItem(
                     title = "${String.format("%,d", costTotal)}円",
-                    supportingText = "総費用",
+                    supportingText = stringResource(R.string.total_cost),
                 ),
             ),
         )
@@ -170,8 +172,8 @@ internal fun LazyListScope.CostPeriodContent(
         item {
             StylishEmptyState(
                 icon = Icons.Default.AttachMoney,
-                title = "記録なし",
-                description = "費用の記録がありません",
+                title = stringResource(R.string.no_records),
+                description = stringResource(R.string.no_cost_records),
             )
         }
     } else {

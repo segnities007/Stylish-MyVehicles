@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.domain.model.CostCategory
 import com.segnities007.stylishui.components.charts.BarChartData
 import com.segnities007.stylishui.components.charts.LineChartData
@@ -28,15 +30,15 @@ fun DashboardChartsSection(
 ) {
     Column(modifier = modifier) {
         LineChartSection(
-            title = "燃費推移 (km/L)",
+            title = stringResource(R.string.fuel_economy_trend),
             data = dashboard.fuelEconomyTrend.map { LineChartData(it.first, it.second) },
-            contentDescriptionPrefix = "折れ線グラフ",
-            emptyLabel = "データがありません",
+            contentDescriptionPrefix = stringResource(R.string.line_chart),
+            emptyLabel = stringResource(R.string.no_data),
         )
         Spacer(Modifier.height(20.dp))
 
         PieChartSection(
-            title = "費用カテゴリ",
+            title = stringResource(R.string.cost_category),
             data = dashboard.costByCategory.map { (category, total) ->
                 PieChartData(category.label, total.toFloat(), stylishChartColor(category.ordinal))
             },
@@ -44,10 +46,10 @@ fun DashboardChartsSection(
         Spacer(Modifier.height(20.dp))
 
         BarChartSection(
-            title = "月次費用",
+            title = stringResource(R.string.monthly_cost),
             data = dashboard.monthlyCostTrend.map { BarChartData(it.first, it.second) },
-            contentDescriptionPrefix = "棒グラフ",
-            emptyLabel = "データがありません",
+            contentDescriptionPrefix = stringResource(R.string.bar_chart),
+            emptyLabel = stringResource(R.string.no_data),
         )
     }
 }

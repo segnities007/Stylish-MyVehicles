@@ -1,7 +1,9 @@
 package com.segnities007.stylish_myvehicles.presentation.screen.vehiclelist
 
+import androidx.compose.runtime.Immutable
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 
+@Immutable
 data class VehicleListUiState(
     val vehicles: List<Vehicle> = emptyList(),
     val isLoading: Boolean = true,

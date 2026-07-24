@@ -9,4 +9,5 @@ interface FuelRecordRepository {
     suspend fun insert(record: FuelRecord): Long
     suspend fun update(record: FuelRecord)
     suspend fun delete(record: FuelRecord)
+    suspend fun deleteById(id: Long)
 }

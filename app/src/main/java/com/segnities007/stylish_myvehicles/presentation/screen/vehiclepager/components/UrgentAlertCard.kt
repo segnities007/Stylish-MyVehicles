@@ -16,8 +16,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 import com.segnities007.stylish_myvehicles.domain.service.DeadlineResolver
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
@@ -56,13 +58,13 @@ fun UrgentAlertCard(
             Spacer(Modifier.width(12.dp))
             Column {
                 Text(
-                    if (days < 0) "⚠️ $label が期限切れです"
-                    else "$label まであと${days}日",
+                    if (days < 0) stringResource(R.string.deadline_expired_alert, label)
+                    else stringResource(R.string.deadline_days_alert, label, days),
                     style = MaterialTheme.typography.titleMedium,
                 )
                 if (days >= 0) {
                     Text(
-                        "次の対応が必要な項目です",
+                        stringResource(R.string.next_action_needed),
                         style = MaterialTheme.typography.bodySmall,
                         color = if (urgent) MaterialTheme.colorScheme.onErrorContainer
                         else MaterialTheme.colorScheme.onSurfaceVariant,

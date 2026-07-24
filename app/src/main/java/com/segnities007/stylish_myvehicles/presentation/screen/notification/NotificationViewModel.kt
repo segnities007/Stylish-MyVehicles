@@ -4,9 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.segnities007.stylish_myvehicles.domain.model.MaintenanceSchedule
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
+import com.segnities007.stylish_myvehicles.domain.repository.MaintenanceScheduleRepository
+import com.segnities007.stylish_myvehicles.domain.repository.VehicleRepository
 import com.segnities007.stylish_myvehicles.domain.service.DeadlineInfo
-import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.GetMaintenanceSchedulesUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.GetVehiclesUseCase
+import com.segnities007.stylish_myvehicles.domain.service.InspectionCalculator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,21 +18,21 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 class NotificationViewModel(
-    private val getVehiclesUseCase: GetVehiclesUseCase,
-    private val getMaintenanceSchedulesUseCase: GetMaintenanceSchedulesUseCase,
+    private val vehicleRepository: VehicleRepository,
+    private val maintenanceScheduleRepository: MaintenanceScheduleRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NotificationUiState())
     val uiState: StateFlow<NotificationUiState> = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            getVehiclesUseCase().collect { vehicles ->
+            vehicleRepository.getAll().collect { vehicles ->
                 if (vehicles.isEmpty()) {
                     _uiState.update { it.copy(isLoading = false, deadlines = emptyList()) }
                     return@collect
                 }
                 val scheduleFlows = vehicles.map { v ->
-                    getMaintenanceSchedulesUseCase(v.id)
+                    maintenanceScheduleRepository.getByVehicleId(v.id)
                 }
                 combine(scheduleFlows) { scheduleLists ->
                     vehicles.zip(scheduleLists.toList())
@@ -55,7 +56,7 @@ class NotificationViewModel(
     ): List<VehicleDeadlineItem> {
         val items = mutableListOf<VehicleDeadlineItem>()
 
-        vehicle.currentInspectionExpiry?.let { date ->
+        InspectionCalculator.currentExpiryFor(vehicle)?.let { date ->
             items += VehicleDeadlineItem(
                 vehicleId = vehicle.id,
                 vehicleName = vehicle.name,

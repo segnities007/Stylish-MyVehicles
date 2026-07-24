@@ -1,5 +1,6 @@
 package com.segnities007.stylish_myvehicles.domain.model
 
+import androidx.compose.runtime.Immutable
 import java.time.LocalDateTime
 
 enum class TripPurpose(val label: String) {
@@ -11,6 +12,7 @@ enum class TripPurpose(val label: String) {
     OTHER("その他"),
 }
 
+@Immutable
 data class TripRecord(
     val id: Long = 0,
     val vehicleId: Long,

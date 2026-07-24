@@ -15,8 +15,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylishui.components.atoms.StylishRoundedIconButton
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 import com.segnities007.stylishui.tokens.StylishDimensions
@@ -49,24 +51,24 @@ fun StylishBottomBar(
         ) {
             StylishRoundedIconButton(
                 imageVector = Icons.Default.Home,
-                contentDescription = "ホーム",
+                contentDescription = stringResource(R.string.home),
                 onClick = onNavigateToHome,
             )
             if (onNavigateToRecordsList != null) {
                 StylishRoundedIconButton(
                     imageVector = Icons.Default.History,
-                    contentDescription = "履歴一覧",
+                    contentDescription = stringResource(R.string.history_list),
                     onClick = onNavigateToRecordsList,
                 )
             }
             StylishRoundedIconButton(
                 imageVector = Icons.Default.Notifications,
-                contentDescription = "通知",
+                contentDescription = stringResource(R.string.notifications),
                 onClick = onNavigateToNotifications,
             )
             StylishRoundedIconButton(
                 imageVector = Icons.Default.Settings,
-                contentDescription = "設定",
+                contentDescription = stringResource(R.string.settings),
                 onClick = onNavigateToSettings,
             )
         }

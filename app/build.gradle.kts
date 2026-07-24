@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.aboutlibraries)
+    jacoco
     kotlin("android")
 }
 
@@ -34,12 +35,19 @@ android {
     buildFeatures {
         compose = true
     }
+    testCoverage {
+        jacocoVersion = "0.8.12"
+    }
 }
 
 kotlin {
     compilerOptions {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
     }
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
@@ -55,6 +63,7 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
@@ -65,14 +74,13 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.coil.compose)
-    implementation(libs.androidx.glance.appwidget)
-    implementation(libs.androidx.glance.material3)
     implementation(libs.mlkit.text.recognition.japanese)
     implementation(libs.aboutlibraries.core)
     implementation(libs.aboutlibraries.compose)
     ksp(libs.androidx.room.compiler)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -81,4 +89,89 @@ dependencies {
     androidTestImplementation(libs.kotlinx.coroutines.test)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+}
+
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testDebugUnitTest")
+
+    reports {
+        xml.required = true
+        html.required = true
+    }
+
+    val fileFilter = listOf(
+        "**/R.class", "**/R$*.class", "**/BuildConfig.*",
+        "**/Manifest*.*", "**/*Test*.*",
+        "**/databinding/**", "**/DataBinderMapperImpl*.*",
+        // Composable UI（スクリーンショットテスト向き）
+        "**/*Screen*.class", "**/*ScreenKt*.class",
+        "**/components/**", "**/theme/**",
+        "**/*Layout*.class", "**/*LayoutKt*.class",
+        // Android フレームワーク（計装テスト向き）
+        "**/app/StylishMyVehiclesApp*.class",
+        "**/app/MainActivity*.class",
+        "**/app/di/**",
+        "**/navigation/**",
+        "**/data/trip/TripTrackingService*.class",
+        "**/data/notification/**",
+        "**/data/worker/**",
+        "**/data/ocr/ReceiptScanner.class",
+        // Room 生成コード・DB（計装テスト向き）
+        "**/data/local/dao/**",
+        "**/data/local/AppDatabase*.class",
+        "**/data/local/Converters*.class",
+        // Repository 実装（Room DAO への薄委譲、計装テスト向き）
+        "**/data/repository/**",
+    )
+    val debugTree = fileTree("${layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
+        exclude(fileFilter)
+    }
+    val mainSrc = "${projectDir}/src/main/java"
+
+    sourceDirectories.setFrom(files(mainSrc))
+    classDirectories.setFrom(files(debugTree))
+    executionData.setFrom(fileTree(layout.buildDirectory) {
+        include("jacoco/testDebugUnitTest.exec")
+    })
+}
+
+tasks.register<JacocoCoverageVerification>("jacocoVerify") {
+    dependsOn("jacocoTestReport")
+
+    val fileFilter = listOf(
+        "**/R.class", "**/R$*.class", "**/BuildConfig.*",
+        "**/Manifest*.*", "**/*Test*.*",
+        "**/databinding/**", "**/DataBinderMapperImpl*.*",
+        "**/*Screen*.class", "**/*ScreenKt*.class",
+        "**/components/**", "**/theme/**",
+        "**/*Layout*.class", "**/*LayoutKt*.class",
+        "**/app/StylishMyVehiclesApp*.class",
+        "**/app/MainActivity*.class",
+        "**/app/di/**",
+        "**/navigation/**",
+        "**/data/trip/TripTrackingService*.class",
+        "**/data/notification/**",
+        "**/data/worker/**",
+        "**/data/ocr/ReceiptScanner.class",
+        "**/data/local/dao/**",
+        "**/data/local/AppDatabase*.class",
+        "**/data/local/Converters*.class",
+        "**/data/repository/**",
+    )
+    val debugTree = fileTree("${layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
+        exclude(fileFilter)
+    }
+
+    classDirectories.setFrom(files(debugTree))
+    executionData.setFrom(fileTree(layout.buildDirectory) {
+        include("jacoco/testDebugUnitTest.exec")
+    })
+
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.90".toBigDecimal()
+            }
+        }
+    }
 }

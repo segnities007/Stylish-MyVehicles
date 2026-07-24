@@ -22,7 +22,7 @@ object DeadlineResolver {
 
     fun resolve(vehicle: Vehicle, today: LocalDate = LocalDate.now()): DeadlineInfo? {
         val candidates = buildList {
-            vehicle.currentInspectionExpiry?.let { add("車検" to it) }
+            InspectionCalculator.currentExpiryFor(vehicle, today)?.let { add("車検" to it) }
             vehicle.jibaiExpiry?.let { add("自賠責保険" to it) }
             vehicle.insuranceExpiry?.let { add("任意保険" to it) }
         }

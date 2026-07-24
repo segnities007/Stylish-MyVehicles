@@ -1,7 +1,9 @@
 package com.segnities007.stylish_myvehicles.domain.model
 
+import androidx.compose.runtime.Immutable
 import java.time.LocalDate
 
+@Immutable
 data class MaintenanceRecord(
     val id: Long = 0,
     val vehicleId: Long,

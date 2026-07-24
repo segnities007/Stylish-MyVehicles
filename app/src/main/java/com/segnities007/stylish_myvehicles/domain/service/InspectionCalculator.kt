@@ -1,5 +1,6 @@
 package com.segnities007.stylish_myvehicles.domain.service
 
+import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -71,4 +72,13 @@ object InspectionCalculator {
         }
         return expiry
     }
+
+    /**
+     * [Vehicle] から現在日付基準の車検満了日を導出する。
+     * 初度登録日が未設定の場合は [Vehicle.inspectionExpiry] をフォールバックとして返す。
+     */
+    fun currentExpiryFor(vehicle: Vehicle, today: LocalDate = LocalDate.now()): LocalDate? =
+        vehicle.firstRegistrationDate?.let {
+            calculateCurrentExpiry(vehicle.category, it, vehicle.displacement, today)
+        } ?: vehicle.inspectionExpiry
 }

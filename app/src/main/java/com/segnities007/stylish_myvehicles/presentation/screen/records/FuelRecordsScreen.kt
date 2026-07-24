@@ -20,7 +20,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,9 +28,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
+import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.data.ocr.ReceiptScanner
 import com.segnities007.stylish_myvehicles.domain.model.FuelRecord
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
@@ -66,8 +68,8 @@ fun FuelRecordsScreen(
     openAddDialog: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
-    val state by viewModel.uiState.collectAsState()
-    val dialogState by dialogViewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val dialogState by dialogViewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var receiptImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -118,7 +120,7 @@ fun FuelRecordsScreen(
         floatingActionButton = {
             StylishFab(
                 imageVector = Icons.Default.Add,
-                contentDescription = "給油を記録",
+                contentDescription = stringResource(R.string.record_fuel),
                 onClick = { dialogViewModel.accept(FuelRecordIntent.OpenAddDialog) },
             )
         },
@@ -143,14 +145,14 @@ fun FuelRecordsScreen(
     if (showReceiptSourceDialog) {
         StylishDialogSurface(onDismiss = { showReceiptSourceDialog = false }) {
             Column(Modifier.padding(24.dp)) {
-                Text("レシートを読み取る", style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.read_receipt), style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.height(16.dp))
                 StylishConnectedCardGrid(
                     columns = 2,
                     spacing = 4.dp,
                     items = listOf(
                         StylishConnectedCardItem(
-                            title = "カメラ",
+                            title = stringResource(R.string.camera),
                             onClick = {
                                 showReceiptSourceDialog = false
                                 val uri = createReceiptImageUri(context)
@@ -166,7 +168,7 @@ fun FuelRecordsScreen(
                             },
                         ),
                         StylishConnectedCardItem(
-                            title = "写真",
+                            title = stringResource(R.string.photo),
                             onClick = {
                                 showReceiptSourceDialog = false
                                 receiptPickLauncher.launch("image/*")
@@ -180,7 +182,7 @@ fun FuelRecordsScreen(
                             },
                         ),
                         StylishConnectedCardItem(
-                            title = "キャンセル",
+                            title = stringResource(R.string.cancel),
                             onClick = { showReceiptSourceDialog = false },
                         ),
                     ),
@@ -191,10 +193,10 @@ fun FuelRecordsScreen(
 
     if (dialogState.deletingRecordId != null) {
         StylishDeleteConfirmDialog(
-            title = "給油記録を削除",
-            message = "この給油記録を削除しますか？この操作は取り消せません。",
-            confirmLabel = "削除",
-            cancelLabel = "キャンセル",
+            title = stringResource(R.string.delete_fuel_record),
+            message = stringResource(R.string.delete_fuel_record_message),
+            confirmLabel = stringResource(R.string.delete),
+            cancelLabel = stringResource(R.string.cancel),
             onConfirm = { dialogViewModel.accept(FuelRecordIntent.ConfirmDelete) },
             onDismiss = { dialogViewModel.accept(FuelRecordIntent.DismissDelete) },
         )
@@ -221,12 +223,6 @@ internal fun LazyListScope.FuelPeriodContent(
 ) {
     val mode = state.periodMode
     val periodFuels = state.fuelRecords.filter { it.date in period.start..period.endInclusive }
-    val periodPrefix = when (mode) {
-        PeriodMode.MONTHLY -> "この月"
-        PeriodMode.YEARLY -> "この年"
-        PeriodMode.WEEKLY -> "この週"
-        PeriodMode.ALL -> "全期間"
-    }
 
     val periodFuelCost = periodFuels.sumOf { it.amount }
     val periodFuelEconomy = periodFuels.mapNotNull { it.fuelEconomy }
@@ -247,18 +243,24 @@ internal fun LazyListScope.FuelPeriodContent(
     }
 
     item {
+        val periodPrefix = when (mode) {
+            PeriodMode.MONTHLY -> stringResource(R.string.this_month_prefix)
+            PeriodMode.YEARLY -> stringResource(R.string.this_year_prefix)
+            PeriodMode.WEEKLY -> stringResource(R.string.this_week_prefix)
+            PeriodMode.ALL -> stringResource(R.string.all_period_prefix)
+        }
         LineChartSection(
-            title = "燃費推移 (km/L)",
+            title = stringResource(R.string.fuel_economy_trend),
             data = fuelEconomyTrend.map { LineChartData(it.first, it.second) },
-            contentDescriptionPrefix = "折れ線グラフ",
-            emptyLabel = "データがありません",
+            contentDescriptionPrefix = stringResource(R.string.line_chart),
+            emptyLabel = stringResource(R.string.no_data),
         )
         Spacer(Modifier.height(8.dp))
         BarChartSection(
-            title = "給油費用の推移",
+            title = stringResource(R.string.fuel_cost_trend),
             data = fuelCostTrend.map { BarChartData(it.first, it.second) },
-            contentDescriptionPrefix = "棒グラフ",
-            emptyLabel = "データがありません",
+            contentDescriptionPrefix = stringResource(R.string.bar_chart),
+            emptyLabel = stringResource(R.string.no_data),
         )
         Spacer(Modifier.height(12.dp))
         StylishConnectedCardGrid(
@@ -267,26 +269,26 @@ internal fun LazyListScope.FuelPeriodContent(
                 add(
                     StylishConnectedCardItem(
                         title = "${String.format("%,d", periodFuelCost)}円",
-                        supportingText = "${periodPrefix}の給油",
+                        supportingText = stringResource(R.string.period_fuel_label, periodPrefix),
                     )
                 )
                 add(
                     StylishConnectedCardItem(
                         title = "${String.format("%,d", fuelYearTotal)}円",
-                        supportingText = "年間給油費用",
+                        supportingText = stringResource(R.string.yearly_fuel_cost),
                     )
                 )
                 add(
                     StylishConnectedCardItem(
                         title = "${String.format("%,d", fuelTotal)}円",
-                        supportingText = "総給油費用",
+                        supportingText = stringResource(R.string.total_fuel_cost),
                     )
                 )
                 if (state.vehicle?.category?.usesFuel == true) {
                     add(
                         StylishConnectedCardItem(
                             title = periodFuelEconomy?.let { "%.1f km/L".format(it) } ?: "--",
-                            supportingText = "平均燃費",
+                            supportingText = stringResource(R.string.average_fuel_economy_label),
                         )
                     )
                 }
@@ -299,8 +301,8 @@ internal fun LazyListScope.FuelPeriodContent(
         item {
             StylishEmptyState(
                 icon = Icons.Default.LocalGasStation,
-                title = "記録なし",
-                description = "給油の記録がありません",
+                title = stringResource(R.string.no_records),
+                description = stringResource(R.string.no_fuel_records),
             )
         }
     } else {

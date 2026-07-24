@@ -11,6 +11,7 @@ fun FuelRecordEntity.toDomain(): FuelRecord = FuelRecord(
     volume = volume,
     amount = amount,
     unitPrice = unitPrice,
+    fuelEconomy = fuelEconomy,
     isFullTank = isFullTank,
     memo = memo,
 )
@@ -23,6 +24,7 @@ fun FuelRecord.toEntity(): FuelRecordEntity = FuelRecordEntity(
     volume = volume,
     amount = amount,
     unitPrice = unitPrice,
+    fuelEconomy = fuelEconomy,
     isFullTank = isFullTank,
     memo = memo,
 )

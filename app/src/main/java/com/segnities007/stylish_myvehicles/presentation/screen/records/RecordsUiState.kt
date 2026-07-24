@@ -1,10 +1,12 @@
 package com.segnities007.stylish_myvehicles.presentation.screen.records
 
+import androidx.compose.runtime.Immutable
 import com.segnities007.stylish_myvehicles.domain.model.CostRecord
 import com.segnities007.stylish_myvehicles.domain.model.FuelRecord
 import com.segnities007.stylish_myvehicles.domain.model.MaintenanceRecord
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 
+@Immutable
 data class RecordsUiState(
     val vehicleId: Long = 0,
     val topic: RecordTopic = RecordTopic.COST,

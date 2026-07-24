@@ -1,8 +1,9 @@
 package com.segnities007.stylish_myvehicles.domain.model
 
-import com.segnities007.stylish_myvehicles.domain.service.InspectionCalculator
+import androidx.compose.runtime.Immutable
 import java.time.LocalDate
 
+@Immutable
 data class Vehicle(
     val id: Long = 0,
     val category: VehicleCategory = VehicleCategory.CAR,
@@ -25,13 +26,4 @@ data class Vehicle(
     val insuranceRank: Int? = null,
     val photoUri: String? = null,
     val memo: String = "",
-) {
-    /**
-     * 現在日付基準の車検満了日。カテゴリと初度登録日から導出する。
-     * 車検対象外（自転車・250cc以下バイク等）は null。
-     */
-    val currentInspectionExpiry: LocalDate?
-        get() = firstRegistrationDate?.let {
-            InspectionCalculator.calculateCurrentExpiry(category, it, displacement)
-        } ?: inspectionExpiry
-}
+)

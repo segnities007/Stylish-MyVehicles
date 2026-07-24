@@ -10,8 +10,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.domain.model.MaintenanceCategory
 import com.segnities007.stylishui.components.molecules.StylishConnectedChipRow
 import com.segnities007.stylishui.components.molecules.StylishDatePickerField
@@ -31,7 +33,7 @@ fun MaintenanceInputDialog(
     StylishDialogSurface(onDismiss = { onIntent(MaintenanceRecordIntent.CloseDialog) }) {
         Column(Modifier.padding(24.dp)) {
             Text(
-                if (state.isEditing) "整備記録を編集" else "整備を記録",
+                if (state.isEditing) stringResource(R.string.edit_maintenance_record) else stringResource(R.string.add_maintenance_record),
                 style = MaterialTheme.typography.titleLarge,
             )
             Spacer(Modifier.height(16.dp))
@@ -50,16 +52,16 @@ fun MaintenanceInputDialog(
             StylishDatePickerField(
                 value = state.inputDate,
                 onValueChange = { it?.let { d -> onIntent(MaintenanceRecordIntent.DateChanged(d)) } },
-                label = "日付",
+                label = stringResource(R.string.date_label),
                 confirmLabel = "OK",
-                dismissLabel = "キャンセル",
-                placeholder = "日付を選択",
+                dismissLabel = stringResource(R.string.cancel),
+                placeholder = stringResource(R.string.select_date),
             )
             Spacer(Modifier.height(12.dp))
             OutlinedTextField(
                 value = state.inputTitle,
                 onValueChange = { onIntent(MaintenanceRecordIntent.TitleChanged(it)) },
-                label = { Text("整備内容 *") },
+                label = { Text(stringResource(R.string.maintenance_content_label)) },
                 placeholder = { Text("エンジンオイル交換") },
                 singleLine = true,
                 isError = state.titleError != null,
@@ -70,7 +72,7 @@ fun MaintenanceInputDialog(
             OutlinedTextField(
                 value = state.inputOdometer,
                 onValueChange = { onIntent(MaintenanceRecordIntent.OdometerChanged(it)) },
-                label = { Text("走行距離 (km)") },
+                label = { Text(stringResource(R.string.maintenance_odometer_label)) },
                 placeholder = { Text("45230") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -79,7 +81,7 @@ fun MaintenanceInputDialog(
             OutlinedTextField(
                 value = state.inputCost,
                 onValueChange = { onIntent(MaintenanceRecordIntent.CostChanged(it)) },
-                label = { Text("費用 (円)") },
+                label = { Text(stringResource(R.string.maintenance_cost_label)) },
                 placeholder = { Text("4200") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -88,7 +90,7 @@ fun MaintenanceInputDialog(
             OutlinedTextField(
                 value = state.inputShopName,
                 onValueChange = { onIntent(MaintenanceRecordIntent.ShopNameChanged(it)) },
-                label = { Text("整備工場") },
+                label = { Text(stringResource(R.string.maintenance_shop_label)) },
                 placeholder = { Text("ディーラー") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -97,8 +99,8 @@ fun MaintenanceInputDialog(
 
             Spacer(Modifier.height(24.dp))
             StylishDialogActions(
-                confirmLabel = if (state.isEditing) "更新" else "保存",
-                cancelLabel = "キャンセル",
+                confirmLabel = if (state.isEditing) stringResource(R.string.update) else stringResource(R.string.save),
+                cancelLabel = stringResource(R.string.cancel),
                 onConfirm = { onIntent(MaintenanceRecordIntent.Save) },
                 onCancel = { onIntent(MaintenanceRecordIntent.CloseDialog) },
                 confirmEnabled = state.canSave,

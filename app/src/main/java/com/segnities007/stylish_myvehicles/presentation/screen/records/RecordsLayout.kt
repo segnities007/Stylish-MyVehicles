@@ -24,7 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,7 +33,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylishui.components.atoms.StylishIconButton
 import com.segnities007.stylishui.components.molecules.StylishEmptyState
 import com.segnities007.stylishui.components.patterns.StylishHeader
@@ -54,7 +56,7 @@ fun RecordsLayout(
     floatingActionButton: @Composable () -> Unit = {},
     periodContent: LazyListScope.(Period) -> Unit,
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     LaunchedEffect(viewModel) {
@@ -91,8 +93,8 @@ fun RecordsLayout(
                 state.isLoading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
                 state.periods.isEmpty() -> StylishEmptyState(
                     icon = Icons.Default.AttachMoney,
-                    title = "記録がありません",
-                    description = "給油・整備・費用を記録しましょう",
+                    title = stringResource(R.string.no_records_title),
+                    description = stringResource(R.string.no_records_description),
                     modifier = Modifier.align(Alignment.Center),
                 )
 
@@ -198,14 +200,14 @@ internal fun PeriodShell(
                 },
                 navigation = {
                     StylishIconButton(
-                        Icons.AutoMirrored.Filled.ArrowBack, "戻る",
+                        Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back),
                         onClick = onNavigateBack,
                     )
                 },
                 actions = {
                     Box {
                         StylishIconButton(
-                            Icons.Default.Settings, "表示設定",
+                            Icons.Default.Settings, stringResource(R.string.display_settings),
                             onClick = { showModeMenu = true },
                         )
                         DropdownMenu(
@@ -243,7 +245,7 @@ private fun NoDataBoundaryPage(
                 title = {},
                 navigation = {
                     StylishIconButton(
-                        Icons.AutoMirrored.Filled.ArrowBack, "戻る",
+                        Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back),
                         onClick = onNavigateBack,
                     )
                 },
@@ -253,8 +255,8 @@ private fun NoDataBoundaryPage(
         item {
             StylishEmptyState(
                 icon = Icons.Default.AttachMoney,
-                title = "これより過去のデータはありません",
-                description = "古い記録はありません",
+                title = stringResource(R.string.no_older_data),
+                description = stringResource(R.string.no_older_records),
             )
         }
     }

@@ -11,7 +11,8 @@ data class ExportDocument(
     val content: String,
 )
 
-class ExportDataUseCase {
+object ExportDataUseCase {
+
     fun exportVehiclesCsv(vehicles: List<Vehicle>): ExportDocument {
         val header =
             "ID,メーカー,車種,グレード,年式,型式,ナンバー,排気量(cc),重量(kg),カラー,初度登録日,車検満了日,自賠責満了日,任意保険満了日,保険会社,等級"
@@ -23,7 +24,7 @@ class ExportDataUseCase {
                 v.inspectionExpiry ?: "", v.jibaiExpiry ?: "",
                 v.insuranceExpiry ?: "", v.insuranceCompany,
                 v.insuranceRank ?: "",
-            ).joinToString(",")
+            ).joinToString(",") { csvField(it.toString()) }
         }
         return ExportDocument(
             fileName = "vehicles_${java.time.LocalDate.now()}.csv",
@@ -39,7 +40,7 @@ class ExportDataUseCase {
                 r.id, r.vehicleId, r.date, r.odometer, r.volume,
                 r.amount, r.unitPrice ?: "", r.fuelEconomy ?: "",
                 if (r.isFullTank) "はい" else "いいえ",
-            ).joinToString(",")
+            ).joinToString(",") { csvField(it.toString()) }
         }
         return ExportDocument(
             fileName = "fuel_records_${java.time.LocalDate.now()}.csv",
@@ -53,9 +54,8 @@ class ExportDataUseCase {
         val rows = records.map { r ->
             listOf(
                 r.id, r.vehicleId, r.date, r.odometer ?: "",
-                r.category.label, r.title.replace(",", "、"),
-                r.cost, r.shopName.replace(",", "、"),
-            ).joinToString(",")
+                r.category.label, r.title, r.cost, r.shopName,
+            ).joinToString(",") { csvField(it.toString()) }
         }
         return ExportDocument(
             fileName = "maintenance_records_${java.time.LocalDate.now()}.csv",
@@ -69,8 +69,8 @@ class ExportDataUseCase {
         val rows = records.map { r ->
             listOf(
                 r.id, r.vehicleId, r.date, r.category.label,
-                r.title.replace(",", "、"), r.amount,
-            ).joinToString(",")
+                r.title, r.amount,
+            ).joinToString(",") { csvField(it.toString()) }
         }
         return ExportDocument(
             fileName = "cost_records_${java.time.LocalDate.now()}.csv",
@@ -78,4 +78,11 @@ class ExportDataUseCase {
             content = (listOf(header) + rows).joinToString("\n"),
         )
     }
+
+    private fun csvField(value: String): String =
+        if (value.contains(',') || value.contains('"') || value.contains('\n')) {
+            "\"${value.replace("\"", "\"\"")}\""
+        } else {
+            value
+        }
 }

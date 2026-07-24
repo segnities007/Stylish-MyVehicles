@@ -1,5 +1,6 @@
 package com.segnities007.stylish_myvehicles.presentation.screen.onboarding
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,33 +30,35 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 import kotlinx.coroutines.launch
 
 private data class OnboardingPage(
     val icon: ImageVector,
-    val title: String,
-    val description: String,
+    @StringRes val titleRes: Int,
+    @StringRes val descriptionRes: Int,
 )
 
 private val pages = listOf(
     OnboardingPage(
         icon = Icons.Default.Event,
-        title = "あらゆる乗り物を管理",
-        description = "車・バイク・自転車・トラックに対応。\n種別ごとに車検・保険・税金の期限を\n自動計算して通知でお知らせします。",
+        titleRes = R.string.onboarding_manage_title,
+        descriptionRes = R.string.onboarding_manage_description,
     ),
     OnboardingPage(
         icon = Icons.Default.LocalGasStation,
-        title = "給油記録で燃費を可視化",
-        description = "満タン法で実燃費を自動計算。\n推移グラフで愛車の調子を把握できます。\nレシートのカメラ読み取りにも対応。",
+        titleRes = R.string.onboarding_fuel_title,
+        descriptionRes = R.string.onboarding_fuel_description,
     ),
     OnboardingPage(
         icon = Icons.Default.Build,
-        title = "整備・費用を一元管理",
-        description = "種別ごとの整備目安で履歴を記録。\nカテゴリ別の費用グラフで\n年間維持費がひと目でわかります。",
+        titleRes = R.string.onboarding_maintenance_title,
+        descriptionRes = R.string.onboarding_maintenance_description,
     ),
 )
 
@@ -75,7 +78,7 @@ fun OnboardingScreen(
         // スキップ
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             TextButton(onClick = onComplete) {
-                Text("スキップ")
+                Text(stringResource(R.string.skip))
             }
         }
 
@@ -97,13 +100,13 @@ fun OnboardingScreen(
                 )
                 Spacer(Modifier.height(32.dp))
                 Text(
-                    p.title,
+                    stringResource(p.titleRes),
                     style = MaterialTheme.typography.headlineMedium,
                     textAlign = TextAlign.Center,
                 )
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    p.description,
+                    stringResource(p.descriptionRes),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -151,7 +154,7 @@ fun OnboardingScreen(
                 .height(52.dp),
         ) {
             Text(
-                if (pagerState.currentPage < pages.size - 1) "次へ" else "はじめる",
+                if (pagerState.currentPage < pages.size - 1) stringResource(R.string.next) else stringResource(R.string.get_started),
                 style = MaterialTheme.typography.titleMedium,
             )
         }

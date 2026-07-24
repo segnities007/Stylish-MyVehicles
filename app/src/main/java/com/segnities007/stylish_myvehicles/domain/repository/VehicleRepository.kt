@@ -9,4 +9,5 @@ interface VehicleRepository {
     suspend fun insert(vehicle: Vehicle): Long
     suspend fun update(vehicle: Vehicle)
     suspend fun delete(vehicle: Vehicle)
+    suspend fun deleteById(id: Long)
 }

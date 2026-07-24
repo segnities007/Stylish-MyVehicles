@@ -9,8 +9,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
 import com.segnities007.stylish_myvehicles.domain.service.InspectionCalculator
@@ -54,10 +56,10 @@ fun VehicleDeadlineSection(
                 )
             }
 
-            val inspectionExpiry = vehicle.currentInspectionExpiry
+            val inspectionExpiry = InspectionCalculator.currentExpiryFor(vehicle)
             add(
                 StylishConnectedListItem(
-                    "車検",
+                    stringResource(R.string.inspection_label),
                     inspectionExpiry?.let { "$it（${deadlineStatus(it)}）" } ?: NOT_REGISTERED,
                     onClick = { onEditField(VehicleField.INSPECTION_EXPIRY) },
                     trailingContent = chevron,
@@ -67,7 +69,7 @@ fun VehicleDeadlineSection(
             val jibaiExpiry = vehicle.jibaiExpiry
             add(
                 StylishConnectedListItem(
-                    "自賠責",
+                    stringResource(R.string.jibai_label),
                     jibaiExpiry?.let { "$it（${deadlineStatus(it)}）" } ?: NOT_REGISTERED,
                     onClick = { onEditField(VehicleField.JIBAI_EXPIRY) },
                     trailingContent = chevron,
@@ -77,7 +79,7 @@ fun VehicleDeadlineSection(
             val insuranceExpiry = vehicle.insuranceExpiry
             add(
                 StylishConnectedListItem(
-                    "任意保険",
+                    stringResource(R.string.voluntary_insurance_label),
                     insuranceExpiry?.let { "$it（${deadlineStatus(it)}）" } ?: NOT_REGISTERED,
                     onClick = { onEditField(VehicleField.INSURANCE_EXPIRY) },
                     trailingContent = chevron,

@@ -1,9 +1,11 @@
 package com.segnities007.stylish_myvehicles.presentation.screen.cost
 
+import androidx.compose.runtime.Immutable
 import com.segnities007.stylish_myvehicles.domain.model.CostCategory
 import com.segnities007.stylish_myvehicles.domain.model.CostRecord
 import java.time.LocalDate
 
+@Immutable
 data class CostListUiState(
     val vehicleId: Long = 0,
     val records: List<CostRecord> = emptyList(),

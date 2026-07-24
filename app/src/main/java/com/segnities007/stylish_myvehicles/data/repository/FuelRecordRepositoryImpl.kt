@@ -27,4 +27,7 @@ class FuelRecordRepositoryImpl(
 
     override suspend fun delete(record: FuelRecord) =
         dao.delete(record.toEntity())
+
+    override suspend fun deleteById(id: Long) =
+        dao.deleteById(id)
 }

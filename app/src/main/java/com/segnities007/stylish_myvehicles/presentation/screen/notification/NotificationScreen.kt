@@ -22,12 +22,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.domain.service.DeadlineInfo
 import com.segnities007.stylishui.components.molecules.StylishConnectedListItemColumn
 import com.segnities007.stylishui.components.molecules.StylishEmptyState
@@ -46,7 +48,7 @@ fun NotificationScreen(
     onNavigateToHome: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
 
     StylishScaffold(modifier = modifier) {
@@ -58,7 +60,7 @@ fun NotificationScreen(
             ) {
                 item {
                     StylishHeader(
-                        title = { Text("通知") },
+                        title = { Text(stringResource(R.string.notifications_title)) },
                     )
                     Spacer(Modifier.height(8.dp))
                 }
@@ -81,8 +83,8 @@ fun NotificationScreen(
                         item {
                             StylishEmptyState(
                                 icon = Icons.Default.Notifications,
-                                title = "通知はありません",
-                                description = "期限が設定されるとここに表示されます",
+                                title = stringResource(R.string.no_notifications_title),
+                                description = stringResource(R.string.no_notifications_description),
                             )
                         }
                     }
@@ -105,7 +107,7 @@ fun NotificationScreen(
 
                         if (expired.isNotEmpty()) {
                             item {
-                                StylishSectionTitle("期限切れ")
+                                StylishSectionTitle(stringResource(R.string.expired_section))
                             }
                             item {
                                 DeadlineList(items = expired)
@@ -115,7 +117,7 @@ fun NotificationScreen(
 
                         if (urgent.isNotEmpty()) {
                             item {
-                                StylishSectionTitle("まもなく期限")
+                                StylishSectionTitle(stringResource(R.string.expiring_soon_section))
                             }
                             item {
                                 DeadlineList(items = urgent)
@@ -125,7 +127,7 @@ fun NotificationScreen(
 
                         if (upcoming.isNotEmpty()) {
                             item {
-                                StylishSectionTitle("今後の予定")
+                                StylishSectionTitle(stringResource(R.string.upcoming_section))
                             }
                             item {
                                 DeadlineList(items = upcoming)
@@ -144,9 +146,9 @@ fun NotificationScreen(
 @Composable
 private fun MostImportantDeadlineCard(item: VehicleDeadlineItem) {
     val daysText = if (item.deadline.isExpired) {
-        "期限切れ（${-item.deadline.daysRemaining}日超過）"
+        stringResource(R.string.expired_days_over, -item.deadline.daysRemaining)
     } else {
-        "あと${item.deadline.daysRemaining}日"
+        stringResource(R.string.days_remaining, item.deadline.daysRemaining)
     }
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -157,7 +159,7 @@ private fun MostImportantDeadlineCard(item: VehicleDeadlineItem) {
     ) {
         Column(Modifier.padding(16.dp)) {
             Text(
-                "最重要",
+                stringResource(R.string.most_important),
                 style = MaterialTheme.typography.labelLarge,
             )
             Spacer(Modifier.height(4.dp))
@@ -180,9 +182,9 @@ private fun DeadlineList(items: List<VehicleDeadlineItem>) {
         spacing = 4.dp,
         items = items.map { item ->
             val daysText = if (item.deadline.isExpired) {
-                "期限切れ（${-item.deadline.daysRemaining}日超過）"
+                stringResource(R.string.expired_days_over, -item.deadline.daysRemaining)
             } else {
-                "あと${item.deadline.daysRemaining}日"
+                stringResource(R.string.days_remaining, item.deadline.daysRemaining)
             }
             StylishConnectedListItem(
                 headline = "${item.vehicleName} / ${item.deadline.label}",

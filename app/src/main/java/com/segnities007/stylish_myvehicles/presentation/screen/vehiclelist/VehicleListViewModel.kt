@@ -2,7 +2,7 @@ package com.segnities007.stylish_myvehicles.presentation.screen.vehiclelist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.GetVehiclesUseCase
+import com.segnities007.stylish_myvehicles.domain.repository.VehicleRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class VehicleListViewModel(
-    private val getVehiclesUseCase: GetVehiclesUseCase,
+    private val vehicleRepository: VehicleRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(VehicleListUiState())
     val uiState: StateFlow<VehicleListUiState> = _uiState.asStateFlow()
@@ -23,7 +23,7 @@ class VehicleListViewModel(
 
     init {
         viewModelScope.launch {
-            getVehiclesUseCase().collect { vehicles ->
+            vehicleRepository.getAll().collect { vehicles ->
                 _uiState.update { it.copy(vehicles = vehicles, isLoading = false) }
             }
         }

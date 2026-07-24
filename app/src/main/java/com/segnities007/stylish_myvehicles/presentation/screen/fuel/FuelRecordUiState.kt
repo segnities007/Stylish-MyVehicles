@@ -1,9 +1,11 @@
 package com.segnities007.stylish_myvehicles.presentation.screen.fuel
 
+import androidx.compose.runtime.Immutable
 import com.segnities007.stylish_myvehicles.domain.model.FuelRecord
 import com.segnities007.stylish_myvehicles.domain.model.RecordPeriod
 import java.time.LocalDate
 
+@Immutable
 data class FuelRecordUiState(
     val vehicleId: Long = 0,
     val records: List<FuelRecord> = emptyList(),

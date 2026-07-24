@@ -1,6 +1,5 @@
 package com.segnities007.stylish_myvehicles.presentation.navigation
 
-import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -32,9 +31,11 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
+import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.domain.usecase.ExportDocument
 import com.segnities007.stylishui.components.atoms.StylishFab
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.LocalBottomBarVisible
@@ -69,7 +70,6 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 @Composable
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 fun AppNavigation(
     showOnboarding: Boolean,
     onSaveDocument: (ExportDocument) -> Unit,
@@ -139,14 +139,15 @@ fun AppNavigation(
             ) {
                 StylishFab(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "記録を追加",
+                    contentDescription = stringResource(R.string.add_record_cd),
                     onClick = { showAddDialog.value = true },
                 )
             }
         },
-    ) { _ ->
+    ) { innerPadding ->
         NavDisplay(
             backStack = backStack,
+            modifier = Modifier.padding(innerPadding),
             transitionSpec = {
                 (slideInHorizontally(tween(260)) { it / 5 } + fadeIn(tween(220))) togetherWith
                         (slideOutHorizontally(tween(260)) { -it / 10 } + fadeOut(tween(180)))

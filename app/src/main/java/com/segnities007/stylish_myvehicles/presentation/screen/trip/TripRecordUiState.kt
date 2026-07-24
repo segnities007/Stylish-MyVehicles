@@ -1,10 +1,12 @@
 package com.segnities007.stylish_myvehicles.presentation.screen.trip
 
+import androidx.compose.runtime.Immutable
 import com.segnities007.stylish_myvehicles.domain.model.TripPurpose
 import com.segnities007.stylish_myvehicles.domain.model.TripRecord
 import java.time.LocalDate
 import java.time.LocalTime
 
+@Immutable
 data class TripRecordUiState(
     val records: List<TripRecord> = emptyList(),
     val editingRecordId: Long? = null,

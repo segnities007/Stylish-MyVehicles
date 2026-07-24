@@ -23,6 +23,7 @@ class InsertFuelRecordUseCaseTest {
         override suspend fun insert(record: FuelRecord): Long = 1L
         override suspend fun update(record: FuelRecord) {}
         override suspend fun delete(record: FuelRecord) {}
+        override suspend fun deleteById(id: Long) {}
     }
 
     private val fakeCostRepository = object : CostRecordRepository {

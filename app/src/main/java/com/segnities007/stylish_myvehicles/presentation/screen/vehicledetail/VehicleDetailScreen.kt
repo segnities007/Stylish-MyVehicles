@@ -21,15 +21,17 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
 import com.segnities007.stylish_myvehicles.domain.usecase.ExportDocument
@@ -60,7 +62,7 @@ fun VehicleDetailScreen(
     onSaveDocument: (ExportDocument) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     var showExportDialog by remember { mutableStateOf(false) }
 
     // ホーム画面と同じスクロールUI。最上部にいる間だけFABを表示する
@@ -93,7 +95,7 @@ fun VehicleDetailScreen(
             ) {
                 StylishFab(
                     imageVector = Icons.Default.FileDownload,
-                    contentDescription = "データエクスポート",
+                    contentDescription = stringResource(R.string.data_export),
                     onClick = { showExportDialog = true },
                 )
             }
@@ -105,17 +107,17 @@ fun VehicleDetailScreen(
             header = {
                 StylishHeader(
                     title = {
-                        Text(if (vehicle != null) "${vehicle.maker} ${vehicle.name}" else "車両詳細")
+                        Text(if (vehicle != null) "${vehicle.maker} ${vehicle.name}" else stringResource(R.string.vehicle_detail))
                     },
                     navigation = {
                         StylishIconButton(
-                            Icons.AutoMirrored.Filled.ArrowBack, "戻る",
+                            Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back),
                             onClick = { viewModel.accept(VehicleDetailIntent.NavigateBack) },
                         )
                     },
                     actions = {
                         StylishIconButton(
-                            Icons.Default.Edit, "編集",
+                            Icons.Default.Edit, stringResource(R.string.edit),
                             onClick = { viewModel.accept(VehicleDetailIntent.EditVehicle) },
                         )
                     },
@@ -125,7 +127,7 @@ fun VehicleDetailScreen(
             if (vehicle != null) {
                 // 期限管理
                 item {
-                    StylishSectionTitle("期限管理")
+                    StylishSectionTitle(stringResource(R.string.deadline_management))
                     VehicleDeadlineSection(
                         vehicle = vehicle,
                         taxPaidThisYear = state.taxPaidThisYear,
@@ -138,7 +140,7 @@ fun VehicleDetailScreen(
 
                 // 車両情報
                 item {
-                    StylishSectionTitle("車両情報")
+                    StylishSectionTitle(stringResource(R.string.vehicle_info))
                     VehicleInfoSection(
                         vehicle = vehicle,
                         onEditField = {
@@ -169,7 +171,7 @@ fun VehicleDetailScreen(
     if (showExportDialog) {
         StylishDialogSurface(onDismiss = { showExportDialog = false }) {
             Column(Modifier.padding(24.dp)) {
-                Text("データエクスポート", style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.data_export), style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.height(16.dp))
                 StylishConnectedButtonColumn(
                     items = listOf(
@@ -178,19 +180,19 @@ fun VehicleDetailScreen(
                                 showExportDialog = false
                                 viewModel.accept(VehicleDetailIntent.ExportFuelCsv)
                             },
-                        ) { Text("給油記録をCSV出力") },
+                        ) { Text(stringResource(R.string.export_fuel_csv)) },
                         StylishConnectedButtonItem(
                             onClick = {
                                 showExportDialog = false
                                 viewModel.accept(VehicleDetailIntent.ExportMaintenanceCsv)
                             },
-                        ) { Text("整備記録をCSV出力") },
+                        ) { Text(stringResource(R.string.export_maintenance_csv)) },
                         StylishConnectedButtonItem(
                             onClick = {
                                 showExportDialog = false
                                 viewModel.accept(VehicleDetailIntent.ExportCostCsv)
                             },
-                        ) { Text("費用記録をCSV出力") },
+                        ) { Text(stringResource(R.string.export_cost_csv)) },
                     ),
                 )
             }

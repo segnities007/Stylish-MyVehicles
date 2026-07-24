@@ -11,9 +11,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
 import com.segnities007.stylishui.components.molecules.StylishConnectedChipRow
 import com.segnities007.stylishui.components.molecules.StylishDatePickerField
@@ -72,8 +74,8 @@ fun VehicleFieldEditDialog(
                     onValueChange = onDateChanged,
                     label = field.label,
                     confirmLabel = "OK",
-                    dismissLabel = "キャンセル",
-                    placeholder = "日付を選択",
+                    dismissLabel = stringResource(R.string.cancel),
+                    placeholder = stringResource(R.string.select_date),
                 )
 
                 VehicleFieldInputType.SELECTION -> StylishConnectedChipRow(
@@ -90,8 +92,8 @@ fun VehicleFieldEditDialog(
 
             Spacer(Modifier.height(24.dp))
             StylishDialogActions(
-                confirmLabel = "保存",
-                cancelLabel = "キャンセル",
+                confirmLabel = stringResource(R.string.save),
+                cancelLabel = stringResource(R.string.cancel),
                 onConfirm = onSave,
                 onCancel = onDismiss,
             )

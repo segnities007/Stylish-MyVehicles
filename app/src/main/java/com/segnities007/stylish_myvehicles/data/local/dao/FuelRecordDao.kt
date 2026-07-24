@@ -24,4 +24,7 @@ interface FuelRecordDao {
 
     @Delete
     suspend fun delete(entity: FuelRecordEntity)
+
+    @Query("DELETE FROM fuel_records WHERE id = :id")
+    suspend fun deleteById(id: Long)
 }

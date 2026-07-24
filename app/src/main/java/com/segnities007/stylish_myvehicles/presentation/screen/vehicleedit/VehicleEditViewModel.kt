@@ -3,11 +3,9 @@ package com.segnities007.stylish_myvehicles.presentation.screen.vehicleedit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
+import com.segnities007.stylish_myvehicles.domain.repository.VehicleRepository
 import com.segnities007.stylish_myvehicles.domain.service.InspectionCalculator
-import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.DeleteVehicleUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.GetVehicleUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.InsertVehicleUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.UpdateVehicleUseCase
 import com.segnities007.stylish_myvehicles.presentation.util.normalizeIntegerInput
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -21,10 +19,8 @@ import kotlinx.coroutines.launch
 
 class VehicleEditViewModel(
     private val vehicleId: Long?,
-    private val getVehicleUseCase: GetVehicleUseCase,
+    private val vehicleRepository: VehicleRepository,
     private val insertVehicleUseCase: InsertVehicleUseCase,
-    private val updateVehicleUseCase: UpdateVehicleUseCase,
-    private val deleteVehicleUseCase: DeleteVehicleUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(VehicleEditUiState(vehicleId = vehicleId))
     val uiState: StateFlow<VehicleEditUiState> = _uiState.asStateFlow()
@@ -35,7 +31,7 @@ class VehicleEditViewModel(
     init {
         if (vehicleId != null) {
             viewModelScope.launch {
-                val vehicle = getVehicleUseCase(vehicleId).first() ?: return@launch
+                val vehicle = vehicleRepository.getById(vehicleId).first() ?: return@launch
                 _uiState.update {
                     it.copy(
                         category = vehicle.category,
@@ -168,7 +164,7 @@ class VehicleEditViewModel(
                 insuranceRank = state.insuranceRank.toIntOrNull(),
             )
             if (state.isEditing) {
-                updateVehicleUseCase(vehicle)
+                vehicleRepository.update(vehicle)
             }
             else {
                 insertVehicleUseCase(vehicle)
@@ -181,8 +177,8 @@ class VehicleEditViewModel(
         val state = _uiState.value
         val id = state.vehicleId ?: return
         viewModelScope.launch {
-            val vehicle = getVehicleUseCase(id).first() ?: return@launch
-            deleteVehicleUseCase(vehicle)
+            val vehicle = vehicleRepository.getById(id).first() ?: return@launch
+            vehicleRepository.delete(vehicle)
             _effects.send(VehicleEditEffect.NavigateBack)
         }
     }

@@ -2,10 +2,10 @@ package com.segnities007.stylish_myvehicles.presentation.screen.records
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.segnities007.stylish_myvehicles.domain.usecase.cost.GetCostRecordsUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.fuel.GetFuelRecordsUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.GetMaintenanceRecordsUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.GetVehiclesUseCase
+import com.segnities007.stylish_myvehicles.domain.repository.CostRecordRepository
+import com.segnities007.stylish_myvehicles.domain.repository.FuelRecordRepository
+import com.segnities007.stylish_myvehicles.domain.repository.MaintenanceRecordRepository
+import com.segnities007.stylish_myvehicles.domain.repository.VehicleRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,10 +23,10 @@ class RecordsViewModel(
     private val vehicleId: Long,
     private val topic: RecordTopic,
     initialPeriodMode: PeriodMode,
-    private val getFuelRecordsUseCase: GetFuelRecordsUseCase,
-    private val getMaintenanceRecordsUseCase: GetMaintenanceRecordsUseCase,
-    private val getCostRecordsUseCase: GetCostRecordsUseCase,
-    private val getVehiclesUseCase: GetVehiclesUseCase,
+    private val fuelRecordRepository: FuelRecordRepository,
+    private val maintenanceRecordRepository: MaintenanceRecordRepository,
+    private val costRecordRepository: CostRecordRepository,
+    private val vehicleRepository: VehicleRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(
         RecordsUiState(vehicleId = vehicleId, topic = topic, periodMode = initialPeriodMode)
@@ -40,13 +40,13 @@ class RecordsViewModel(
 
     init {
         viewModelScope.launch {
-            val vehicle = getVehiclesUseCase().first()
+            val vehicle = vehicleRepository.getAll().first()
                 .find { it.id == vehicleId }
 
             combine(
-                getFuelRecordsUseCase(vehicleId),
-                getMaintenanceRecordsUseCase(vehicleId),
-                getCostRecordsUseCase(vehicleId),
+                fuelRecordRepository.getByVehicleId(vehicleId),
+                maintenanceRecordRepository.getByVehicleId(vehicleId),
+                costRecordRepository.getByVehicleId(vehicleId),
                 _periodMode,
             ) { fuels, maintenances, costs, mode ->
                 val recordDates = when (topic) {

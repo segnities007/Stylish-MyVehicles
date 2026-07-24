@@ -5,12 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.segnities007.stylish_myvehicles.domain.model.MaintenanceCategory
 import com.segnities007.stylish_myvehicles.domain.model.MaintenanceRecord
 import com.segnities007.stylish_myvehicles.domain.model.MaintenanceSchedule
-import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.DeleteMaintenanceRecordUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.GetMaintenanceRecordsUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.GetMaintenanceSchedulesUseCase
+import com.segnities007.stylish_myvehicles.domain.repository.MaintenanceRecordRepository
+import com.segnities007.stylish_myvehicles.domain.repository.MaintenanceScheduleRepository
+import com.segnities007.stylish_myvehicles.domain.repository.VehicleRepository
 import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.InsertMaintenanceRecordUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.UpdateMaintenanceRecordUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.GetVehicleUseCase
 import com.segnities007.stylish_myvehicles.presentation.util.normalizeIntegerInput
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -25,12 +23,10 @@ import java.time.LocalDate
 
 class MaintenanceRecordViewModel(
     private val vehicleId: Long,
-    private val getMaintenanceRecordsUseCase: GetMaintenanceRecordsUseCase,
+    private val maintenanceRecordRepository: MaintenanceRecordRepository,
     private val insertMaintenanceRecordUseCase: InsertMaintenanceRecordUseCase,
-    private val updateMaintenanceRecordUseCase: UpdateMaintenanceRecordUseCase,
-    private val deleteMaintenanceRecordUseCase: DeleteMaintenanceRecordUseCase,
-    private val getVehicleUseCase: GetVehicleUseCase,
-    private val getMaintenanceSchedulesUseCase: GetMaintenanceSchedulesUseCase,
+    private val vehicleRepository: VehicleRepository,
+    private val maintenanceScheduleRepository: MaintenanceScheduleRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(MaintenanceRecordUiState(vehicleId = vehicleId))
     val uiState: StateFlow<MaintenanceRecordUiState> = _uiState.asStateFlow()
@@ -40,18 +36,18 @@ class MaintenanceRecordViewModel(
 
     init {
         viewModelScope.launch {
-            getMaintenanceRecordsUseCase(vehicleId).collect { records ->
+            maintenanceRecordRepository.getByVehicleId(vehicleId).collect { records ->
                 _uiState.update { it.copy(records = records, isLoading = false) }
             }
         }
         viewModelScope.launch {
-            val vehicle = getVehicleUseCase(vehicleId).first() ?: return@launch
+            val vehicle = vehicleRepository.getById(vehicleId).first() ?: return@launch
             val relevant = MaintenanceCategory
                 .relevantFor(vehicle.category)
             _uiState.update { it.copy(relevantCategories = relevant) }
         }
         viewModelScope.launch {
-            getMaintenanceSchedulesUseCase(vehicleId).collect { schedules ->
+            maintenanceScheduleRepository.getByVehicleId(vehicleId).collect { schedules ->
                 val now = LocalDate.now()
                 val dueItems = schedules.mapNotNull { schedule ->
                     val days = schedule.daysUntilDue(now) ?: return@mapNotNull null
@@ -153,7 +149,7 @@ class MaintenanceRecordViewModel(
             if (state.isEditing) {
                 val existing =
                     state.records.find { it.id == state.editingRecordId } ?: return@launch
-                updateMaintenanceRecordUseCase(
+                maintenanceRecordRepository.update(
                     existing.copy(
                         date = state.inputDate,
                         odometer = state.inputOdometer.toIntOrNull(),
@@ -185,7 +181,7 @@ class MaintenanceRecordViewModel(
         val recordId = _uiState.value.deletingRecordId ?: return
         viewModelScope.launch {
             val record = _uiState.value.records.find { it.id == recordId } ?: return@launch
-            deleteMaintenanceRecordUseCase(record)
+            maintenanceRecordRepository.delete(record)
             _uiState.update { it.copy(deletingRecordId = null) }
         }
     }

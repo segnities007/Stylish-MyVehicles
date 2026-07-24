@@ -1,6 +1,7 @@
 package com.segnities007.stylish_myvehicles.presentation.navigation
 
 import androidx.navigation3.runtime.NavKey
+import java.util.UUID
 
 internal sealed interface AppDestination : NavKey
 internal data object OnboardingDestination : AppDestination
@@ -11,13 +12,9 @@ internal data object VehiclePagerDestination : AppDestination
  */
 internal data class VehicleEditDestination(
     val vehicleId: Long?,
-    val sessionId: Long = nextVehicleEditSessionId(),
+    val sessionId: String = UUID.randomUUID().toString(),
 ) : AppDestination
 
-private var vehicleEditSessionSequence = 0L
-
-@Synchronized
-private fun nextVehicleEditSessionId(): Long = ++vehicleEditSessionSequence
 internal data class FuelRecordsDestination(val vehicleId: Long, val openAdd: Boolean = false) :
     AppDestination
 

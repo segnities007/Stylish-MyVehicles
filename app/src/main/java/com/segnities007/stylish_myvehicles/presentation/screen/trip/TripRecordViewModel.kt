@@ -2,10 +2,7 @@ package com.segnities007.stylish_myvehicles.presentation.screen.trip
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.segnities007.stylish_myvehicles.domain.usecase.trip.DeleteTripRecordUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.trip.GetTripRecordsUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.trip.InsertTripRecordUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.trip.UpdateTripRecordUseCase
+import com.segnities007.stylish_myvehicles.domain.repository.TripRecordRepository
 import com.segnities007.stylish_myvehicles.presentation.util.normalizeDecimalInput
 import com.segnities007.stylish_myvehicles.presentation.util.normalizeIntegerInput
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,17 +17,14 @@ import kotlin.math.roundToLong
 
 class TripRecordViewModel(
     private val vehicleId: Long,
-    getTripRecordsUseCase: GetTripRecordsUseCase,
-    private val insertTripRecordUseCase: InsertTripRecordUseCase,
-    private val updateTripRecordUseCase: UpdateTripRecordUseCase,
-    private val deleteTripRecordUseCase: DeleteTripRecordUseCase,
+    private val tripRecordRepository: TripRecordRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(TripRecordUiState())
     val uiState: StateFlow<TripRecordUiState> = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            getTripRecordsUseCase(vehicleId).collect { records ->
+            tripRecordRepository.getByVehicleId(vehicleId).collect { records ->
                 _uiState.update { it.copy(records = records) }
             }
         }
@@ -142,9 +136,9 @@ class TripRecordViewModel(
                     memo = "",
                 )
             if (values.id == 0L) {
-                insertTripRecordUseCase(values)
+                tripRecordRepository.insert(values)
             } else {
-                updateTripRecordUseCase(values)
+                tripRecordRepository.update(values)
             }
             _uiState.update { it.copy(editingRecordId = null, isInputDialogOpen = false) }
         }
@@ -155,7 +149,7 @@ class TripRecordViewModel(
         val record = state.records.firstOrNull { it.id == state.deletingRecordId } ?: return
         if (record.isRecording) return
         viewModelScope.launch {
-            deleteTripRecordUseCase(record)
+            tripRecordRepository.delete(record)
             _uiState.update { it.copy(deletingRecordId = null) }
         }
     }

@@ -3,11 +3,11 @@ package com.segnities007.stylish_myvehicles.presentation.screen.recordslist
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.segnities007.stylish_myvehicles.domain.model.CostCategory
-import com.segnities007.stylish_myvehicles.domain.usecase.cost.GetCostRecordsUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.fuel.GetFuelRecordsUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.GetMaintenanceRecordsUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.trip.GetTripRecordsUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.GetVehiclesUseCase
+import com.segnities007.stylish_myvehicles.domain.repository.CostRecordRepository
+import com.segnities007.stylish_myvehicles.domain.repository.FuelRecordRepository
+import com.segnities007.stylish_myvehicles.domain.repository.MaintenanceRecordRepository
+import com.segnities007.stylish_myvehicles.domain.repository.TripRecordRepository
+import com.segnities007.stylish_myvehicles.domain.repository.VehicleRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -27,11 +27,11 @@ import java.time.YearMonth
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class RecordsListViewModel(
-    getVehiclesUseCase: GetVehiclesUseCase,
-    getFuelRecordsUseCase: GetFuelRecordsUseCase,
-    getMaintenanceRecordsUseCase: GetMaintenanceRecordsUseCase,
-    getCostRecordsUseCase: GetCostRecordsUseCase,
-    getTripRecordsUseCase: GetTripRecordsUseCase,
+    vehicleRepository: VehicleRepository,
+    fuelRecordRepository: FuelRecordRepository,
+    maintenanceRecordRepository: MaintenanceRecordRepository,
+    costRecordRepository: CostRecordRepository,
+    tripRecordRepository: TripRecordRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(RecordsListUiState())
     val uiState: StateFlow<RecordsListUiState> = _uiState.asStateFlow()
@@ -41,15 +41,15 @@ class RecordsListViewModel(
 
     init {
         viewModelScope.launch {
-            getVehiclesUseCase()
+            vehicleRepository.getAll()
                 .flatMapLatest { vehicles ->
                     val perVehicleFlows: List<Flow<List<RecordEntry>>> = vehicles.map { vehicle ->
                         val vehicleName = "${vehicle.maker} ${vehicle.name}".trim()
                         combine(
-                            getFuelRecordsUseCase(vehicle.id),
-                            getMaintenanceRecordsUseCase(vehicle.id),
-                            getCostRecordsUseCase(vehicle.id),
-                            getTripRecordsUseCase(vehicle.id),
+                            fuelRecordRepository.getByVehicleId(vehicle.id),
+                            maintenanceRecordRepository.getByVehicleId(vehicle.id),
+                            costRecordRepository.getByVehicleId(vehicle.id),
+                            tripRecordRepository.getByVehicleId(vehicle.id),
                         ) { fuels, maintenances, costs, trips ->
                             buildList<RecordEntry> {
                                 fuels.forEach { add(FuelEntry(it, vehicleName)) }

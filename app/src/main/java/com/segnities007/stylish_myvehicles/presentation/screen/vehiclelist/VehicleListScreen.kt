@@ -22,12 +22,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
 import com.segnities007.stylish_myvehicles.domain.service.InspectionCalculator
@@ -46,7 +48,7 @@ fun VehicleListScreen(
     onNavigateToSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
@@ -68,7 +70,7 @@ fun VehicleListScreen(
                 containerColor = MaterialTheme.colorScheme.onSurface,
                 contentColor = MaterialTheme.colorScheme.surface,
             ) {
-                Icon(Icons.Default.Add, contentDescription = "車両を追加")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_vehicle))
             }
         },
     ) {
@@ -79,10 +81,10 @@ fun VehicleListScreen(
         ) {
             StylishHeader(
                 modifier = Modifier.padding(horizontal = 20.dp),
-                title = { Text("マイカー") },
+                title = { Text(stringResource(R.string.my_cars)) },
                 actions = {
                     StylishIconButton(
-                        Icons.Default.Settings, "設定",
+                        Icons.Default.Settings, stringResource(R.string.settings),
                         onClick = onNavigateToSettings,
                     )
                 },
@@ -93,7 +95,7 @@ fun VehicleListScreen(
                 OutlinedTextField(
                     value = state.searchQuery,
                     onValueChange = { viewModel.accept(VehicleListIntent.SearchQueryChanged(it)) },
-                    placeholder = { Text("メーカー・車種・ナンバーで検索") },
+                    placeholder = { Text(stringResource(R.string.search_by_maker_model_plate)) },
                     leadingIcon = { Icon(Icons.Default.Search, null) },
                     singleLine = true,
                     modifier = Modifier
@@ -156,12 +158,12 @@ private fun EmptyState(onAddClick: () -> Unit) {
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                "まだ車両が登録されていません",
+                stringResource(R.string.no_vehicles_registered),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                "下の＋ボタンから最初の車を登録しましょう",
+                stringResource(R.string.register_first_car_prompt),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp),
@@ -170,7 +172,7 @@ private fun EmptyState(onAddClick: () -> Unit) {
                 onClick = onAddClick,
                 modifier = Modifier.padding(top = 16.dp),
             ) {
-                Text("車両を登録する")
+                Text(stringResource(R.string.register_vehicle))
             }
         }
     }
@@ -180,7 +182,7 @@ private fun EmptyState(onAddClick: () -> Unit) {
 private fun NoSearchResultState() {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(
-            "該当する車両が見つかりません",
+            stringResource(R.string.no_matching_vehicles),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -191,7 +193,7 @@ private fun buildSupportingLines(vehicle: Vehicle): List<String> {
     val parts = mutableListOf<String>()
     vehicle.plateNumber.takeIf { it.isNotBlank() }
         ?.let { parts.add(it) }
-    vehicle.currentInspectionExpiry?.let { expiry ->
+    InspectionCalculator.currentExpiryFor(vehicle)?.let { expiry ->
         val days = InspectionCalculator.daysUntilExpiry(expiry)
         val label = when {
             days < 0 -> "⚠️ 車検切れ"

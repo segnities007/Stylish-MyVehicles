@@ -17,24 +17,24 @@ object NotificationHelper {
         val channels = listOf(
             NotificationChannel(
                 CHANNEL_INSPECTION,
-                "車検・自賠責",
+                context.getString(R.string.channel_inspection_name),
                 NotificationManager.IMPORTANCE_HIGH
             )
-                .apply { description = "車検・自賠責保険の期限通知" },
+                .apply { description = context.getString(R.string.channel_inspection_description) },
             NotificationChannel(
                 CHANNEL_INSURANCE,
-                "任意保険",
+                context.getString(R.string.channel_insurance_name),
                 NotificationManager.IMPORTANCE_DEFAULT
             )
-                .apply { description = "任意保険の満期通知" },
-            NotificationChannel(CHANNEL_TAX, "税金", NotificationManager.IMPORTANCE_DEFAULT)
-                .apply { description = "自動車税の納付通知" },
+                .apply { description = context.getString(R.string.channel_insurance_description) },
+            NotificationChannel(CHANNEL_TAX, context.getString(R.string.channel_tax_name), NotificationManager.IMPORTANCE_DEFAULT)
+                .apply { description = context.getString(R.string.channel_tax_description) },
             NotificationChannel(
                 CHANNEL_MAINTENANCE,
-                "メンテナンス",
+                context.getString(R.string.channel_maintenance_name),
                 NotificationManager.IMPORTANCE_LOW
             )
-                .apply { description = "整備の目安通知" },
+                .apply { description = context.getString(R.string.channel_maintenance_description) },
         )
         channels.forEach { manager.createNotificationChannel(it) }
     }

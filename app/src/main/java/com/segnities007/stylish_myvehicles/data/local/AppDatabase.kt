@@ -31,8 +31,8 @@ import com.segnities007.stylish_myvehicles.data.local.entity.VehicleEntity
         TripRecordEntity::class,
         TripLocationPointEntity::class,
     ],
-    version = 6,
-    exportSchema = false,
+    version = 7,
+    exportSchema = true,
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -46,9 +46,8 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
         fun create(context: Context): AppDatabase =
             Room.databaseBuilder(context, AppDatabase::class.java, "stylish_myvehicles.db")
-                .addMigrations(MIGRATION_5_6)
+                .addMigrations(MIGRATION_5_6, MIGRATION_6_7)
                 .enableMultiInstanceInvalidation()
-                .fallbackToDestructiveMigration()
                 .build()
 
         private val MIGRATION_5_6 = object : Migration(5, 6) {
@@ -90,6 +89,14 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL(
                     "CREATE INDEX IF NOT EXISTS `index_trip_location_points_tripId` " +
                         "ON `trip_location_points` (`tripId`)",
+                )
+            }
+        }
+
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE `fuel_records` ADD COLUMN `fuelEconomy` REAL DEFAULT NULL",
                 )
             }
         }

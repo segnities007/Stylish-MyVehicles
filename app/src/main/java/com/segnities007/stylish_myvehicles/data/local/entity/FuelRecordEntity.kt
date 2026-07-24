@@ -25,6 +25,7 @@ data class FuelRecordEntity(
     val volume: Double,
     val amount: Int,
     val unitPrice: Int? = null,
+    val fuelEconomy: Double? = null,
     val isFullTank: Boolean = true,
     val memo: String = "",
     val createdAt: LocalDateTime = LocalDateTime.now(),

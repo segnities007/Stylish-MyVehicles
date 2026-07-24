@@ -3,13 +3,12 @@ package com.segnities007.stylish_myvehicles.presentation.screen.vehicledetail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.segnities007.stylish_myvehicles.domain.model.CostCategory
+import com.segnities007.stylish_myvehicles.domain.repository.CostRecordRepository
+import com.segnities007.stylish_myvehicles.domain.repository.FuelRecordRepository
+import com.segnities007.stylish_myvehicles.domain.repository.MaintenanceRecordRepository
+import com.segnities007.stylish_myvehicles.domain.repository.VehicleRepository
 import com.segnities007.stylish_myvehicles.domain.usecase.ExportDataUseCase
 import com.segnities007.stylish_myvehicles.domain.usecase.ExportDocument
-import com.segnities007.stylish_myvehicles.domain.usecase.cost.GetCostRecordsUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.fuel.GetFuelRecordsUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.maintenance.GetMaintenanceRecordsUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.GetVehicleUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.UpdateVehicleUseCase
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.VehicleField
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.VehicleFieldInputType
 import kotlinx.coroutines.channels.Channel
@@ -24,12 +23,10 @@ import kotlinx.coroutines.launch
 
 class VehicleDetailViewModel(
     private val vehicleId: Long,
-    private val getVehicleUseCase: GetVehicleUseCase,
-    private val getFuelRecordsUseCase: GetFuelRecordsUseCase,
-    private val getMaintenanceRecordsUseCase: GetMaintenanceRecordsUseCase,
-    private val getCostRecordsUseCase: GetCostRecordsUseCase,
-    private val updateVehicleUseCase: UpdateVehicleUseCase,
-    private val exportDataUseCase: ExportDataUseCase,
+    private val vehicleRepository: VehicleRepository,
+    private val fuelRecordRepository: FuelRecordRepository,
+    private val maintenanceRecordRepository: MaintenanceRecordRepository,
+    private val costRecordRepository: CostRecordRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(VehicleDetailUiState())
     val uiState: StateFlow<VehicleDetailUiState> = _uiState.asStateFlow()
@@ -39,12 +36,12 @@ class VehicleDetailViewModel(
 
     init {
         viewModelScope.launch {
-            getVehicleUseCase(vehicleId).collect { vehicle ->
+            vehicleRepository.getById(vehicleId).collect { vehicle ->
                 _uiState.update { it.copy(vehicle = vehicle, isLoading = false) }
             }
         }
         viewModelScope.launch {
-            getCostRecordsUseCase(vehicleId).collect { records ->
+            costRecordRepository.getByVehicleId(vehicleId).collect { records ->
                 val now = java.time.LocalDate.now()
                 val taxPaidThisYear = records
                     .any { it.category == CostCategory.TAX && it.date.year == now.year }
@@ -162,19 +159,17 @@ class VehicleDetailViewModel(
         }
 
         viewModelScope.launch {
-            updateVehicleUseCase(updated)
+            vehicleRepository.update(updated)
             _uiState.update { it.copy(editingField = null) }
         }
     }
 
     private fun exportFuel() {
         viewModelScope.launch {
-            val records = getFuelRecordsUseCase(vehicleId).first()
+            val records = fuelRecordRepository.getByVehicleId(vehicleId).first()
             _effects.send(
                 VehicleDetailEffect.SaveDocument(
-                    exportDataUseCase.exportFuelRecordsCsv(
-                        records
-                    )
+                    ExportDataUseCase.exportFuelRecordsCsv(records)
                 )
             )
         }
@@ -182,12 +177,10 @@ class VehicleDetailViewModel(
 
     private fun exportMaintenance() {
         viewModelScope.launch {
-            val records = getMaintenanceRecordsUseCase(vehicleId).first()
+            val records = maintenanceRecordRepository.getByVehicleId(vehicleId).first()
             _effects.send(
                 VehicleDetailEffect.SaveDocument(
-                    exportDataUseCase.exportMaintenanceRecordsCsv(
-                        records
-                    )
+                    ExportDataUseCase.exportMaintenanceRecordsCsv(records)
                 )
             )
         }
@@ -195,12 +188,10 @@ class VehicleDetailViewModel(
 
     private fun exportCost() {
         viewModelScope.launch {
-            val records = getCostRecordsUseCase(vehicleId).first()
+            val records = costRecordRepository.getByVehicleId(vehicleId).first()
             _effects.send(
                 VehicleDetailEffect.SaveDocument(
-                    exportDataUseCase.exportCostRecordsCsv(
-                        records
-                    )
+                    ExportDataUseCase.exportCostRecordsCsv(records)
                 )
             )
         }

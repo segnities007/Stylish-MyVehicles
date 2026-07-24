@@ -10,8 +10,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.domain.model.CostCategory
 import com.segnities007.stylishui.components.molecules.StylishConnectedChipRow
 import com.segnities007.stylishui.components.molecules.StylishDatePickerField
@@ -31,7 +33,7 @@ fun CostInputDialog(
     StylishDialogSurface(onDismiss = { onIntent(CostListIntent.CloseDialog) }) {
         Column(Modifier.padding(24.dp)) {
             Text(
-                if (state.isEditing) "費用記録を編集" else "費用を記録",
+                if (state.isEditing) stringResource(R.string.edit_cost_record) else stringResource(R.string.add_cost_record),
                 style = MaterialTheme.typography.titleLarge,
             )
             Spacer(Modifier.height(16.dp))
@@ -50,16 +52,16 @@ fun CostInputDialog(
             StylishDatePickerField(
                 value = state.inputDate,
                 onValueChange = { it?.let { d -> onIntent(CostListIntent.InputDateChanged(d)) } },
-                label = "日付",
+                label = stringResource(R.string.date_label),
                 confirmLabel = "OK",
-                dismissLabel = "キャンセル",
-                placeholder = "日付を選択",
+                dismissLabel = stringResource(R.string.cancel),
+                placeholder = stringResource(R.string.select_date),
             )
             Spacer(Modifier.height(12.dp))
             OutlinedTextField(
                 value = state.inputTitle,
                 onValueChange = { onIntent(CostListIntent.InputTitleChanged(it)) },
-                label = { Text("項目 *") },
+                label = { Text(stringResource(R.string.cost_item_label)) },
                 placeholder = { Text("任意保険料") },
                 singleLine = true,
                 isError = state.titleError != null,
@@ -70,7 +72,7 @@ fun CostInputDialog(
             OutlinedTextField(
                 value = state.inputAmount,
                 onValueChange = { onIntent(CostListIntent.InputAmountChanged(it)) },
-                label = { Text("金額 (円) *") },
+                label = { Text(stringResource(R.string.cost_amount_label)) },
                 placeholder = { Text("12000") },
                 singleLine = true,
                 isError = state.amountError != null,
@@ -79,8 +81,8 @@ fun CostInputDialog(
             )
             Spacer(Modifier.height(24.dp))
             StylishDialogActions(
-                confirmLabel = if (state.isEditing) "更新" else "保存",
-                cancelLabel = "キャンセル",
+                confirmLabel = if (state.isEditing) stringResource(R.string.update) else stringResource(R.string.save),
+                cancelLabel = stringResource(R.string.cancel),
                 onConfirm = { onIntent(CostListIntent.Save) },
                 onCancel = { onIntent(CostListIntent.CloseDialog) },
                 confirmEnabled = state.canSave,

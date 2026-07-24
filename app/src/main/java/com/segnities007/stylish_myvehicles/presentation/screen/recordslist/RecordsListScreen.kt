@@ -23,13 +23,15 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.domain.model.CostCategory
 import com.segnities007.stylish_myvehicles.domain.model.CostRecord
 import com.segnities007.stylish_myvehicles.domain.model.FuelRecord
@@ -58,7 +60,7 @@ fun RecordsListScreen(
     onNavigateToTrip: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
@@ -83,10 +85,10 @@ fun RecordsListScreen(
                 else -> StylishPageContent(
                     header = {
                         StylishHeader(
-                            title = { Text("履歴一覧") },
+                            title = { Text(stringResource(R.string.records_list_title)) },
                             navigation = {
                                 StylishIconButton(
-                                    Icons.AutoMirrored.Filled.ArrowBack, "戻る",
+                                    Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back),
                                     onClick = { viewModel.accept(RecordsListIntent.NavigateBack) },
                                 )
                             },
@@ -97,8 +99,8 @@ fun RecordsListScreen(
                         item {
                             StylishEmptyState(
                                 icon = Icons.AutoMirrored.Filled.ReceiptLong,
-                                title = "記録がありません",
-                                description = "給油・整備・費用・移動を記録しましょう",
+                                title = stringResource(R.string.no_records_title),
+                                description = stringResource(R.string.no_records_list_description),
                             )
                         }
                     }

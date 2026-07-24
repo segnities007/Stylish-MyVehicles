@@ -18,8 +18,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_myvehicles.R
 import com.mikepenz.aboutlibraries.entity.Library
 import com.mikepenz.aboutlibraries.ui.compose.android.rememberLibraries
 import com.segnities007.stylishui.components.atoms.StylishIconButton
@@ -56,10 +58,10 @@ fun LicensesScreen(
         ) {
             StylishHeader(
                 modifier = Modifier.padding(horizontal = 20.dp),
-                title = { Text("オープンソースライセンス") },
+                title = { Text(stringResource(R.string.open_source_licenses)) },
                 navigation = {
                     StylishIconButton(
-                        Icons.AutoMirrored.Filled.ArrowBack, "戻る",
+                        Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back),
                         onClick = onNavigateBack,
                     )
                 },
@@ -115,7 +117,7 @@ private fun LicenseDetailDialog(
             library.artifactVersion?.let {
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "バージョン $it",
+                    stringResource(R.string.version_format, it),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -139,7 +141,7 @@ private fun LicenseDetailDialog(
             license?.let {
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    "ライセンス: ${it.spdxId ?: it.name}",
+                    stringResource(R.string.license_format, it.spdxId ?: it.name),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -155,7 +157,7 @@ private fun LicenseDetailDialog(
                 }
             Spacer(Modifier.height(24.dp))
             StylishDialogActions(
-                confirmLabel = "閉じる",
+                confirmLabel = stringResource(R.string.close),
                 cancelLabel = "",
                 onConfirm = onDismiss,
                 onCancel = onDismiss,

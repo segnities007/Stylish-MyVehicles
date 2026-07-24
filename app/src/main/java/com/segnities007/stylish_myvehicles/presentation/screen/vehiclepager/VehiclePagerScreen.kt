@@ -34,7 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -42,9 +42,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.domain.model.CostCategory
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
@@ -88,7 +90,7 @@ fun VehiclePagerScreen(
     showAddDialog: MutableState<Boolean>? = null,
     modifier: Modifier = Modifier,
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
@@ -299,7 +301,7 @@ private fun VehiclePage(
                 },
                 navigation = {
                     StylishIconButton(
-                        Icons.Default.Edit, "編集",
+                        Icons.Default.Edit, stringResource(R.string.edit),
                         onClick = { onIntent(VehiclePagerIntent.EditVehicle(vehicle.id)) },
                     )
                 },
@@ -309,17 +311,17 @@ private fun VehiclePage(
             item {
                 if (dashboard.fuelEconomyTrend.size >= 2) {
                     LineChartSection(
-                        title = "燃費推移 (km/L)",
+                        title = stringResource(R.string.fuel_economy_trend),
                         data = dashboard.fuelEconomyTrend.map {
                             LineChartData(it.first, it.second)
                         },
-                        contentDescriptionPrefix = "折れ線グラフ",
-                        emptyLabel = "データがありません",
+                        contentDescriptionPrefix = stringResource(R.string.line_chart),
+                        emptyLabel = stringResource(R.string.no_data),
                     )
                     Spacer(Modifier.height(16.dp))
                 }
                 PieChartSection(
-                    title = "費用カテゴリ",
+                    title = stringResource(R.string.cost_category),
                     data = dashboard.costByCategory.map { (category, total) ->
                         PieChartData(
                             category.label,
@@ -330,9 +332,9 @@ private fun VehiclePage(
                 )
                 Spacer(Modifier.height(16.dp))
                 BarChartSection(
-                    title = "月次費用",
-                    contentDescriptionPrefix = "棒グラフ",
-                    emptyLabel = "データがありません",
+                    title = stringResource(R.string.monthly_cost),
+                    contentDescriptionPrefix = stringResource(R.string.bar_chart),
+                    emptyLabel = stringResource(R.string.no_data),
                     data = dashboard.monthlyCostByCategory.map { slice ->
                         BarChartData(
                             label = slice.label,
@@ -350,15 +352,15 @@ private fun VehiclePage(
             }
 
             item {
-                StylishSectionTitle("記録")
+                StylishSectionTitle(stringResource(R.string.records_section))
                 StylishConnectedCardGrid(
                     columns = 2,
                     items = listOf(
                         StylishConnectedCardItem(
-                            title = "給油",
+                            title = stringResource(R.string.fuel_label),
                             supportingText = dashboard.averageFuelEconomy?.let {
-                                "平均 %.1f km/L".format(it)
-                            } ?: "記録・燃費",
+                                stringResource(R.string.fuel_economy_avg, it)
+                            } ?: stringResource(R.string.fuel_record_economy),
                             onClick = { onIntent(VehiclePagerIntent.OpenFuel(vehicle.id)) },
                         ) {
                             Icon(
@@ -368,8 +370,8 @@ private fun VehiclePage(
                             )
                         },
                         StylishConnectedCardItem(
-                            title = "整備",
-                            supportingText = "記録・目安",
+                            title = stringResource(R.string.maintenance_label),
+                            supportingText = stringResource(R.string.maintenance_record_guide),
                             onClick = { onIntent(VehiclePagerIntent.OpenMaintenance(vehicle.id)) },
                         ) {
                             Icon(
@@ -379,11 +381,11 @@ private fun VehiclePage(
                             )
                         },
                         StylishConnectedCardItem(
-                            title = "費用",
+                            title = stringResource(R.string.cost_label),
                             supportingText = if (dashboard.monthlyCost > 0) {
-                                "今月 ${String.format("%,d", dashboard.monthlyCost)}円"
+                                stringResource(R.string.this_month_cost, String.format("%,d", dashboard.monthlyCost))
                             } else {
-                                "一覧・グラフ"
+                                stringResource(R.string.cost_list_graph)
                             },
                             onClick = { onIntent(VehiclePagerIntent.OpenCost(vehicle.id)) },
                         ) {
@@ -394,8 +396,8 @@ private fun VehiclePage(
                             )
                         },
                         StylishConnectedCardItem(
-                            title = "移動",
-                            supportingText = "ルート・距離・時間",
+                            title = stringResource(R.string.trip_label),
+                            supportingText = stringResource(R.string.trip_route_distance_time),
                             onClick = { onIntent(VehiclePagerIntent.OpenTrip(vehicle.id)) },
                         ) {
                             Icon(
@@ -414,8 +416,8 @@ private fun VehiclePage(
                     columns = 2,
                     items = listOf(
                         StylishConnectedCardItem(
-                            title = "車両情報",
-                            supportingText = "諸元・保険",
+                            title = stringResource(R.string.vehicle_info_label),
+                            supportingText = stringResource(R.string.vehicle_info_specs_insurance),
                             onClick = { onIntent(VehiclePagerIntent.OpenVehicleDetail(vehicle.id)) },
                         ),
                     ),
@@ -442,14 +444,14 @@ private fun AddVehiclePage(onAdd: () -> Unit) {
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                "車両を追加しましょう",
+                stringResource(R.string.add_vehicle_prompt),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(12.dp))
             Text(
-                "車検・保険・税金の期限管理、給油記録、整備履歴を一元管理できます",
+                stringResource(R.string.add_vehicle_description),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -468,7 +470,7 @@ private fun AddVehiclePage(onAdd: () -> Unit) {
             ) {
                 Icon(Icons.Default.Add, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("車両を登録する")
+                Text(stringResource(R.string.register_vehicle))
             }
         }
     }
