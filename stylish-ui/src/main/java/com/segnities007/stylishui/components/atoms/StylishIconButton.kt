@@ -1,5 +1,6 @@
 package com.segnities007.stylishui.components.atoms
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -42,6 +43,10 @@ fun StylishIconButton(
         modifier = modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp),
         shape = CircleShape,
         color = resolvedContainerColor,
+        border = BorderStroke(
+            StylishDimensions.outlineWidth,
+            MaterialTheme.colorScheme.outlineVariant,
+        ),
         shadowElevation = if (enabled) StylishDimensions.interactiveElevation else 0.dp,
     ) {
         IconButton(onClick = onClick, enabled = enabled) {

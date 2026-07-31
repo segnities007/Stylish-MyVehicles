@@ -186,7 +186,3 @@ class MaintenanceRecordViewModel(
         }
     }
 }
-
-sealed interface MaintenanceRecordEffect {
-    data object NavigateBack : MaintenanceRecordEffect
-}

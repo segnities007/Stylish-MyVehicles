@@ -35,13 +35,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import com.segnities007.stylish_myvehicles.R
+import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 import com.segnities007.stylishui.components.atoms.StylishIconButton
 import com.segnities007.stylishui.components.molecules.StylishEmptyState
 import com.segnities007.stylishui.components.patterns.StylishHeader
 import com.segnities007.stylishui.components.patterns.StylishPageContent
 import com.segnities007.stylishui.components.patterns.StylishScaffold
 import com.segnities007.stylish_myvehicles.presentation.screen.vehiclepager.components.PagerIndicator
+import java.time.LocalDate
 
 /**
  * 記録画面（給油/整備/費用）共通のページャー殻。
@@ -258,6 +261,31 @@ private fun NoDataBoundaryPage(
                 title = stringResource(R.string.no_older_data),
                 description = stringResource(R.string.no_older_records),
             )
+        }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 393)
+@Composable
+private fun PeriodShellPreview() {
+    StylishMyVehiclesTheme {
+        PeriodShell(
+            period = Period(
+                label = "2026年7月",
+                start = LocalDate.of(2026, 7, 1),
+                endInclusive = LocalDate.of(2026, 7, 31),
+            ),
+            listState = LazyListState(),
+            onNavigateBack = {},
+            onChangePeriodMode = {},
+        ) {
+            item {
+                StylishEmptyState(
+                    icon = Icons.Default.AttachMoney,
+                    title = "記録なし",
+                    description = "この期間の記録はありません",
+                )
+            }
         }
     }
 }

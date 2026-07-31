@@ -68,7 +68,9 @@ import com.segnities007.stylishui.components.models.StylishConnectedChipItem
 import com.segnities007.stylishui.components.patterns.StylishHeader
 import com.segnities007.stylishui.components.patterns.StylishScaffold
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
+import androidx.compose.ui.tooling.preview.Preview
 import java.time.Duration
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -444,5 +446,39 @@ private fun TripEditDialog(
                 confirmEnabled = state.canSave,
             )
         }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 393)
+@Composable
+private fun TripTrackingCardPreview() {
+    StylishMyVehiclesTheme {
+        TripTrackingCard(
+            activeRecord = null,
+            anotherVehicleIsRecording = false,
+            onStart = {},
+            onStop = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 393)
+@Composable
+private fun TripHistoryCardPreview() {
+    StylishMyVehiclesTheme {
+        TripHistoryCard(
+            record = TripRecord(
+                id = 1,
+                vehicleId = 1,
+                title = "通勤",
+                purpose = TripPurpose.COMMUTE,
+                startedAt = LocalDateTime.of(2026, 7, 24, 9, 0),
+                endedAt = LocalDateTime.of(2026, 7, 24, 10, 30),
+                distanceMeters = 15_400,
+            ),
+            index = 0,
+            count = 3,
+            onEdit = {},
+        )
     }
 }

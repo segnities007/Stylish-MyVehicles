@@ -147,7 +147,3 @@ class CostListViewModel(
         }
     }
 }
-
-sealed interface CostListEffect {
-    data object NavigateBack : CostListEffect
-}

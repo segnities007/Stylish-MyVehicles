@@ -358,9 +358,6 @@ private fun VehiclePage(
                     items = listOf(
                         StylishConnectedCardItem(
                             title = stringResource(R.string.fuel_label),
-                            supportingText = dashboard.averageFuelEconomy?.let {
-                                stringResource(R.string.fuel_economy_avg, it)
-                            } ?: stringResource(R.string.fuel_record_economy),
                             onClick = { onIntent(VehiclePagerIntent.OpenFuel(vehicle.id)) },
                         ) {
                             Icon(
@@ -371,7 +368,6 @@ private fun VehiclePage(
                         },
                         StylishConnectedCardItem(
                             title = stringResource(R.string.maintenance_label),
-                            supportingText = stringResource(R.string.maintenance_record_guide),
                             onClick = { onIntent(VehiclePagerIntent.OpenMaintenance(vehicle.id)) },
                         ) {
                             Icon(
@@ -382,11 +378,6 @@ private fun VehiclePage(
                         },
                         StylishConnectedCardItem(
                             title = stringResource(R.string.cost_label),
-                            supportingText = if (dashboard.monthlyCost > 0) {
-                                stringResource(R.string.this_month_cost, String.format("%,d", dashboard.monthlyCost))
-                            } else {
-                                stringResource(R.string.cost_list_graph)
-                            },
                             onClick = { onIntent(VehiclePagerIntent.OpenCost(vehicle.id)) },
                         ) {
                             Icon(
@@ -397,7 +388,6 @@ private fun VehiclePage(
                         },
                         StylishConnectedCardItem(
                             title = stringResource(R.string.trip_label),
-                            supportingText = stringResource(R.string.trip_route_distance_time),
                             onClick = { onIntent(VehiclePagerIntent.OpenTrip(vehicle.id)) },
                         ) {
                             Icon(
@@ -417,12 +407,20 @@ private fun VehiclePage(
                     items = listOf(
                         StylishConnectedCardItem(
                             title = stringResource(R.string.vehicle_info_label),
-                            supportingText = stringResource(R.string.vehicle_info_specs_insurance),
                             onClick = { onIntent(VehiclePagerIntent.OpenVehicleDetail(vehicle.id)) },
-                        ),
+                        ){
+                            Icon(
+                                Icons.Default.DirectionsCar,
+                                null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        },
                     ),
                 )
                 Spacer(Modifier.height(40.dp))
+            }
+            item {
+                Spacer(Modifier.height(20.dp))
             }
         },
     )

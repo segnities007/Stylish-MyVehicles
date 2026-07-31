@@ -47,9 +47,9 @@ import com.segnities007.stylish_myvehicles.presentation.screen.maintenance.Maint
 import com.segnities007.stylish_myvehicles.presentation.screen.notification.NotificationScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.notification.NotificationViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.onboarding.OnboardingScreen
-import com.segnities007.stylish_myvehicles.presentation.screen.records.CostRecordsScreen
-import com.segnities007.stylish_myvehicles.presentation.screen.records.FuelRecordsScreen
-import com.segnities007.stylish_myvehicles.presentation.screen.records.MaintenanceRecordsScreen
+import com.segnities007.stylish_myvehicles.presentation.screen.cost.CostRecordsScreen
+import com.segnities007.stylish_myvehicles.presentation.screen.fuel.FuelRecordsScreen
+import com.segnities007.stylish_myvehicles.presentation.screen.maintenance.MaintenanceRecordsScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.records.PeriodPreference
 import com.segnities007.stylish_myvehicles.presentation.screen.records.RecordTopic
 import com.segnities007.stylish_myvehicles.presentation.screen.records.RecordsViewModel
@@ -87,7 +87,13 @@ fun AppNavigation(
     val showAddDialog = remember { mutableStateOf(false) }
 
     fun popBack() {
-        if (backStack.size > 1) backStack.removeAt(backStack.lastIndex)
+        if (backStack.size > 1) {
+            backStack.removeAt(backStack.lastIndex)
+            // VehiclePager 以外ではスクロール連動がないため、FNB を常に表示にリセットする
+            if (backStack.lastOrNull() !is VehiclePagerDestination) {
+                bottomBarVisible.value = true
+            }
+        }
     }
 
     // 下部バーのタブ遷移。ルート（ホーム）まで戻してから選択タブを積み、スタックの積み上がりを防ぐ。
@@ -95,6 +101,8 @@ fun AppNavigation(
         while (backStack.size > 1) backStack.removeAt(backStack.lastIndex)
         if (tab !is VehiclePagerDestination) {
             backStack.add(tab)
+            // VehiclePager 以外ではスクロール連動がないため、FNB を常に表示にリセットする
+            bottomBarVisible.value = true
         }
     }
 
@@ -104,50 +112,23 @@ fun AppNavigation(
             currentDestination is NotificationDestination ||
             currentDestination is SettingsDestination) && bottomBarVisible.value
 
+    // FNB・FAB は Scaffold の bottomBar/floatingActionButton スロットではなく Box オーバーレイで描画する。
+    // Scaffold スロット内では AnimatedVisibility のサイズアニメーションが
+    // Scaffold のレイアウト再計算と干渉し、アニメーションが正しく描画されないため。
     Scaffold(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        bottomBar = {
-            AnimatedVisibility(
-                visible = showBottomBar,
-                modifier = Modifier
-                    .navigationBarsPadding()
-                    .padding(bottom = 32.dp),
-                enter = fadeIn(tween(200)) + slideInVertically(tween(200)) { it / 2 },
-                exit = fadeOut(tween(200)) + slideOutVertically(tween(200)) { it / 2 },
-            ) {
-                Box(
-                    Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    StylishBottomBar(
-                        onNavigateToHome = { navigateToTab(VehiclePagerDestination) },
-                        onNavigateToNotifications = { navigateToTab(NotificationDestination) },
-                        onNavigateToSettings = { backStack.add(SettingsDestination) },
-                        onNavigateToRecordsList = { navigateToTab(RecordsListDestination) },
-                    )
-                }
-            }
-        },
-        floatingActionButton = {
-            AnimatedVisibility(
-                visible = currentDestination is VehiclePagerDestination && bottomBarVisible.value,
-                enter = fadeIn(tween(200)) + slideInVertically(tween(200)) { it / 2 },
-                exit = fadeOut(tween(200)) + slideOutVertically(tween(200)) { it / 2 },
-            ) {
-                StylishFab(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = stringResource(R.string.add_record_cd),
-                    onClick = { showAddDialog.value = true },
-                )
-            }
-        },
-    ) { innerPadding ->
-        NavDisplay(
-            backStack = backStack,
-            modifier = Modifier.padding(innerPadding),
+    ) { _ ->
+        // innerPadding を意図的に無視している。
+        // FNB は padding(bottom=32dp) でコンテンツの上を浮遊する設計。
+        // innerPadding を適用すると、各画面内の StylishScaffold（WindowInsets.navigationBars）と
+        // 二重パディングが発生し、コンテンツ領域が圧縮されるため。
+        Box(Modifier.fillMaxSize()) {
+            NavDisplay(
+                backStack = backStack,
+                modifier = Modifier.fillMaxSize(),
             transitionSpec = {
                 (slideInHorizontally(tween(260)) { it / 5 } + fadeIn(tween(220))) togetherWith
                         (slideOutHorizontally(tween(260)) { -it / 10 } + fadeOut(tween(180)))
@@ -296,12 +277,14 @@ fun AppNavigation(
                         onNavigateToMaintenance = { backStack.add(MaintenanceRecordsDestination(it)) },
                         onNavigateToCost = { backStack.add(CostRecordsDestination(it)) },
                         onNavigateToTrip = { backStack.add(TripRecordsDestination(it)) },
+                        bottomBarVisible = bottomBarVisible,
                     )
                 }
                 entry<SettingsDestination> {
                     SettingsScreen(
                         onThemeChanged = onThemeChanged,
                         onNavigateToLicenses = { backStack.add(LicensesDestination) },
+                        bottomBarVisible = bottomBarVisible,
                     )
                 }
                 entry<LicensesDestination> {
@@ -315,10 +298,52 @@ fun AppNavigation(
                         viewModel = viewModel,
                         onAddRecord = { /* TODO: show add record dialog */ },
                         onNavigateToHome = { popBack() },
+                        bottomBarVisible = bottomBarVisible,
                     )
                 }
             },
         )
+
+            // FNB（フロートナビゲーションバー）オーバーレイ
+            AnimatedVisibility(
+                visible = showBottomBar,
+                modifier = Modifier.align(Alignment.BottomCenter),
+                enter = fadeIn(tween(200)) + slideInVertically(tween(200)) { it / 2 },
+                exit = fadeOut(tween(200)) + slideOutVertically(tween(200)) { it / 2 },
+            ) {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(bottom = 32.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    StylishBottomBar(
+                        onNavigateToHome = { navigateToTab(VehiclePagerDestination) },
+                        onNavigateToNotifications = { navigateToTab(NotificationDestination) },
+                        onNavigateToSettings = { backStack.add(SettingsDestination) },
+                        onNavigateToRecordsList = { navigateToTab(RecordsListDestination) },
+                    )
+                }
+            }
+
+            // FAB オーバーレイ
+            AnimatedVisibility(
+                visible = currentDestination is VehiclePagerDestination && bottomBarVisible.value,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .navigationBarsPadding()
+                    .padding(end = 16.dp, bottom = 100.dp),
+                enter = fadeIn(tween(200)) + slideInVertically(tween(200)) { it / 2 },
+                exit = fadeOut(tween(200)) + slideOutVertically(tween(200)) { it / 2 },
+            ) {
+                StylishFab(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = stringResource(R.string.add_record_cd),
+                    onClick = { showAddDialog.value = true },
+                )
+            }
+        }
     }
 }
 

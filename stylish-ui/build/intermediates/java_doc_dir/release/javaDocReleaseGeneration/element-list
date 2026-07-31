@@ -1,0 +1,13 @@
+$dokka.format:javadoc-v1
+$dokka.linkExtension:html
+$dokka.location:com.segnities007.stylishui.foundation/ConnectedCorners.Companion///PointingToDeclaration/com/segnities007/stylishui/foundation/ConnectedCorners.Companion.html
+$dokka.location:com.segnities007.stylishui.foundation/ConnectedEdges.Companion///PointingToDeclaration/com/segnities007/stylishui/foundation/ConnectedEdges.Companion.html
+com.segnities007.stylishui.components.atoms
+com.segnities007.stylishui.components.charts
+com.segnities007.stylishui.components.models
+com.segnities007.stylishui.components.molecules
+com.segnities007.stylishui.components.patterns
+com.segnities007.stylishui.foundation
+com.segnities007.stylishui.theme
+com.segnities007.stylishui.tokens
+

@@ -43,7 +43,7 @@ fun StylishConnectedCardGrid(
                     rowItems.forEachIndexed { columnIndex, item ->
                         val index = rowIndex * columns + columnIndex
                         val corners = connectedGridCorners(index, items.size, columns)
-                        StylishConnectedCard(
+                    StylishConnectedCard(
                             title = item.title,
                             supportingText = item.supportingText,
                             onClick = item.onClick,

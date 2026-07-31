@@ -45,7 +45,7 @@ fun StylishDialogActions(
 private fun StylishDialogActionsPreview() {
     StylishTheme(darkTheme = false) {
         Card(Modifier.padding(20.dp)) {
-            StylishDialogActions("保存", "キャンセル", {}, {})
+            StylishDialogActions("", "キャンセル", {}, {})
         }
     }
 }

@@ -22,8 +22,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -31,6 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.domain.service.DeadlineInfo
+import com.segnities007.stylishui.components.molecules.StylishConnectedCard
 import com.segnities007.stylishui.components.molecules.StylishConnectedListItemColumn
 import com.segnities007.stylishui.components.molecules.StylishEmptyState
 import com.segnities007.stylishui.components.models.StylishConnectedListItem
@@ -46,10 +51,20 @@ fun NotificationScreen(
     viewModel: NotificationViewModel,
     onAddRecord: () -> Unit,
     onNavigateToHome: () -> Unit,
+    bottomBarVisible: MutableState<Boolean>? = null,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
+    val isAtTop by remember(listState) {
+        derivedStateOf {
+            listState.firstVisibleItemIndex == 0 &&
+                    listState.firstVisibleItemScrollOffset <= 0
+        }
+    }
+    LaunchedEffect(isAtTop) {
+        bottomBarVisible?.value = isAtTop
+    }
 
     StylishScaffold(modifier = modifier) {
         Box(Modifier.fillMaxSize()) {
@@ -150,30 +165,17 @@ private fun MostImportantDeadlineCard(item: VehicleDeadlineItem) {
     } else {
         stringResource(R.string.days_remaining, item.deadline.daysRemaining)
     }
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.errorContainer,
-        contentColor = MaterialTheme.colorScheme.onErrorContainer,
-        tonalElevation = 4.dp,
-    ) {
-        Column(Modifier.padding(16.dp)) {
+    StylishConnectedCard(
+        title = "${item.vehicleName} / ${item.deadline.label}",
+        supportingText = "${item.deadline.date} （$daysText）",
+        trailingContent = {
             Text(
                 stringResource(R.string.most_important),
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.error,
             )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                "${item.vehicleName} / ${item.deadline.label}",
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Spacer(Modifier.height(2.dp))
-            Text(
-                "${item.deadline.date} （$daysText）",
-                style = MaterialTheme.typography.bodySmall,
-            )
-        }
-    }
+        },
+    )
 }
 
 @Composable

@@ -8,7 +8,6 @@ import com.segnities007.stylish_myvehicles.domain.repository.FuelRecordRepositor
 import com.segnities007.stylish_myvehicles.domain.repository.MaintenanceRecordRepository
 import com.segnities007.stylish_myvehicles.domain.repository.VehicleRepository
 import com.segnities007.stylish_myvehicles.domain.usecase.ExportDataUseCase
-import com.segnities007.stylish_myvehicles.domain.usecase.ExportDocument
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.VehicleField
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.VehicleFieldInputType
 import kotlinx.coroutines.channels.Channel
@@ -196,12 +195,4 @@ class VehicleDetailViewModel(
             )
         }
     }
-}
-
-sealed interface VehicleDetailEffect {
-    data object NavigateBack : VehicleDetailEffect
-    data class NavigateToEdit(val vehicleId: Long) : VehicleDetailEffect
-    data class NavigateToCost(val vehicleId: Long) : VehicleDetailEffect
-    data class SaveDocument(val document: ExportDocument) :
-        VehicleDetailEffect
 }

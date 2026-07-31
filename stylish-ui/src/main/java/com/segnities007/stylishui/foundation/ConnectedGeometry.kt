@@ -61,16 +61,31 @@ fun connectedGridCorners(index: Int, size: Int, columns: Int): ConnectedCorners 
 
     val column = index % columns
     val row = index / columns
+    val totalRows = (size + columns - 1) / columns
 
-    fun hasCell(targetRow: Int, targetColumn: Int): Boolean {
-        if (targetColumn !in 0 until columns) return false
-        return targetRow * columns + targetColumn in 0 until size
+    fun rowItemCount(r: Int): Int {
+        val start = r * columns
+        return (minOf(start + columns, size) - start).coerceAtLeast(0)
     }
 
-    val hasAbove = hasCell(row - 1, column)
-    val hasBelow = hasCell(row + 1, column)
-    val hasLeft = hasCell(row, column - 1)
-    val hasRight = hasCell(row, column + 1)
+    // 同じ行内の左右は実座標のまま厳密に判定でよい
+    fun hasHorizontalNeighbor(targetColumn: Int): Boolean {
+        if (targetColumn !in 0 until columns) return false
+        return row * columns + targetColumn in 0 until size
+    }
+
+    // 上下は「隣接行が不完全（=weightで全幅に伸びる）なら全列と接続している」とみなす
+    fun hasVerticalNeighbor(targetRow: Int): Boolean {
+        if (targetRow !in 0 until totalRows) return false
+        val count = rowItemCount(targetRow)
+        if (count < columns) return true // 伸びているので全列に接続
+        return targetRow * columns + column in 0 until size
+    }
+
+    val hasAbove = hasVerticalNeighbor(row - 1)
+    val hasBelow = hasVerticalNeighbor(row + 1)
+    val hasLeft = hasHorizontalNeighbor(column - 1)
+    val hasRight = hasHorizontalNeighbor(column + 1)
 
     return ConnectedCorners(
         topStart = !hasAbove && !hasLeft,
@@ -79,7 +94,6 @@ fun connectedGridCorners(index: Int, size: Int, columns: Int): ConnectedCorners 
         bottomEnd = !hasBelow && !hasRight,
     )
 }
-
 fun connectedRowEdges(index: Int, size: Int): ConnectedEdges {
     require(index in 0 until size)
     return ConnectedEdges.All

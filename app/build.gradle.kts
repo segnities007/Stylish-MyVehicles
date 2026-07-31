@@ -51,7 +51,7 @@ ksp {
 }
 
 dependencies {
-    implementation(project(":stylish-ui"))
+    implementation("io.github.segnities007:stylish-ui:0.1.0")
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)

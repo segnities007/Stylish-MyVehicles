@@ -2,12 +2,14 @@ package com.segnities007.stylishui.components.molecules
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -55,7 +57,6 @@ fun StylishConnectedCard(
     )
     Card(
         modifier = modifier
-            .fillMaxWidth()
             .connectedOutline(outlineEdges, outlineCorners)
             .then(
                 if (actionable) {
@@ -85,10 +86,14 @@ fun StylishConnectedCard(
         Row(
             Modifier
                 .fillMaxWidth()
-                .padding(start = 20.dp, end = 12.dp, top = 14.dp, bottom = 14.dp),
+                .sizeIn(minHeight = 77.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(Modifier.weight(1f)) {
+            Column(
+                Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center,
+            ) {
                 Text(
                     title,
                     style = MaterialTheme.typography.titleLarge,

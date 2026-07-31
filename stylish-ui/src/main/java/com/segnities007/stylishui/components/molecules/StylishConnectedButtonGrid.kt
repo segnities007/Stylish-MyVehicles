@@ -131,7 +131,10 @@ private fun StylishConnectedButtonGridPreview() {
                 items = listOf(
                     StylishConnectedButtonItem({}, leadingContent = {
                         Icon(Icons.Default.Add, null)
-                    }) { Text("追加\n\n\n\n\n\\") },
+                    }) { Text("追加\n") },
+                    StylishConnectedButtonItem({}, leadingContent = {
+                        Icon(Icons.Default.Edit, null)
+                    }) { Text("編集") },
                     StylishConnectedButtonItem({}, leadingContent = {
                         Icon(Icons.Default.Edit, null)
                     }) { Text("編集") },

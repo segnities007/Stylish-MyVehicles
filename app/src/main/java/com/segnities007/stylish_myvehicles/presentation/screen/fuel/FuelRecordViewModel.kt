@@ -220,7 +220,3 @@ class FuelRecordViewModel(
         }
     }
 }
-
-sealed interface FuelRecordEffect {
-    data object NavigateBack : FuelRecordEffect
-}

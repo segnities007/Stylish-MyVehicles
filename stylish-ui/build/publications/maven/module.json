@@ -1,0 +1,194 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "io.github.segnities007",
+    "module": "stylish-ui",
+    "version": "0.1.0",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "9.5.0"
+    }
+  },
+  "variants": [
+    {
+      "name": "releaseVariantReleaseApiPublication",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.libraryelements": "aar",
+        "org.gradle.usage": "java-api"
+      },
+      "dependencies": [
+        {
+          "group": "androidx.compose",
+          "module": "compose-bom",
+          "version": {
+            "requires": "2026.06.01"
+          },
+          "attributes": {
+            "org.gradle.category": "platform"
+          }
+        },
+        {
+          "group": "androidx.compose.material3",
+          "module": "material3"
+        },
+        {
+          "group": "androidx.compose.ui",
+          "module": "ui"
+        },
+        {
+          "group": "androidx.compose.ui",
+          "module": "ui-graphics"
+        },
+        {
+          "group": "androidx.compose.foundation",
+          "module": "foundation"
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.2.21"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "stylish-ui-0.1.0.aar",
+          "url": "stylish-ui-0.1.0.aar",
+          "size": 353544,
+          "sha512": "275cf63fdc76efea309e82b6f8a2471a0a8b843459caa8c1b107009b5ed2b4f1db5e1e9f6eb18b9a427e6b3e34a5ddb63fb6d9fbcf8f5566b81a7fa645321c39",
+          "sha256": "667a47b36b5f2a0b90eae3818625e6ad5531fb567e8c3e48b199052987636747",
+          "sha1": "c11bf4903f26690f9f36810e31db1aa28a1a8790",
+          "md5": "c0aaf788e601fbb2d2bba0c45b98b39d"
+        }
+      ]
+    },
+    {
+      "name": "releaseVariantReleaseRuntimePublication",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.libraryelements": "aar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "androidx.activity",
+          "module": "activity-compose",
+          "version": {
+            "requires": "1.13.0"
+          }
+        },
+        {
+          "group": "androidx.compose.material",
+          "module": "material-icons-core"
+        },
+        {
+          "group": "androidx.compose.material",
+          "module": "material-icons-extended"
+        },
+        {
+          "group": "androidx.core",
+          "module": "core-ktx",
+          "version": {
+            "requires": "1.19.0"
+          }
+        },
+        {
+          "group": "androidx.compose.ui",
+          "module": "ui-tooling-preview"
+        },
+        {
+          "group": "androidx.compose",
+          "module": "compose-bom",
+          "version": {
+            "requires": "2026.06.01"
+          },
+          "attributes": {
+            "org.gradle.category": "platform"
+          }
+        },
+        {
+          "group": "androidx.compose.material3",
+          "module": "material3"
+        },
+        {
+          "group": "androidx.compose.ui",
+          "module": "ui"
+        },
+        {
+          "group": "androidx.compose.ui",
+          "module": "ui-graphics"
+        },
+        {
+          "group": "androidx.compose.foundation",
+          "module": "foundation"
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.2.21"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "stylish-ui-0.1.0.aar",
+          "url": "stylish-ui-0.1.0.aar",
+          "size": 353544,
+          "sha512": "275cf63fdc76efea309e82b6f8a2471a0a8b843459caa8c1b107009b5ed2b4f1db5e1e9f6eb18b9a427e6b3e34a5ddb63fb6d9fbcf8f5566b81a7fa645321c39",
+          "sha256": "667a47b36b5f2a0b90eae3818625e6ad5531fb567e8c3e48b199052987636747",
+          "sha1": "c11bf4903f26690f9f36810e31db1aa28a1a8790",
+          "md5": "c0aaf788e601fbb2d2bba0c45b98b39d"
+        }
+      ]
+    },
+    {
+      "name": "releaseVariantReleaseSourcePublication",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "stylish-ui-0.1.0-sources.jar",
+          "url": "stylish-ui-0.1.0-sources.jar",
+          "size": 45201,
+          "sha512": "cab1e706aef2792d4a7702cbb2d817998da69542541a2b3c41aae686214a94351b79adf15b24c613e71d1b76939b36a69140b87107079b7ea7051bf44b94fe1f",
+          "sha256": "513d14f90740cc65847dacd174aee68239cf9ff59df3c611a2c6f5b677c0891c",
+          "sha1": "0d5310ec52ba199261e4c58b86d74e6d593f6a1e",
+          "md5": "e04de85cb1e30aa87ee96e583b9a4f07"
+        }
+      ]
+    },
+    {
+      "name": "releaseVariantReleaseJavaDocPublication",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "javadoc",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "stylish-ui-0.1.0-javadoc.jar",
+          "url": "stylish-ui-0.1.0-javadoc.jar",
+          "size": 438347,
+          "sha512": "dc083dcd877031a41934e65422d8c59c5f2e6932af8a1392f66f82c4dff3277ac42d102b9d94b26b007d9e3e482ada8af45f1a434bcb3315dbca6e6ddf175802",
+          "sha256": "877db9b865252e11c22578129b3abdd295f6f0b1c2374e447aefdbc145a3aea5",
+          "sha1": "66ebcc9a9a7a2e5e8b21e2c6f58282fcd782e5dc",
+          "md5": "feb971915bea663df2d197ec4b3e3370"
+        }
+      ]
+    }
+  ]
+}

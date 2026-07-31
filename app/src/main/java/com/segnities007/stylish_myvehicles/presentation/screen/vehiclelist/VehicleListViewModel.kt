@@ -42,8 +42,3 @@ class VehicleListViewModel(
         }
     }
 }
-
-sealed interface VehicleListEffect {
-    data class NavigateToDetail(val vehicleId: Long) : VehicleListEffect
-    data class NavigateToEdit(val vehicleId: Long?) : VehicleListEffect
-}

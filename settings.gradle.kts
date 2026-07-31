@@ -24,4 +24,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "Stylish-MyVehicles"
 include(":app")
-include(":stylish-ui")

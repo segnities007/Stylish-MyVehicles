@@ -14,6 +14,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,10 +39,18 @@ import com.segnities007.stylish_myvehicles.presentation.theme.ThemePreference
 fun SettingsScreen(
     onThemeChanged: (ThemeMode) -> Unit,
     onNavigateToLicenses: () -> Unit,
+    bottomBarVisible: MutableState<Boolean>? = null,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     var currentTheme by remember { mutableStateOf(ThemePreference.getThemeMode(context)) }
+    val scrollState = rememberScrollState()
+    val isAtTop by remember(scrollState) {
+        derivedStateOf { scrollState.value == 0 }
+    }
+    LaunchedEffect(isAtTop) {
+        bottomBarVisible?.value = isAtTop
+    }
 
     StylishScaffold(
         modifier = modifier,
@@ -47,7 +58,7 @@ fun SettingsScreen(
         Column(
             Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
         ) {
             StylishHeader(
                 modifier = Modifier.padding(horizontal = 20.dp),

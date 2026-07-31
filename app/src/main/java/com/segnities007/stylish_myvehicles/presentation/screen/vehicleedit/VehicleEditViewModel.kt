@@ -183,7 +183,3 @@ class VehicleEditViewModel(
         }
     }
 }
-
-sealed interface VehicleEditEffect {
-    data object NavigateBack : VehicleEditEffect
-}

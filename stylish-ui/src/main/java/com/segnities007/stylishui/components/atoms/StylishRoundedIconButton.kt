@@ -1,5 +1,6 @@
 package com.segnities007.stylishui.components.atoms
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
@@ -45,6 +46,10 @@ fun StylishRoundedIconButton(
         modifier = modifier.sizeIn(minWidth = 80.dp, minHeight = 48.dp),
         shape = RoundedCornerShape(24.dp),
         color = resolvedContainerColor,
+        border = BorderStroke(
+            StylishDimensions.outlineWidth,
+            MaterialTheme.colorScheme.outlineVariant,
+        ),
         shadowElevation = if (enabled) StylishDimensions.interactiveElevation else 0.dp,
     ) {
         if (enabled) {

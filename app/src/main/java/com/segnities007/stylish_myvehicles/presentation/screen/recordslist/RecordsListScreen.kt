@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Build
@@ -23,8 +23,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -37,7 +40,6 @@ import com.segnities007.stylish_myvehicles.domain.model.CostRecord
 import com.segnities007.stylish_myvehicles.domain.model.FuelRecord
 import com.segnities007.stylish_myvehicles.domain.model.MaintenanceCategory
 import com.segnities007.stylish_myvehicles.domain.model.MaintenanceRecord
-import com.segnities007.stylishui.components.atoms.StylishIconButton
 import com.segnities007.stylishui.components.molecules.StylishConnectedListItemColumn
 import com.segnities007.stylishui.components.molecules.StylishEmptyState
 import com.segnities007.stylishui.components.models.StylishConnectedListItem
@@ -58,6 +60,7 @@ fun RecordsListScreen(
     onNavigateToMaintenance: (Long) -> Unit,
     onNavigateToCost: (Long) -> Unit,
     onNavigateToTrip: (Long) -> Unit,
+    bottomBarVisible: MutableState<Boolean>? = null,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -74,6 +77,17 @@ fun RecordsListScreen(
         }
     }
 
+    val listState = rememberLazyListState()
+    val isAtTop by remember(listState) {
+        derivedStateOf {
+            listState.firstVisibleItemIndex == 0 &&
+                    listState.firstVisibleItemScrollOffset <= 0
+        }
+    }
+    LaunchedEffect(isAtTop) {
+        bottomBarVisible?.value = isAtTop
+    }
+
     StylishScaffold(modifier = modifier) {
         Box(Modifier.fillMaxSize()) {
             when {
@@ -86,14 +100,9 @@ fun RecordsListScreen(
                     header = {
                         StylishHeader(
                             title = { Text(stringResource(R.string.records_list_title)) },
-                            navigation = {
-                                StylishIconButton(
-                                    Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back),
-                                    onClick = { viewModel.accept(RecordsListIntent.NavigateBack) },
-                                )
-                            },
                         )
                     },
+                    listState = listState,
                 ) {
                     if (state.sections.isEmpty()) {
                         item {

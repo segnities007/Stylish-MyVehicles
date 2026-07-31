@@ -20,6 +20,7 @@ mlkit = "16.0.1"
 aboutlibraries = "12.2.4"
 kotlinxSerialization = "1.9.0"
 turbine = "1.2.0"
+mavenPublish = "0.30.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -66,3 +67,4 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibraries" }
+maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
