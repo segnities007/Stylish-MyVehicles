@@ -15,14 +15,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.domain.model.CostCategory
+import com.segnities007.stylishui.components.atoms.StylishDialogSurface
 import com.segnities007.stylishui.components.molecules.StylishConnectedChipRow
 import com.segnities007.stylishui.components.molecules.StylishDatePickerField
-import com.segnities007.stylishui.components.molecules.StylishDialogActions
-import com.segnities007.stylishui.components.molecules.StylishDialogSurface
 import com.segnities007.stylishui.components.models.StylishConnectedChipItem
+import com.segnities007.stylishui.components.organisms.StylishDialogActions
 import com.segnities007.stylish_myvehicles.presentation.screen.cost.CostListIntent
 import com.segnities007.stylish_myvehicles.presentation.screen.cost.CostListUiState
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
+import kotlinx.datetime.toJavaLocalDate
+import kotlinx.datetime.toKotlinLocalDate
 
 /** 費用記録の入力・編集ダイアログ。カテゴリ選択チップ付き。 */
 @Composable
@@ -50,8 +52,8 @@ fun CostInputDialog(
             Spacer(Modifier.height(16.dp))
 
             StylishDatePickerField(
-                value = state.inputDate,
-                onValueChange = { it?.let { d -> onIntent(CostListIntent.InputDateChanged(d)) } },
+                value = state.inputDate.toKotlinLocalDate(),
+                onValueChange = { it?.let { d -> onIntent(CostListIntent.InputDateChanged(d.toJavaLocalDate())) } },
                 label = stringResource(R.string.date_label),
                 confirmLabel = "OK",
                 dismissLabel = stringResource(R.string.cancel),

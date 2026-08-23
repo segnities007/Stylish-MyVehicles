@@ -18,32 +18,31 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.segnities007.stylish_myvehicles.R
-import com.segnities007.stylishui.components.molecules.StylishConnectedListItemColumn
-import com.segnities007.stylishui.components.models.StylishConnectedListItem
+import com.segnities007.stylish_myvehicles.domain.model.ThemeMode
+import com.segnities007.stylish_myvehicles.domain.repository.SettingsRepository
+import com.segnities007.stylish_myvehicles.presentation.screen.settings.components.SettingsOptionSheet
+import com.segnities007.stylishui.components.molecules.StylishConnectedCardColumn
+import com.segnities007.stylishui.components.models.StylishConnectedCardItem
 import com.segnities007.stylishui.components.patterns.StylishHeader
 import com.segnities007.stylishui.components.patterns.StylishScaffold
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
-import com.segnities007.stylish_myvehicles.presentation.theme.ThemeMode
-import com.segnities007.stylish_myvehicles.presentation.theme.ThemePreference
+import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun SettingsScreen(
-    onThemeChanged: (ThemeMode) -> Unit,
+    viewModel: SettingsViewModel,
     onNavigateToLicenses: () -> Unit,
     bottomBarVisible: MutableState<Boolean>? = null,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    var currentTheme by remember { mutableStateOf(ThemePreference.getThemeMode(context)) }
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
     val isAtTop by remember(scrollState) {
         derivedStateOf { scrollState.value == 0 }
@@ -72,18 +71,14 @@ fun SettingsScreen(
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
-                StylishConnectedListItemColumn(
-                    items = ThemeMode.entries.map { mode ->
-                        StylishConnectedListItem(
-                            headline = mode.label,
-                            supportingText = if (mode == currentTheme) stringResource(R.string.theme_selected) else null,
-                            onClick = {
-                                currentTheme = mode
-                                ThemePreference.setThemeMode(context, mode)
-                                onThemeChanged(mode)
-                            },
-                        )
-                    },
+                StylishConnectedCardColumn(
+                    items = listOf(
+                        StylishConnectedCardItem(
+                            title = stringResource(R.string.theme_section),
+                            supportingText = state.themeMode.label,
+                            onClick = { viewModel.accept(SettingsIntent.OpenThemeSelector) },
+                        ),
+                    ),
                 )
 
                 Spacer(Modifier.height(24.dp))
@@ -93,12 +88,12 @@ fun SettingsScreen(
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
-                StylishConnectedListItemColumn(
+                StylishConnectedCardColumn(
                     items = listOf(
-                        StylishConnectedListItem(stringResource(R.string.app_name_label), "Stylish MyCars"),
-                        StylishConnectedListItem(stringResource(R.string.version_label), "1.0"),
-                        StylishConnectedListItem(
-                            headline = stringResource(R.string.open_source_licenses),
+                        StylishConnectedCardItem(stringResource(R.string.app_name_label), "Stylish MyCars"),
+                        StylishConnectedCardItem(stringResource(R.string.version_label), "1.0"),
+                        StylishConnectedCardItem(
+                            title = stringResource(R.string.open_source_licenses),
                             onClick = onNavigateToLicenses,
                             trailingContent = {
                                 Icon(
@@ -112,6 +107,16 @@ fun SettingsScreen(
             }
         }
     }
+
+    if (state.isThemeSheetVisible) {
+        SettingsOptionSheet(
+            selectedThemeMode = state.themeMode,
+            onThemeModeSelect = { mode ->
+                viewModel.accept(SettingsIntent.ThemeModeSelected(mode))
+            },
+            onDismiss = { viewModel.accept(SettingsIntent.CloseThemeSelector) },
+        )
+    }
 }
 
 @Preview(name = "SettingsScreen", showBackground = true, widthDp = 393)
@@ -119,7 +124,16 @@ fun SettingsScreen(
 private fun SettingsScreenPreview() {
     StylishMyVehiclesTheme {
         Surface(Modifier.padding(20.dp)) {
-            SettingsScreen(onThemeChanged = {}, onNavigateToLicenses = {})
+            val settingsRepository = remember {
+                object : SettingsRepository {
+                    override fun getThemeMode() = flowOf(ThemeMode.SYSTEM)
+                    override suspend fun setThemeMode(mode: ThemeMode) {}
+                }
+            }
+            SettingsScreen(
+                viewModel = remember { SettingsViewModel(settingsRepository) },
+                onNavigateToLicenses = {},
+            )
         }
     }
 }

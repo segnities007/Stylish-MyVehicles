@@ -27,11 +27,10 @@ import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
 import com.segnities007.stylishui.components.atoms.StylishFab
 import com.segnities007.stylishui.components.charts.BarChartData
 import com.segnities007.stylishui.components.molecules.StylishConnectedCardGrid
-import com.segnities007.stylishui.components.molecules.StylishConnectedListItemColumn
-import com.segnities007.stylishui.components.molecules.StylishDeleteConfirmDialog
+import com.segnities007.stylishui.components.molecules.StylishConnectedCardColumn
 import com.segnities007.stylishui.components.molecules.StylishEmptyState
+import com.segnities007.stylishui.components.organisms.StylishDeleteConfirmDialog
 import com.segnities007.stylishui.components.models.StylishConnectedCardItem
-import com.segnities007.stylishui.components.models.StylishConnectedListItem
 import com.segnities007.stylishui.components.patterns.BarChartSection
 import com.segnities007.stylish_myvehicles.presentation.screen.maintenance.MaintenanceRecordIntent
 import com.segnities007.stylish_myvehicles.presentation.screen.maintenance.MaintenanceRecordViewModel
@@ -173,15 +172,16 @@ internal fun LazyListScope.MaintenancePeriodContent(
         }
     } else {
         item {
-            StylishConnectedListItemColumn(
+            StylishConnectedCardColumn(
                 spacing = 4.dp,
                 items = periodMaintenances.map { record ->
-                    StylishConnectedListItem(
-                        headline = record.title,
-                        supportingLines = listOf(
-                            record.date.toString(),
-                            record.category.label,
-                        ),
+                    StylishConnectedCardItem(
+                        title = record.title,
+                        supportingText =
+                            listOf(
+                                record.date.toString(),
+                                record.category.label,
+                            ).joinToString("\n"),
                         onClick = { onEditRecord(record.id) },
                         onLongClick = { onRequestDelete(record.id) },
                         trailingContent = {

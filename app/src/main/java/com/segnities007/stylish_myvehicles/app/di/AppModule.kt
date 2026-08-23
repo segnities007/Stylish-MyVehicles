@@ -5,12 +5,14 @@ import com.segnities007.stylish_myvehicles.data.repository.CostRecordRepositoryI
 import com.segnities007.stylish_myvehicles.data.repository.FuelRecordRepositoryImpl
 import com.segnities007.stylish_myvehicles.data.repository.MaintenanceRecordRepositoryImpl
 import com.segnities007.stylish_myvehicles.data.repository.MaintenanceScheduleRepositoryImpl
+import com.segnities007.stylish_myvehicles.data.repository.SettingsRepositoryImpl
 import com.segnities007.stylish_myvehicles.data.repository.TripRecordRepositoryImpl
 import com.segnities007.stylish_myvehicles.data.repository.VehicleRepositoryImpl
 import com.segnities007.stylish_myvehicles.domain.repository.CostRecordRepository
 import com.segnities007.stylish_myvehicles.domain.repository.FuelRecordRepository
 import com.segnities007.stylish_myvehicles.domain.repository.MaintenanceRecordRepository
 import com.segnities007.stylish_myvehicles.domain.repository.MaintenanceScheduleRepository
+import com.segnities007.stylish_myvehicles.domain.repository.SettingsRepository
 import com.segnities007.stylish_myvehicles.domain.repository.TripRecordRepository
 import com.segnities007.stylish_myvehicles.domain.repository.VehicleRepository
 import com.segnities007.stylish_myvehicles.domain.usecase.fuel.InsertFuelRecordUseCase
@@ -22,6 +24,7 @@ import com.segnities007.stylish_myvehicles.presentation.screen.maintenance.Maint
 import com.segnities007.stylish_myvehicles.presentation.screen.notification.NotificationViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.records.RecordsViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.recordslist.RecordsListViewModel
+import com.segnities007.stylish_myvehicles.presentation.screen.settings.SettingsViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.trip.TripRecordViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.vehicledetail.VehicleDetailViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.vehicleedit.VehicleEditViewModel
@@ -48,6 +51,7 @@ val appModule = module {
     single<MaintenanceScheduleRepository> { MaintenanceScheduleRepositoryImpl(get()) }
     single<CostRecordRepository> { CostRecordRepositoryImpl(get()) }
     single<TripRecordRepository> { TripRecordRepositoryImpl(get()) }
+    single<SettingsRepository> { SettingsRepositoryImpl(androidContext()) }
 
     // UseCase (cross-aggregate orchestration only)
     single { InsertVehicleUseCase(get(), get()) }
@@ -132,6 +136,11 @@ val appModule = module {
         TripRecordViewModel(
             vehicleId = params.get(),
             tripRecordRepository = get(),
+        )
+    }
+    viewModel {
+        SettingsViewModel(
+            settingsRepository = get(),
         )
     }
 }

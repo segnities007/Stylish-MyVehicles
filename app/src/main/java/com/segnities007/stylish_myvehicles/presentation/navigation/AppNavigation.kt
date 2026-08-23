@@ -56,6 +56,7 @@ import com.segnities007.stylish_myvehicles.presentation.screen.records.RecordsVi
 import com.segnities007.stylish_myvehicles.presentation.screen.recordslist.RecordsListScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.recordslist.RecordsListViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.settings.SettingsScreen
+import com.segnities007.stylish_myvehicles.presentation.screen.settings.SettingsViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.trip.TripRecordViewModel
 import com.segnities007.stylish_myvehicles.presentation.screen.trip.TripRecordsScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.vehicledetail.VehicleDetailScreen
@@ -65,7 +66,6 @@ import com.segnities007.stylish_myvehicles.presentation.screen.vehicleedit.Vehic
 import com.segnities007.stylish_myvehicles.presentation.screen.vehiclepager.VehiclePagerScreen
 import com.segnities007.stylish_myvehicles.presentation.screen.vehiclepager.VehiclePagerViewModel
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
-import com.segnities007.stylish_myvehicles.presentation.theme.ThemeMode
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -73,7 +73,6 @@ import org.koin.core.parameter.parametersOf
 fun AppNavigation(
     showOnboarding: Boolean,
     onSaveDocument: (ExportDocument) -> Unit,
-    onThemeChanged: (ThemeMode) -> Unit,
     onOnboardingComplete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -281,8 +280,9 @@ fun AppNavigation(
                     )
                 }
                 entry<SettingsDestination> {
+                    val viewModel: SettingsViewModel = koinViewModel()
                     SettingsScreen(
-                        onThemeChanged = onThemeChanged,
+                        viewModel = viewModel,
                         onNavigateToLicenses = { backStack.add(LicensesDestination) },
                         bottomBarVisible = bottomBarVisible,
                     )
@@ -355,7 +355,6 @@ private fun AppNavigationPreview() {
             AppNavigation(
                 showOnboarding = false,
                 onSaveDocument = {},
-                onThemeChanged = {},
                 onOnboardingComplete = {},
             )
         }

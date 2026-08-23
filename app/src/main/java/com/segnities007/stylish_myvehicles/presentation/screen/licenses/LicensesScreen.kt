@@ -25,10 +25,10 @@ import com.segnities007.stylish_myvehicles.R
 import com.mikepenz.aboutlibraries.entity.Library
 import com.mikepenz.aboutlibraries.ui.compose.android.rememberLibraries
 import com.segnities007.stylishui.components.atoms.StylishIconButton
-import com.segnities007.stylishui.components.molecules.StylishConnectedListItemColumn
-import com.segnities007.stylishui.components.molecules.StylishDialogActions
-import com.segnities007.stylishui.components.molecules.StylishDialogSurface
-import com.segnities007.stylishui.components.models.StylishConnectedListItem
+import com.segnities007.stylishui.components.atoms.StylishDialogSurface
+import com.segnities007.stylishui.components.molecules.StylishConnectedCardColumn
+import com.segnities007.stylishui.components.models.StylishConnectedCardItem
+import com.segnities007.stylishui.components.organisms.StylishDialogActions
 import com.segnities007.stylishui.components.patterns.StylishHeader
 import com.segnities007.stylishui.components.patterns.StylishScaffold
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
@@ -67,13 +67,13 @@ fun LicensesScreen(
                 },
             )
 
-            StylishConnectedListItemColumn(
+            StylishConnectedCardColumn(
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 24.dp),
                 spacing = 4.dp,
                 items = libraries.map { library ->
-                    StylishConnectedListItem(
-                        headline = library.name,
-                        supportingLines = buildSupportingLines(library),
+                    StylishConnectedCardItem(
+                        title = library.name,
+                        supportingText = buildSupportingLines(library).joinToString("\n"),
                         onClick = { selected = library },
                         trailingContent = {
                             Text(

@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
+import com.segnities007.stylish_myvehicles.domain.model.ThemeMode
 import com.segnities007.stylishui.theme.StylishDarkColorScheme
 import com.segnities007.stylishui.theme.StylishLightColorScheme
 import com.segnities007.stylishui.theme.StylishTheme

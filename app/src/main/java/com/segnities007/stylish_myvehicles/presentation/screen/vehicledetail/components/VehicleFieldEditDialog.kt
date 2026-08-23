@@ -17,15 +17,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
+import com.segnities007.stylishui.components.atoms.StylishDialogSurface
 import com.segnities007.stylishui.components.molecules.StylishConnectedChipRow
 import com.segnities007.stylishui.components.molecules.StylishDatePickerField
-import com.segnities007.stylishui.components.molecules.StylishDialogActions
-import com.segnities007.stylishui.components.molecules.StylishDialogSurface
 import com.segnities007.stylishui.components.models.StylishConnectedChipItem
+import com.segnities007.stylishui.components.organisms.StylishDialogActions
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.VehicleField
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.VehicleFieldInputType
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 import java.time.LocalDate
+import kotlinx.datetime.toJavaLocalDate
+import kotlinx.datetime.toKotlinLocalDate
 
 /**
  * 車両情報のフィールドを1つだけ編集するダイアログ。
@@ -34,24 +36,18 @@ import java.time.LocalDate
 @Composable
 fun VehicleFieldEditDialog(
     field: VehicleField,
-    inputText: String,
-    inputDate: LocalDate?,
-    inputCategory: VehicleCategory,
-    onTextChanged: (String) -> Unit,
-    onDateChanged: (LocalDate?) -> Unit,
-    onCategoryChanged: (VehicleCategory) -> Unit,
-    onSave: () -> Unit,
-    onDismiss: () -> Unit,
+    value: VehicleFieldEditValue,
+    actions: VehicleFieldEditActions,
 ) {
-    StylishDialogSurface(onDismiss = onDismiss) {
+    StylishDialogSurface(onDismiss = actions::dismiss) {
         Column(Modifier.padding(24.dp)) {
             Text(field.label, style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(16.dp))
 
             when (field.inputType) {
                 VehicleFieldInputType.TEXT -> OutlinedTextField(
-                    value = inputText,
-                    onValueChange = onTextChanged,
+                    value = value.inputText,
+                    onValueChange = actions::onTextChanged,
                     label = { Text(field.label) },
                     singleLine = field != VehicleField.MEMO,
                     minLines = if (field == VehicleField.MEMO) 3 else 1,
@@ -59,8 +55,10 @@ fun VehicleFieldEditDialog(
                 )
 
                 VehicleFieldInputType.NUMBER -> OutlinedTextField(
-                    value = inputText,
-                    onValueChange = { value -> onTextChanged(value.filter { it.isDigit() }) },
+                    value = value.inputText,
+                    onValueChange = { text ->
+                        actions.onTextChanged(text.filter { it.isDigit() })
+                    },
                     label = {
                         Text(field.unit?.let { "${field.label} (${it})" } ?: field.label)
                     },
@@ -70,8 +68,8 @@ fun VehicleFieldEditDialog(
                 )
 
                 VehicleFieldInputType.DATE -> StylishDatePickerField(
-                    value = inputDate,
-                    onValueChange = onDateChanged,
+                    value = value.inputDate?.toKotlinLocalDate(),
+                    onValueChange = { date -> actions.onDateChanged(date?.toJavaLocalDate()) },
                     label = field.label,
                     confirmLabel = "OK",
                     dismissLabel = stringResource(R.string.cancel),
@@ -83,8 +81,8 @@ fun VehicleFieldEditDialog(
                     items = VehicleCategory.entries.map { category ->
                         StylishConnectedChipItem(
                             label = category.label,
-                            onClick = { onCategoryChanged(category) },
-                            selected = inputCategory == category,
+                            onClick = { actions.onCategoryChanged(category) },
+                            selected = value.inputCategory == category,
                         )
                     },
                 )
@@ -94,8 +92,8 @@ fun VehicleFieldEditDialog(
             StylishDialogActions(
                 confirmLabel = stringResource(R.string.save),
                 cancelLabel = stringResource(R.string.cancel),
-                onConfirm = onSave,
-                onCancel = onDismiss,
+                onConfirm = actions::save,
+                onCancel = actions::dismiss,
             )
         }
     }
@@ -107,14 +105,20 @@ private fun VehicleFieldEditDialogPreview() {
     StylishMyVehiclesTheme {
         VehicleFieldEditDialog(
             field = VehicleField.PLATE_NUMBER,
-            inputText = "横浜 300 あ 12-34",
-            inputDate = null,
-            inputCategory = VehicleCategory.CAR,
-            onTextChanged = {},
-            onDateChanged = {},
-            onCategoryChanged = {},
-            onSave = {},
-            onDismiss = {},
+            value = VehicleFieldEditValue(
+                inputText = "横浜 300 あ 12-34",
+                inputDate = null,
+                inputCategory = VehicleCategory.CAR,
+            ),
+            actions = EmptyVehicleFieldEditActions,
         )
     }
+}
+
+private val EmptyVehicleFieldEditActions = object : VehicleFieldEditActions {
+    override fun onTextChanged(text: String) = Unit
+    override fun onDateChanged(date: LocalDate?) = Unit
+    override fun onCategoryChanged(category: VehicleCategory) = Unit
+    override fun save() = Unit
+    override fun dismiss() = Unit
 }

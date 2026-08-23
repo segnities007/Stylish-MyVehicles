@@ -24,12 +24,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_myvehicles.R
+import com.segnities007.stylishui.components.atoms.StylishDialogSurface
 import com.segnities007.stylishui.components.molecules.StylishDatePickerField
-import com.segnities007.stylishui.components.molecules.StylishDialogActions
-import com.segnities007.stylishui.components.molecules.StylishDialogSurface
+import com.segnities007.stylishui.components.organisms.StylishDialogActions
 import com.segnities007.stylish_myvehicles.presentation.screen.fuel.FuelRecordIntent
 import com.segnities007.stylish_myvehicles.presentation.screen.fuel.FuelRecordUiState
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
+import kotlinx.datetime.toJavaLocalDate
+import kotlinx.datetime.toKotlinLocalDate
 
 /** 給油記録の入力・編集ダイアログ。レシート読み取りによる自動入力に対応。 */
 @Composable
@@ -68,8 +70,8 @@ fun FuelInputDialog(
             Spacer(Modifier.height(16.dp))
 
             StylishDatePickerField(
-                value = state.inputDate,
-                onValueChange = { it?.let { d -> onIntent(FuelRecordIntent.DateChanged(d)) } },
+                value = state.inputDate.toKotlinLocalDate(),
+                onValueChange = { it?.let { d -> onIntent(FuelRecordIntent.DateChanged(d.toJavaLocalDate())) } },
                 label = stringResource(R.string.date_label),
                 confirmLabel = "OK",
                 dismissLabel = stringResource(R.string.cancel),

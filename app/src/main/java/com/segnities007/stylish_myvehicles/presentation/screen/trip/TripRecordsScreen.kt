@@ -52,23 +52,24 @@ import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.data.trip.TripTrackingService
 import com.segnities007.stylish_myvehicles.domain.model.TripPurpose
 import com.segnities007.stylish_myvehicles.domain.model.TripRecord
-import com.segnities007.stylishui.components.atoms.StylishIconButton
+import com.segnities007.stylishui.components.atoms.StylishConnectedCard
+import com.segnities007.stylishui.components.atoms.StylishDialogSurface
 import com.segnities007.stylishui.components.atoms.StylishFab
+import com.segnities007.stylishui.components.atoms.StylishFormTextField
+import com.segnities007.stylishui.components.atoms.StylishIconButton
 import com.segnities007.stylishui.foundation.connectedColumnCorners
-import com.segnities007.stylishui.foundation.connectedColumnEdges
 import com.segnities007.stylishui.foundation.connectedShape
-import com.segnities007.stylishui.components.molecules.StylishConnectedCard
-import com.segnities007.stylishui.components.molecules.StylishDialogActions
-import com.segnities007.stylishui.components.molecules.StylishDialogSurface
-import com.segnities007.stylishui.components.molecules.StylishEmptyState
-import com.segnities007.stylishui.components.molecules.StylishFormTextField
-import com.segnities007.stylishui.components.molecules.StylishDatePickerField
 import com.segnities007.stylishui.components.molecules.StylishConnectedChipRow
+import com.segnities007.stylishui.components.molecules.StylishDatePickerField
+import com.segnities007.stylishui.components.molecules.StylishEmptyState
 import com.segnities007.stylishui.components.models.StylishConnectedChipItem
+import com.segnities007.stylishui.components.organisms.StylishDialogActions
 import com.segnities007.stylishui.components.patterns.StylishHeader
 import com.segnities007.stylishui.components.patterns.StylishScaffold
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 import androidx.compose.ui.tooling.preview.Preview
+import kotlinx.datetime.toJavaLocalDate
+import kotlinx.datetime.toKotlinLocalDate
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -324,8 +325,6 @@ private fun TripHistoryCard(
         onClick = onEdit,
         onLongClick = onEdit,
         shape = connectedShape(corners),
-        outlineEdges = connectedColumnEdges(index, count),
-        outlineCorners = corners,
         trailingContent = {
             Icon(
                 Icons.Default.Edit,
@@ -374,9 +373,9 @@ private fun TripEditDialog(
             )
             Spacer(Modifier.height(12.dp))
             StylishDatePickerField(
-                value = state.inputDate,
+                value = state.inputDate.toKotlinLocalDate(),
                 onValueChange = { date ->
-                    date?.let { onIntent(TripRecordIntent.DateChanged(it)) }
+                    date?.let { onIntent(TripRecordIntent.DateChanged(it.toJavaLocalDate())) }
                 },
                 label = stringResource(R.string.date_label),
                 confirmLabel = "OK",

@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylishui.components.charts.PieChartData
 import com.segnities007.stylishui.components.charts.SimplePieChart
-import com.segnities007.stylishui.components.patterns.StylishSectionTitle
+import com.segnities007.stylishui.components.atoms.StylishSectionTitle
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 
 @Composable

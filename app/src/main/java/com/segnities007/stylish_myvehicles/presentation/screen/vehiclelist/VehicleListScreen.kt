@@ -34,8 +34,8 @@ import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
 import com.segnities007.stylish_myvehicles.domain.service.InspectionCalculator
 import com.segnities007.stylishui.components.atoms.StylishIconButton
-import com.segnities007.stylishui.components.molecules.StylishConnectedListItemColumn
-import com.segnities007.stylishui.components.models.StylishConnectedListItem
+import com.segnities007.stylishui.components.molecules.StylishConnectedCardColumn
+import com.segnities007.stylishui.components.models.StylishConnectedCardItem
 import com.segnities007.stylishui.components.patterns.StylishHeader
 import com.segnities007.stylishui.components.patterns.StylishScaffold
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
@@ -127,13 +127,13 @@ private fun VehicleList(
     onVehicleClick: (Vehicle) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    StylishConnectedListItemColumn(
+    StylishConnectedCardColumn(
         modifier = modifier,
         spacing = 4.dp,
         items = vehicles.map { vehicle ->
-            StylishConnectedListItem(
-                headline = "${vehicle.maker} ${vehicle.name}",
-                supportingLines = buildSupportingLines(vehicle),
+            StylishConnectedCardItem(
+                title = "${vehicle.maker} ${vehicle.name}",
+                supportingText = buildSupportingLines(vehicle).joinToString("\n"),
                 onClick = { onVehicleClick(vehicle) },
             )
         },

@@ -1,6 +1,5 @@
 package com.segnities007.stylish_myvehicles.presentation.components.organisms
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -21,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylishui.components.atoms.StylishRoundedIconButton
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
-import com.segnities007.stylishui.tokens.StylishDimensions
+import com.segnities007.stylishui.theme.StylishTheme
 
 @Composable
 fun StylishBottomBar(
@@ -32,17 +31,11 @@ fun StylishBottomBar(
     onNavigateToRecordsList: (() -> Unit)? = null,
 ) {
     Surface(
-        modifier = modifier
-            .padding(horizontal = 20.dp)
-            .border(
-                width = StylishDimensions.outlineWidth,
-                color = MaterialTheme.colorScheme.outlineVariant,
-                shape = RoundedCornerShape(28.dp),
-            ),
+        modifier = modifier.padding(horizontal = 20.dp),
         shape = RoundedCornerShape(28.dp),
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         tonalElevation = 4.dp,
-        shadowElevation = StylishDimensions.floatingElevation,
+        shadowElevation = StylishTheme.dimensions.floatingElevation,
     ) {
         Row(
             modifier = Modifier.padding(8.dp),

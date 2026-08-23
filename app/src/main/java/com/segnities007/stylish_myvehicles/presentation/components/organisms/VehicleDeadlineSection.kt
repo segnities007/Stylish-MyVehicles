@@ -17,8 +17,8 @@ import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
 import com.segnities007.stylish_myvehicles.domain.service.InspectionCalculator
 import com.segnities007.stylish_myvehicles.domain.service.VehicleTaxCalculator
-import com.segnities007.stylishui.components.molecules.StylishConnectedListItemColumn
-import com.segnities007.stylishui.components.models.StylishConnectedListItem
+import com.segnities007.stylishui.components.molecules.StylishConnectedCardColumn
+import com.segnities007.stylishui.components.models.StylishConnectedCardItem
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 import java.time.LocalDate
 
@@ -46,10 +46,10 @@ fun VehicleDeadlineSection(
     onTaxClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    StylishConnectedListItemColumn(
+    StylishConnectedCardColumn(
         modifier = modifier,
         items = buildList {
-            val chevron: @Composable RowScope.() -> Unit = {
+            val chevron: @Composable () -> Unit = {
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowForward, null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -58,7 +58,7 @@ fun VehicleDeadlineSection(
 
             val inspectionExpiry = InspectionCalculator.currentExpiryFor(vehicle)
             add(
-                StylishConnectedListItem(
+                StylishConnectedCardItem(
                     stringResource(R.string.inspection_label),
                     inspectionExpiry?.let { "$it（${deadlineStatus(it)}）" } ?: NOT_REGISTERED,
                     onClick = { onEditField(VehicleField.INSPECTION_EXPIRY) },
@@ -68,7 +68,7 @@ fun VehicleDeadlineSection(
 
             val jibaiExpiry = vehicle.jibaiExpiry
             add(
-                StylishConnectedListItem(
+                StylishConnectedCardItem(
                     stringResource(R.string.jibai_label),
                     jibaiExpiry?.let { "$it（${deadlineStatus(it)}）" } ?: NOT_REGISTERED,
                     onClick = { onEditField(VehicleField.JIBAI_EXPIRY) },
@@ -78,7 +78,7 @@ fun VehicleDeadlineSection(
 
             val insuranceExpiry = vehicle.insuranceExpiry
             add(
-                StylishConnectedListItem(
+                StylishConnectedCardItem(
                     stringResource(R.string.voluntary_insurance_label),
                     insuranceExpiry?.let { "$it（${deadlineStatus(it)}）" } ?: NOT_REGISTERED,
                     onClick = { onEditField(VehicleField.INSURANCE_EXPIRY) },
@@ -94,7 +94,7 @@ fun VehicleDeadlineSection(
             if (tax != null) {
                 val taxStatus = if (taxPaidThisYear) " ✓ 納付済み" else " 未納付"
                 add(
-                    StylishConnectedListItem(
+                    StylishConnectedCardItem(
                         taxLabel(vehicle.category),
                         "${String.format("%,d", tax)}円/年$taxStatus",
                         onTaxClick,

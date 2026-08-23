@@ -29,16 +29,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.domain.usecase.ExportDocument
 import com.segnities007.stylish_myvehicles.presentation.navigation.AppNavigation
+import com.segnities007.stylish_myvehicles.presentation.screen.settings.SettingsViewModel
 import com.segnities007.stylish_myvehicles.presentation.theme.OnboardingPreference
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
-import com.segnities007.stylish_myvehicles.presentation.theme.ThemePreference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,9 +48,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            var themeMode by remember { mutableStateOf(ThemePreference.getThemeMode(this)) }
+            val settingsViewModel: SettingsViewModel = koinViewModel()
+            val settingsState by settingsViewModel.uiState.collectAsStateWithLifecycle()
 
-            StylishMyVehiclesTheme(themeMode = themeMode) {
+            StylishMyVehiclesTheme(themeMode = settingsState.themeMode) {
                 var pendingDocument by remember { mutableStateOf<ExportDocument?>(null) }
                 val showOnboarding = remember { !OnboardingPreference.isCompleted(this) }
                 val exportLauncher = rememberLauncherForActivityResult(
@@ -84,7 +87,6 @@ class MainActivity : ComponentActivity() {
                             pendingDocument = document
                             exportLauncher.launch(document)
                         },
-                        onThemeChanged = { mode -> themeMode = mode },
                         onOnboardingComplete = { OnboardingPreference.setCompleted(this@MainActivity) },
                     )
                     SystemBarScrims()

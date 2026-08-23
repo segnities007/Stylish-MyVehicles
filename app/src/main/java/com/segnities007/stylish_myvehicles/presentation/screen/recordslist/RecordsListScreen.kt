@@ -40,9 +40,9 @@ import com.segnities007.stylish_myvehicles.domain.model.CostRecord
 import com.segnities007.stylish_myvehicles.domain.model.FuelRecord
 import com.segnities007.stylish_myvehicles.domain.model.MaintenanceCategory
 import com.segnities007.stylish_myvehicles.domain.model.MaintenanceRecord
-import com.segnities007.stylishui.components.molecules.StylishConnectedListItemColumn
+import com.segnities007.stylishui.components.molecules.StylishConnectedCardColumn
 import com.segnities007.stylishui.components.molecules.StylishEmptyState
-import com.segnities007.stylishui.components.models.StylishConnectedListItem
+import com.segnities007.stylishui.components.models.StylishConnectedCardItem
 import com.segnities007.stylishui.components.patterns.StylishHeader
 import com.segnities007.stylishui.components.patterns.StylishPageContent
 import com.segnities007.stylishui.components.patterns.StylishScaffold
@@ -120,7 +120,7 @@ fun RecordsListScreen(
                             }
                             item(key = "list_${section.month}") {
                                 Column {
-                                    StylishConnectedListItemColumn(
+                                    StylishConnectedCardColumn(
                                         spacing = 4.dp,
                                         items = section.entries.map { entry ->
                                             toListItem(entry, viewModel::accept)
@@ -166,16 +166,17 @@ private fun MonthHeader(section: RecordSection) {
 private fun toListItem(
     entry: RecordEntry,
     onIntent: (RecordsListIntent) -> Unit,
-): StylishConnectedListItem = when (entry) {
+): StylishConnectedCardItem = when (entry) {
     is FuelEntry -> {
         val r = entry.record
-        StylishConnectedListItem(
-            headline = "給油 ${r.volume}L",
-            supportingLines = listOfNotNull(
-                r.fuelEconomy?.let { "%.1f km/L".format(it) },
-                entry.vehicleName,
-                r.date.toString(),
-            ),
+        StylishConnectedCardItem(
+            title = "給油 ${r.volume}L",
+            supportingText =
+                listOfNotNull(
+                    r.fuelEconomy?.let { "%.1f km/L".format(it) },
+                    entry.vehicleName,
+                    r.date.toString(),
+                ).joinToString("\n"),
             onClick = { onIntent(RecordsListIntent.OpenRecord(entry)) },
             leadingContent = {
                 Icon(
@@ -194,13 +195,14 @@ private fun toListItem(
 
     is MaintenanceEntry -> {
         val r = entry.record
-        StylishConnectedListItem(
-            headline = r.title,
-            supportingLines = listOf(
-                entry.vehicleName,
-                r.date.toString(),
-                r.category.label,
-            ),
+        StylishConnectedCardItem(
+            title = r.title,
+            supportingText =
+                listOf(
+                    entry.vehicleName,
+                    r.date.toString(),
+                    r.category.label,
+                ).joinToString("\n"),
             onClick = { onIntent(RecordsListIntent.OpenRecord(entry)) },
             leadingContent = {
                 Icon(
@@ -224,13 +226,14 @@ private fun toListItem(
 
     is CostEntry -> {
         val r = entry.record
-        StylishConnectedListItem(
-            headline = r.title,
-            supportingLines = listOf(
-                entry.vehicleName,
-                r.date.toString(),
-                r.category.label,
-            ),
+        StylishConnectedCardItem(
+            title = r.title,
+            supportingText =
+                listOf(
+                    entry.vehicleName,
+                    r.date.toString(),
+                    r.category.label,
+                ).joinToString("\n"),
             onClick = { onIntent(RecordsListIntent.OpenRecord(entry)) },
             leadingContent = {
                 Icon(
@@ -249,13 +252,13 @@ private fun toListItem(
 
     is TripEntry -> {
         val r = entry.record
-        StylishConnectedListItem(
-            headline = r.title.ifBlank { r.purpose.label },
-            supportingLines = listOf(
+        StylishConnectedCardItem(
+            title = r.title.ifBlank { r.purpose.label },
+            supportingText = listOf(
                 entry.vehicleName,
                 r.startedAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd H:mm")),
                 "%.1f km".format(r.distanceMeters / 1000.0),
-            ),
+            ).joinToString("\n"),
             onClick = { onIntent(RecordsListIntent.OpenRecord(entry)) },
             leadingContent = {
                 Icon(
@@ -301,7 +304,7 @@ private fun RecordsListScreenPreview() {
         Surface(Modifier.padding(20.dp)) {
             Column {
                 MonthHeader(section)
-                StylishConnectedListItemColumn(
+                StylishConnectedCardColumn(
                     spacing = 4.dp,
                     items = section.entries.map { toListItem(it) {} },
                 )

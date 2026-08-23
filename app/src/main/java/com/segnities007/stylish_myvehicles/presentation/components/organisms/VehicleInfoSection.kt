@@ -7,8 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
-import com.segnities007.stylishui.components.molecules.StylishConnectedListItemColumn
-import com.segnities007.stylishui.components.models.StylishConnectedListItem
+import com.segnities007.stylishui.components.molecules.StylishConnectedCardColumn
+import com.segnities007.stylishui.components.models.StylishConnectedCardItem
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 import java.time.LocalDate
 
@@ -27,85 +27,85 @@ fun VehicleInfoSection(
     onEditField: (VehicleField) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    StylishConnectedListItemColumn(
+    StylishConnectedCardColumn(
         modifier = modifier,
         items = listOf(
-            StylishConnectedListItem(
+            StylishConnectedCardItem(
                 VehicleField.CATEGORY.label,
                 vehicle.category.label,
                 onClick = { onEditField(VehicleField.CATEGORY) },
             ),
-            StylishConnectedListItem(
+            StylishConnectedCardItem(
                 VehicleField.MAKER.label,
                 vehicle.maker.orNotRegistered(),
                 onClick = { onEditField(VehicleField.MAKER) },
             ),
-            StylishConnectedListItem(
+            StylishConnectedCardItem(
                 VehicleField.NAME.label,
                 vehicle.name.orNotRegistered(),
                 onClick = { onEditField(VehicleField.NAME) },
             ),
-            StylishConnectedListItem(
+            StylishConnectedCardItem(
                 VehicleField.GRADE.label,
                 vehicle.grade.orNotRegistered(),
                 onClick = { onEditField(VehicleField.GRADE) },
             ),
-            StylishConnectedListItem(
+            StylishConnectedCardItem(
                 VehicleField.YEAR.label,
                 vehicle.year?.let { "${it}年" } ?: NOT_REGISTERED,
                 onClick = { onEditField(VehicleField.YEAR) },
             ),
-            StylishConnectedListItem(
+            StylishConnectedCardItem(
                 VehicleField.MODEL_CODE.label,
                 vehicle.modelCode.orNotRegistered(),
                 onClick = { onEditField(VehicleField.MODEL_CODE) },
             ),
-            StylishConnectedListItem(
+            StylishConnectedCardItem(
                 VehicleField.PLATE_NUMBER.label,
                 vehicle.plateNumber.orNotRegistered(),
                 onClick = { onEditField(VehicleField.PLATE_NUMBER) },
             ),
-            StylishConnectedListItem(
+            StylishConnectedCardItem(
                 VehicleField.VIN.label,
                 vehicle.vin.orNotRegistered(),
                 onClick = { onEditField(VehicleField.VIN) },
             ),
-            StylishConnectedListItem(
+            StylishConnectedCardItem(
                 VehicleField.DISPLACEMENT.label,
                 vehicle.displacement?.let { "${it}cc" } ?: NOT_REGISTERED,
                 onClick = { onEditField(VehicleField.DISPLACEMENT) },
             ),
-            StylishConnectedListItem(
+            StylishConnectedCardItem(
                 VehicleField.WEIGHT.label,
                 vehicle.weight?.let { "${it}kg" } ?: NOT_REGISTERED,
                 onClick = { onEditField(VehicleField.WEIGHT) },
             ),
-            StylishConnectedListItem(
+            StylishConnectedCardItem(
                 VehicleField.MAX_LOAD.label,
                 vehicle.maxLoadKg?.let { "${it}kg" } ?: NOT_REGISTERED,
                 onClick = { onEditField(VehicleField.MAX_LOAD) },
             ),
-            StylishConnectedListItem(
+            StylishConnectedCardItem(
                 VehicleField.COLOR.label,
                 vehicle.color.orNotRegistered(),
                 onClick = { onEditField(VehicleField.COLOR) },
             ),
-            StylishConnectedListItem(
+            StylishConnectedCardItem(
                 VehicleField.FIRST_REGISTRATION_DATE.label,
                 vehicle.firstRegistrationDate?.toString() ?: NOT_REGISTERED,
                 onClick = { onEditField(VehicleField.FIRST_REGISTRATION_DATE) },
             ),
-            StylishConnectedListItem(
+            StylishConnectedCardItem(
                 VehicleField.INSURANCE_COMPANY.label,
                 vehicle.insuranceCompany.orNotRegistered(),
                 onClick = { onEditField(VehicleField.INSURANCE_COMPANY) },
             ),
-            StylishConnectedListItem(
+            StylishConnectedCardItem(
                 VehicleField.INSURANCE_RANK.label,
                 vehicle.insuranceRank?.let { "${it}等級" } ?: NOT_REGISTERED,
                 onClick = { onEditField(VehicleField.INSURANCE_RANK) },
             ),
-            StylishConnectedListItem(
+            StylishConnectedCardItem(
                 VehicleField.MEMO.label,
                 vehicle.memo.orNotRegistered(),
                 onClick = { onEditField(VehicleField.MEMO) },

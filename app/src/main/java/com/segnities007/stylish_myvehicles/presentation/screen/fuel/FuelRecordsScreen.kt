@@ -40,13 +40,12 @@ import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
 import com.segnities007.stylishui.components.atoms.StylishFab
 import com.segnities007.stylishui.components.charts.BarChartData
 import com.segnities007.stylishui.components.charts.LineChartData
+import com.segnities007.stylishui.components.atoms.StylishDialogSurface
 import com.segnities007.stylishui.components.molecules.StylishConnectedCardGrid
-import com.segnities007.stylishui.components.molecules.StylishConnectedListItemColumn
-import com.segnities007.stylishui.components.molecules.StylishDeleteConfirmDialog
-import com.segnities007.stylishui.components.molecules.StylishDialogSurface
+import com.segnities007.stylishui.components.molecules.StylishConnectedCardColumn
 import com.segnities007.stylishui.components.molecules.StylishEmptyState
+import com.segnities007.stylishui.components.organisms.StylishDeleteConfirmDialog
 import com.segnities007.stylishui.components.models.StylishConnectedCardItem
-import com.segnities007.stylishui.components.models.StylishConnectedListItem
 import com.segnities007.stylishui.components.patterns.BarChartSection
 import com.segnities007.stylishui.components.patterns.LineChartSection
 import com.segnities007.stylish_myvehicles.presentation.screen.fuel.FuelRecordIntent
@@ -314,15 +313,16 @@ internal fun LazyListScope.FuelPeriodContent(
         }
     } else {
         item {
-            StylishConnectedListItemColumn(
+            StylishConnectedCardColumn(
                 spacing = 4.dp,
                 items = periodFuels.map { fuel ->
-                    StylishConnectedListItem(
-                        headline = "${fuel.volume}L",
-                        supportingLines = listOfNotNull(
-                            fuel.date.toString(),
-                            fuel.fuelEconomy?.let { "%.1f km/L".format(it) },
-                        ),
+                    StylishConnectedCardItem(
+                        title = "${fuel.volume}L",
+                        supportingText =
+                            listOfNotNull(
+                                fuel.date.toString(),
+                                fuel.fuelEconomy?.let { "%.1f km/L".format(it) },
+                            ).joinToString("\n"),
                         onClick = { onEditRecord(fuel.id) },
                         onLongClick = { onRequestDelete(fuel.id) },
                         trailingContent = {

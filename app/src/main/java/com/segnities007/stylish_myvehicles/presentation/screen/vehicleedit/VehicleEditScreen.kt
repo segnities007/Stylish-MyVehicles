@@ -30,18 +30,20 @@ import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
 import com.segnities007.stylish_myvehicles.domain.repository.MaintenanceScheduleRepository
 import com.segnities007.stylish_myvehicles.domain.repository.VehicleRepository
 import com.segnities007.stylish_myvehicles.domain.usecase.vehicle.InsertVehicleUseCase
+import com.segnities007.stylishui.components.atoms.StylishDialogSurface
+import com.segnities007.stylishui.components.atoms.StylishFormTextField
 import com.segnities007.stylishui.components.atoms.StylishIconButton
+import com.segnities007.stylishui.components.atoms.StylishSectionTitle
 import com.segnities007.stylishui.components.molecules.StylishConnectedChipRow
 import com.segnities007.stylishui.components.molecules.StylishDatePickerField
-import com.segnities007.stylishui.components.molecules.StylishDialogActions
-import com.segnities007.stylishui.components.molecules.StylishDialogSurface
-import com.segnities007.stylishui.components.molecules.StylishFormTextField
 import com.segnities007.stylishui.components.models.StylishConnectedChipItem
+import com.segnities007.stylishui.components.organisms.StylishDialogActions
 import com.segnities007.stylishui.components.patterns.StylishHeader
 import com.segnities007.stylishui.components.patterns.StylishScaffold
-import com.segnities007.stylishui.components.patterns.StylishSectionTitle
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.datetime.toJavaLocalDate
+import kotlinx.datetime.toKotlinLocalDate
 import java.time.LocalDate
 
 @Composable
@@ -196,11 +198,11 @@ fun VehicleEditScreen(
                 // ── 期限・保険 ──
                 StylishSectionTitle(stringResource(R.string.deadline_insurance_section))
                 StylishDatePickerField(
-                    value = state.firstRegistrationDate,
+                    value = state.firstRegistrationDate?.toKotlinLocalDate(),
                     onValueChange = {
                         viewModel.accept(
                             VehicleEditIntent.FirstRegistrationDateChanged(
-                                it
+                                it?.toJavaLocalDate()
                             )
                         )
                     },
@@ -211,9 +213,9 @@ fun VehicleEditScreen(
                 )
                 Spacer(Modifier.height(12.dp))
                 StylishDatePickerField(
-                    value = state.inspectionExpiry,
+                    value = state.inspectionExpiry?.toKotlinLocalDate(),
                     onValueChange = {
-                        viewModel.accept(VehicleEditIntent.InspectionExpiryChanged(it))
+                        viewModel.accept(VehicleEditIntent.InspectionExpiryChanged(it?.toJavaLocalDate()))
                     },
                     label = stringResource(R.string.inspection_expiry_label),
                     confirmLabel = "OK",
@@ -222,8 +224,8 @@ fun VehicleEditScreen(
                 )
                 Spacer(Modifier.height(12.dp))
                 StylishDatePickerField(
-                    value = state.jibaiExpiry,
-                    onValueChange = { viewModel.accept(VehicleEditIntent.JibaiExpiryChanged(it)) },
+                    value = state.jibaiExpiry?.toKotlinLocalDate(),
+                    onValueChange = { viewModel.accept(VehicleEditIntent.JibaiExpiryChanged(it?.toJavaLocalDate())) },
                     label = stringResource(R.string.jibai_insurance_expiry_label),
                     confirmLabel = "OK",
                     dismissLabel = stringResource(R.string.cancel),
@@ -231,8 +233,8 @@ fun VehicleEditScreen(
                 )
                 Spacer(Modifier.height(12.dp))
                 StylishDatePickerField(
-                    value = state.insuranceExpiry,
-                    onValueChange = { viewModel.accept(VehicleEditIntent.InsuranceExpiryChanged(it)) },
+                    value = state.insuranceExpiry?.toKotlinLocalDate(),
+                    onValueChange = { viewModel.accept(VehicleEditIntent.InsuranceExpiryChanged(it?.toJavaLocalDate())) },
                     label = stringResource(R.string.voluntary_insurance_expiry_label),
                     confirmLabel = "OK",
                     dismissLabel = stringResource(R.string.cancel),

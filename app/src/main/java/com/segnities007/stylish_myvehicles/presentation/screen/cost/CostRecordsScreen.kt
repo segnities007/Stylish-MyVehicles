@@ -28,12 +28,11 @@ import com.segnities007.stylishui.components.atoms.StylishFab
 import com.segnities007.stylishui.components.charts.BarChartData
 import com.segnities007.stylishui.components.charts.PieChartData
 import com.segnities007.stylishui.components.molecules.StylishConnectedCardGrid
-import com.segnities007.stylishui.components.molecules.StylishConnectedListItemColumn
-import com.segnities007.stylishui.components.molecules.StylishDeleteConfirmDialog
+import com.segnities007.stylishui.components.molecules.StylishConnectedCardColumn
 import com.segnities007.stylishui.components.molecules.StylishEmptyState
+import com.segnities007.stylishui.components.organisms.StylishDeleteConfirmDialog
 import com.segnities007.stylishui.components.charts.stylishChartColor
 import com.segnities007.stylishui.components.models.StylishConnectedCardItem
-import com.segnities007.stylishui.components.models.StylishConnectedListItem
 import com.segnities007.stylishui.components.patterns.BarChartSection
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.PieChartSection
 import com.segnities007.stylish_myvehicles.presentation.screen.cost.CostListIntent
@@ -185,15 +184,15 @@ internal fun LazyListScope.CostPeriodContent(
         }
     } else {
         item {
-            StylishConnectedListItemColumn(
+            StylishConnectedCardColumn(
                 spacing = 4.dp,
                 items = periodCosts.map { cost ->
-                    StylishConnectedListItem(
-                        headline = cost.title,
-                        supportingLines = listOf(
+                    StylishConnectedCardItem(
+                        title = cost.title,
+                        supportingText = listOf(
                             cost.date.toString(),
                             cost.category.label,
-                        ),
+                        ).joinToString("\n"),
                         onClick = { onEditRecord(cost.id) },
                         onLongClick = { onRequestDelete(cost.id) },
                         trailingContent = {

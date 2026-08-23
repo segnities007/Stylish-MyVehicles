@@ -35,15 +35,18 @@ import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
 import com.segnities007.stylish_myvehicles.domain.usecase.ExportDocument
+import java.time.LocalDate
+import com.segnities007.stylish_myvehicles.presentation.screen.vehicledetail.components.VehicleFieldEditActions
+import com.segnities007.stylish_myvehicles.presentation.screen.vehicledetail.components.VehicleFieldEditValue
+import com.segnities007.stylishui.components.atoms.StylishDialogSurface
 import com.segnities007.stylishui.components.atoms.StylishFab
 import com.segnities007.stylishui.components.atoms.StylishIconButton
+import com.segnities007.stylishui.components.atoms.StylishSectionTitle
 import com.segnities007.stylishui.components.molecules.StylishConnectedButtonColumn
-import com.segnities007.stylishui.components.molecules.StylishDialogSurface
 import com.segnities007.stylishui.components.models.StylishConnectedButtonItem
 import com.segnities007.stylishui.components.patterns.StylishHeader
 import com.segnities007.stylishui.components.patterns.StylishPageContent
 import com.segnities007.stylishui.components.patterns.StylishScaffold
-import com.segnities007.stylishui.components.patterns.StylishSectionTitle
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.VehicleDeadlineSection
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.VehicleInfoSection
 import com.segnities007.stylish_myvehicles.presentation.screen.vehicledetail.components.VehicleFieldEditDialog
@@ -157,14 +160,23 @@ fun VehicleDetailScreen(
     state.editingField?.let { field ->
         VehicleFieldEditDialog(
             field = field,
-            inputText = state.fieldInputText,
-            inputDate = state.fieldInputDate,
-            inputCategory = state.fieldInputCategory,
-            onTextChanged = { viewModel.accept(VehicleDetailIntent.FieldTextChanged(it)) },
-            onDateChanged = { viewModel.accept(VehicleDetailIntent.FieldDateChanged(it)) },
-            onCategoryChanged = { viewModel.accept(VehicleDetailIntent.FieldCategoryChanged(it)) },
-            onSave = { viewModel.accept(VehicleDetailIntent.SaveField) },
-            onDismiss = { viewModel.accept(VehicleDetailIntent.CloseFieldEditor) },
+            value = VehicleFieldEditValue(
+                inputText = state.fieldInputText,
+                inputDate = state.fieldInputDate,
+                inputCategory = state.fieldInputCategory,
+            ),
+            actions = remember(field) {
+                object : VehicleFieldEditActions {
+                    override fun onTextChanged(text: String) =
+                        viewModel.accept(VehicleDetailIntent.FieldTextChanged(text))
+                    override fun onDateChanged(date: LocalDate?) =
+                        viewModel.accept(VehicleDetailIntent.FieldDateChanged(date))
+                    override fun onCategoryChanged(category: VehicleCategory) =
+                        viewModel.accept(VehicleDetailIntent.FieldCategoryChanged(category))
+                    override fun save() = viewModel.accept(VehicleDetailIntent.SaveField)
+                    override fun dismiss() = viewModel.accept(VehicleDetailIntent.CloseFieldEditor)
+                }
+            },
         )
     }
 

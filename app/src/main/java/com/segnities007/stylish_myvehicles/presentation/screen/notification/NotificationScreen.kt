@@ -35,14 +35,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.domain.service.DeadlineInfo
-import com.segnities007.stylishui.components.molecules.StylishConnectedCard
-import com.segnities007.stylishui.components.molecules.StylishConnectedListItemColumn
+import com.segnities007.stylishui.components.atoms.StylishConnectedCard
+import com.segnities007.stylishui.components.atoms.StylishSectionTitle
+import com.segnities007.stylishui.components.molecules.StylishConnectedCardColumn
 import com.segnities007.stylishui.components.molecules.StylishEmptyState
-import com.segnities007.stylishui.components.models.StylishConnectedListItem
+import com.segnities007.stylishui.components.models.StylishConnectedCardItem
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishBottomBar
 import com.segnities007.stylishui.components.patterns.StylishHeader
 import com.segnities007.stylishui.components.patterns.StylishScaffold
-import com.segnities007.stylishui.components.patterns.StylishSectionTitle
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 import java.time.LocalDate
 
@@ -180,7 +180,7 @@ private fun MostImportantDeadlineCard(item: VehicleDeadlineItem) {
 
 @Composable
 private fun DeadlineList(items: List<VehicleDeadlineItem>) {
-    StylishConnectedListItemColumn(
+    StylishConnectedCardColumn(
         spacing = 4.dp,
         items = items.map { item ->
             val daysText = if (item.deadline.isExpired) {
@@ -188,8 +188,8 @@ private fun DeadlineList(items: List<VehicleDeadlineItem>) {
             } else {
                 stringResource(R.string.days_remaining, item.deadline.daysRemaining)
             }
-            StylishConnectedListItem(
-                headline = "${item.vehicleName} / ${item.deadline.label}",
+            StylishConnectedCardItem(
+                title = "${item.vehicleName} / ${item.deadline.label}",
                 supportingText = "${item.deadline.date} （$daysText）",
                 trailingContent = {
                     Text(

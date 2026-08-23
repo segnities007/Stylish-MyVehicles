@@ -50,14 +50,15 @@ import com.segnities007.stylish_myvehicles.R
 import com.segnities007.stylish_myvehicles.domain.model.CostCategory
 import com.segnities007.stylish_myvehicles.domain.model.Vehicle
 import com.segnities007.stylish_myvehicles.domain.model.VehicleCategory
+import com.segnities007.stylishui.components.atoms.StylishDialogSurface
 import com.segnities007.stylishui.components.atoms.StylishIconButton
+import com.segnities007.stylishui.components.atoms.StylishSectionTitle
 import com.segnities007.stylishui.components.charts.BarChartData
 import com.segnities007.stylishui.components.charts.BarChartSegment
 import com.segnities007.stylishui.components.charts.LineChartData
 import com.segnities007.stylishui.components.charts.PieChartData
-import com.segnities007.stylishui.components.molecules.StylishConnectedCardGrid
-import com.segnities007.stylishui.components.molecules.StylishDialogSurface
 import com.segnities007.stylishui.components.charts.stylishChartColor
+import com.segnities007.stylishui.components.molecules.StylishConnectedCardGrid
 import com.segnities007.stylishui.components.models.StylishConnectedCardItem
 import com.segnities007.stylishui.components.patterns.BarChartSection
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.AddRecordDialog
@@ -68,7 +69,6 @@ import com.segnities007.stylishui.components.patterns.StylishHeader
 import com.segnities007.stylish_myvehicles.presentation.components.organisms.StylishBottomBar
 import com.segnities007.stylishui.components.patterns.StylishPageContent
 import com.segnities007.stylishui.components.patterns.StylishScaffold
-import com.segnities007.stylishui.components.patterns.StylishSectionTitle
 import com.segnities007.stylish_myvehicles.presentation.screen.vehiclepager.components.PagerIndicator
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
 
@@ -359,43 +359,31 @@ private fun VehiclePage(
                         StylishConnectedCardItem(
                             title = stringResource(R.string.fuel_label),
                             onClick = { onIntent(VehiclePagerIntent.OpenFuel(vehicle.id)) },
-                        ) {
-                            Icon(
-                                Icons.Default.LocalGasStation,
-                                null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        },
+                            trailingContent = {
+                                Icon(Icons.Default.LocalGasStation, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            },
+                        ),
                         StylishConnectedCardItem(
                             title = stringResource(R.string.maintenance_label),
                             onClick = { onIntent(VehiclePagerIntent.OpenMaintenance(vehicle.id)) },
-                        ) {
-                            Icon(
-                                Icons.Default.Build,
-                                null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        },
+                            trailingContent = {
+                                Icon(Icons.Default.Build, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            },
+                        ),
                         StylishConnectedCardItem(
                             title = stringResource(R.string.cost_label),
                             onClick = { onIntent(VehiclePagerIntent.OpenCost(vehicle.id)) },
-                        ) {
-                            Icon(
-                                Icons.Default.AttachMoney,
-                                null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        },
+                            trailingContent = {
+                                Icon(Icons.Default.AttachMoney, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            },
+                        ),
                         StylishConnectedCardItem(
                             title = stringResource(R.string.trip_label),
                             onClick = { onIntent(VehiclePagerIntent.OpenTrip(vehicle.id)) },
-                        ) {
-                            Icon(
-                                Icons.Default.Route,
-                                null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        },
+                            trailingContent = {
+                                Icon(Icons.Default.Route, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            },
+                        ),
                     ),
                 )
             }
@@ -408,13 +396,10 @@ private fun VehiclePage(
                         StylishConnectedCardItem(
                             title = stringResource(R.string.vehicle_info_label),
                             onClick = { onIntent(VehiclePagerIntent.OpenVehicleDetail(vehicle.id)) },
-                        ){
-                            Icon(
-                                Icons.Default.DirectionsCar,
-                                null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        },
+                            trailingContent = {
+                                Icon(Icons.Default.DirectionsCar, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            },
+                        ),
                     ),
                 )
                 Spacer(Modifier.height(40.dp))
