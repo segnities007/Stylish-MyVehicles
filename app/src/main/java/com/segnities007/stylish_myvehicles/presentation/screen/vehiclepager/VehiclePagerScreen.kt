@@ -12,8 +12,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -71,6 +74,8 @@ import com.segnities007.stylishui.components.patterns.StylishPageContent
 import com.segnities007.stylishui.components.patterns.StylishScaffold
 import com.segnities007.stylish_myvehicles.presentation.screen.vehiclepager.components.PagerIndicator
 import com.segnities007.stylish_myvehicles.presentation.theme.StylishMyVehiclesTheme
+
+
 
 @Composable
 fun VehiclePagerScreen(
@@ -133,42 +138,88 @@ fun VehiclePagerScreen(
         viewModel.accept(VehiclePagerIntent.PageChanged(pagerState.currentPage))
     }
 
-    StylishScaffold(modifier = modifier) {
-        Box(Modifier.fillMaxSize()) {
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier.fillMaxSize(),
-            ) { page ->
-                if (page < state.vehicles.size) {
-                    val vehicle = state.vehicles[page]
-                    VehiclePage(
-                        vehicle = vehicle,
-                        dashboard = state.dashboardFor(vehicle.id),
-                        onIntent = viewModel::accept,
-                        listState = pageListStates[page],
-                    )
-                }
-                else {
-                    AddVehiclePage(onAdd = { viewModel.accept(VehiclePagerIntent.AddVehicle) })
-                }
-            }
-
-            if (state.vehicles.size > 1) {
-                PagerIndicator(
-                    pagerState = pagerState,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .navigationBarsPadding()
-                        .padding(bottom = 88.dp),
-                )
-            }
-        }
+    StylishScaffold(
+        modifier = modifier,
+        // ヘッダーは車両ページごとに異なるため Scaffold ヘッダーには載せない。
+        // コンテンツがフルブリードになるため、ステータスバー分だけ自前で押し下げる。
+        header = {},
+    ) { _ ->
+        VehiclePagerPages(
+            pagerState = pagerState,
+            pageListStates = pageListStates,
+            vehicles = state.vehicles,
+            dashboardFor = state::dashboardFor,
+            onIntent = viewModel::accept,
+        )
     }
 
-    if (isAddDialogVisible) {
+    AddRecordDialogHost(
+        visible = isAddDialogVisible,
+        vehicleId = state.vehicles.getOrNull(pagerState.currentPage)?.id,
+        onDismiss = { isAddDialogVisible = false },
+        onAddFuel = onAddFuel,
+        onAddMaintenance = onAddMaintenance,
+        onAddCost = onAddCost,
+        onAddTrip = onAddTrip,
+    )
+}
+
+@Composable
+private fun VehiclePagerPages(
+    pagerState: PagerState,
+    pageListStates: List<LazyListState>,
+    vehicles: List<Vehicle>,
+    dashboardFor: (Long) -> VehicleDashboard,
+    onIntent: (VehiclePagerIntent) -> Unit,
+) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .statusBarsPadding(),
+    ) {
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize(),
+        ) { page ->
+            if (page < vehicles.size) {
+                val vehicle = vehicles[page]
+                VehiclePage(
+                    vehicle = vehicle,
+                    dashboard = dashboardFor(vehicle.id),
+                    onIntent = onIntent,
+                    listState = pageListStates[page],
+                )
+            } else {
+                AddVehiclePage(onAdd = { onIntent(VehiclePagerIntent.AddVehicle) })
+            }
+        }
+
+        if (vehicles.size > 1) {
+            PagerIndicator(
+                pagerState = pagerState,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(bottom = 88.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun AddRecordDialogHost(
+    visible: Boolean,
+    vehicleId: Long?,
+    onDismiss: () -> Unit,
+    onAddFuel: (Long) -> Unit,
+    onAddMaintenance: (Long) -> Unit,
+    onAddCost: (Long) -> Unit,
+    onAddTrip: (Long) -> Unit,
+) {
+    if (visible) {
         AddRecordDialog(
-            vehicleId = state.vehicles.getOrNull(pagerState.currentPage)?.id,
-            onDismiss = { isAddDialogVisible = false },
+            vehicleId = vehicleId,
+            onDismiss = onDismiss,
             onAddFuel = onAddFuel,
             onAddMaintenance = onAddMaintenance,
             onAddCost = onAddCost,
@@ -284,7 +335,6 @@ private fun VehiclePage(
     listState: LazyListState = LazyListState(),
 ) {
     StylishPageContent(
-        listState = listState,
         header = {
             StylishHeader(
                 title = {
@@ -308,6 +358,16 @@ private fun VehiclePage(
             )
         },
         content = {
+            vehicleDashboardItems(dashboard)
+            vehicleRecordsItems(vehicle = vehicle, onIntent = onIntent)
+            item {
+                Spacer(Modifier.height(20.dp))
+            }
+        },
+    )
+}
+
+private fun LazyListScope.vehicleDashboardItems(dashboard: VehicleDashboard) {
             item {
                 if (dashboard.fuelEconomyTrend.size >= 2) {
                     LineChartSection(
@@ -350,7 +410,12 @@ private fun VehiclePage(
                 )
                 Spacer(Modifier.height(16.dp))
             }
+}
 
+private fun LazyListScope.vehicleRecordsItems(
+    vehicle: Vehicle,
+    onIntent: (VehiclePagerIntent) -> Unit,
+) {
             item {
                 StylishSectionTitle(stringResource(R.string.records_section))
                 StylishConnectedCardGrid(
@@ -404,11 +469,6 @@ private fun VehiclePage(
                 )
                 Spacer(Modifier.height(40.dp))
             }
-            item {
-                Spacer(Modifier.height(20.dp))
-            }
-        },
-    )
 }
 
 @Composable

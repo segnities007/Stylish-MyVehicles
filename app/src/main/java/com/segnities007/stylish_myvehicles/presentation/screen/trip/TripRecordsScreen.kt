@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
@@ -119,23 +120,9 @@ fun TripRecordsScreen(
 
     StylishScaffold(
         modifier = modifier,
-        floatingActionButton = {
-            AnimatedVisibility(
-                visible = isAtTop,
-                enter = fadeIn(tween(200)) + slideInVertically(tween(200)) { it / 2 },
-                exit = fadeOut(tween(200)) + slideOutVertically(tween(200)) { it / 2 },
-            ) {
-                StylishFab(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = stringResource(R.string.manual_record_trip),
-                    onClick = { viewModel.accept(TripRecordIntent.OpenManualAdd) },
-                )
-            }
-        },
-    ) {
-        Column(Modifier.fillMaxSize()) {
+        hideOnScroll = true,
+        header = {
             StylishHeader(
-                modifier = Modifier.padding(horizontal = 20.dp),
                 title = { Text(stringResource(R.string.trip_records_title)) },
                 navigation = {
                     StylishIconButton(
@@ -145,58 +132,35 @@ fun TripRecordsScreen(
                     )
                 },
             )
-
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                    start = 20.dp,
-                    end = 20.dp,
-                    bottom = 120.dp,
-                ),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                item {
-                    TripTrackingCard(
-                        activeRecord = state.activeRecord,
-                        anotherVehicleIsRecording =
-                            TripTrackingService.isRecording(context) &&
-                                TripTrackingService.recordingVehicleId(context) != vehicleId,
-                        onStart = ::startTracking,
-                        onStop = { TripTrackingService.stop(context) },
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        stringResource(R.string.trip_history),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                    Spacer(Modifier.height(8.dp))
-                }
-
-                if (state.records.none { !it.isRecording }) {
-                    item {
-                        StylishEmptyState(
-                            title = stringResource(R.string.no_trip_records_title),
-                            description = stringResource(R.string.no_trip_records_description),
-                            icon = Icons.Default.Route,
-                        )
-                    }
-                } else {
-                    val completedRecords = state.records.filterNot { it.isRecording }
-                    itemsIndexed(
-                        items = completedRecords,
-                        key = { _, record -> record.id },
-                    ) { index, record ->
-                        TripHistoryCard(
-                            record = record,
-                            index = index,
-                            count = completedRecords.size,
-                            onEdit = { viewModel.accept(TripRecordIntent.Edit(record.id)) },
-                        )
-                    }
-                }
-            }
+        },
+        floatingActionButton = {
+            TripFab(
+                visible = isAtTop,
+                onClick = { viewModel.accept(TripRecordIntent.OpenManualAdd) },
+            )
+        },
+    ) { headerHeight ->
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                start = 20.dp,
+                end = 20.dp,
+                top = headerHeight + 8.dp,
+                bottom = 120.dp,
+            ),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            tripRecordsContent(
+                activeRecord = state.activeRecord,
+                anotherVehicleIsRecording =
+                    TripTrackingService.isRecording(context) &&
+                        TripTrackingService.recordingVehicleId(context) != vehicleId,
+                records = state.records,
+                onStart = ::startTracking,
+                onStop = { TripTrackingService.stop(context) },
+                onEditRecord = { viewModel.accept(TripRecordIntent.Edit(it.id)) },
+            )
         }
     }
 
@@ -207,25 +171,73 @@ fun TripRecordsScreen(
         )
     }
     if (state.deletingRecordId != null) {
-        StylishDialogSurface(
-            onDismiss = { viewModel.accept(TripRecordIntent.DismissDelete) },
-        ) {
-            Column(Modifier.padding(24.dp)) {
-                Text(stringResource(R.string.delete_trip_record), style = MaterialTheme.typography.titleLarge)
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    stringResource(R.string.delete_trip_record_message),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(Modifier.height(24.dp))
-                StylishDialogActions(
-                    confirmLabel = stringResource(R.string.delete),
-                    cancelLabel = stringResource(R.string.cancel),
-                    onConfirm = { viewModel.accept(TripRecordIntent.ConfirmDelete) },
-                    onCancel = { viewModel.accept(TripRecordIntent.DismissDelete) },
-                )
-            }
+        TripDeleteConfirmDialog(onIntent = viewModel::accept)
+    }
+}
+
+private fun LazyListScope.tripRecordsContent(
+    activeRecord: TripRecord?,
+    anotherVehicleIsRecording: Boolean,
+    records: List<TripRecord>,
+    onStart: () -> Unit,
+    onStop: () -> Unit,
+    onEditRecord: (TripRecord) -> Unit,
+) {
+    item {
+        TripTrackingCard(
+            activeRecord = activeRecord,
+            anotherVehicleIsRecording = anotherVehicleIsRecording,
+            onStart = onStart,
+            onStop = onStop,
+        )
+        Spacer(Modifier.height(12.dp))
+        Text(
+            stringResource(R.string.trip_history),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        Spacer(Modifier.height(8.dp))
+    }
+
+    if (records.none { !it.isRecording }) {
+        item {
+            StylishEmptyState(
+                title = stringResource(R.string.no_trip_records_title),
+                description = stringResource(R.string.no_trip_records_description),
+                icon = Icons.Default.Route,
+            )
         }
+    } else {
+        val completedRecords = records.filterNot { it.isRecording }
+        itemsIndexed(
+            items = completedRecords,
+            key = { _, record -> record.id },
+        ) { index, record ->
+            TripHistoryCard(
+                record = record,
+                index = index,
+                count = completedRecords.size,
+                onEdit = { onEditRecord(record) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun TripFab(
+    visible: Boolean,
+    onClick: () -> Unit,
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(tween(200)) + slideInVertically(tween(200)) { it / 2 },
+        exit = fadeOut(tween(200)) + slideOutVertically(tween(200)) { it / 2 },
+    ) {
+        StylishFab(
+            imageVector = Icons.Default.Add,
+            contentDescription = stringResource(R.string.manual_record_trip),
+            onClick = onClick,
+        )
     }
 }
 
@@ -336,12 +348,55 @@ private fun TripHistoryCard(
 }
 
 @Composable
+private fun TripDeleteConfirmDialog(onIntent: (TripRecordIntent) -> Unit) {
+    StylishDialogSurface(
+        onDismiss = { onIntent(TripRecordIntent.DismissDelete) },
+    ) {
+        Column(Modifier.padding(24.dp)) {
+            Text(stringResource(R.string.delete_trip_record), style = MaterialTheme.typography.titleLarge)
+            Spacer(Modifier.height(12.dp))
+            Text(
+                stringResource(R.string.delete_trip_record_message),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(24.dp))
+            StylishDialogActions(
+                confirmLabel = stringResource(R.string.delete),
+                cancelLabel = stringResource(R.string.cancel),
+                onConfirm = { onIntent(TripRecordIntent.ConfirmDelete) },
+                onCancel = { onIntent(TripRecordIntent.DismissDelete) },
+            )
+        }
+    }
+}
+
+@Composable
 private fun TripEditDialog(
     state: TripRecordUiState,
     onIntent: (TripRecordIntent) -> Unit,
 ) {
     StylishDialogSurface(onDismiss = { onIntent(TripRecordIntent.DismissEdit) }) {
         Column(Modifier.padding(24.dp)) {
+            TripEditDialogHeader(state = state, onIntent = onIntent)
+            Spacer(Modifier.height(12.dp))
+            TripEditDialogContent(state = state, onIntent = onIntent)
+            Spacer(Modifier.height(20.dp))
+            StylishDialogActions(
+                confirmLabel = stringResource(R.string.save),
+                cancelLabel = stringResource(R.string.cancel),
+                onConfirm = { onIntent(TripRecordIntent.Save) },
+                onCancel = { onIntent(TripRecordIntent.DismissEdit) },
+                confirmEnabled = state.canSave,
+            )
+        }
+    }
+}
+
+@Composable
+private fun TripEditDialogHeader(
+    state: TripRecordUiState,
+    onIntent: (TripRecordIntent) -> Unit,
+) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     if (state.editingRecordId == null) stringResource(R.string.manual_record_trip) else stringResource(R.string.edit_trip_record),
@@ -361,91 +416,88 @@ private fun TripEditDialog(
                     }
                 }
             }
-            Spacer(Modifier.height(12.dp))
-            StylishConnectedChipRow(
-                items = TripPurpose.entries.map { purpose ->
-                    StylishConnectedChipItem(
-                        label = purpose.label,
-                        selected = state.inputPurpose == purpose,
-                        onClick = { onIntent(TripRecordIntent.PurposeChanged(purpose)) },
-                    )
-                },
-            )
-            Spacer(Modifier.height(12.dp))
-            StylishDatePickerField(
-                value = state.inputDate.toKotlinLocalDate(),
-                onValueChange = { date ->
-                    date?.let { onIntent(TripRecordIntent.DateChanged(it.toJavaLocalDate())) }
-                },
-                label = stringResource(R.string.date_label),
-                confirmLabel = "OK",
-                dismissLabel = stringResource(R.string.cancel),
-                placeholder = stringResource(R.string.select_date),
-            )
-            Spacer(Modifier.height(12.dp))
-            Text(
-                stringResource(R.string.odometer_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(6.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                StylishFormTextField(
-                    value = state.inputStartTime,
-                    onValueChange = { onIntent(TripRecordIntent.StartTimeChanged(it)) },
-                    label = stringResource(R.string.start_time_label),
-                    placeholder = "09:30",
-                    modifier = Modifier.weight(1f),
+}
+
+@Composable
+private fun TripEditDialogContent(
+    state: TripRecordUiState,
+    onIntent: (TripRecordIntent) -> Unit,
+) {
+        Spacer(Modifier.height(12.dp))
+        StylishConnectedChipRow(
+            items = TripPurpose.entries.map { purpose ->
+                StylishConnectedChipItem(
+                    label = purpose.label,
+                    selected = state.inputPurpose == purpose,
+                    onClick = { onIntent(TripRecordIntent.PurposeChanged(purpose)) },
                 )
-                StylishFormTextField(
-                    value = state.inputEndTime,
-                    onValueChange = { onIntent(TripRecordIntent.EndTimeChanged(it)) },
-                    label = stringResource(R.string.end_time_label),
-                    placeholder = "11:00",
-                    modifier = Modifier.weight(1f),
-                )
-            }
-            Spacer(Modifier.height(12.dp))
+            },
+        )
+        Spacer(Modifier.height(12.dp))
+        StylishDatePickerField(
+            value = state.inputDate.toKotlinLocalDate(),
+            onValueChange = { date ->
+                date?.let { onIntent(TripRecordIntent.DateChanged(it.toJavaLocalDate())) }
+            },
+            label = stringResource(R.string.date_label),
+            confirmLabel = "OK",
+            dismissLabel = stringResource(R.string.cancel),
+            placeholder = stringResource(R.string.select_date),
+        )
+        Spacer(Modifier.height(12.dp))
+        Text(
+            stringResource(R.string.odometer_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(6.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             StylishFormTextField(
-                value = state.inputDistanceKm,
-                onValueChange = { onIntent(TripRecordIntent.DistanceChanged(it)) },
-                label = stringResource(R.string.distance_km_label),
-                placeholder = "86.4",
+                value = state.inputStartTime,
+                onValueChange = { onIntent(TripRecordIntent.StartTimeChanged(it)) },
+                label = stringResource(R.string.start_time_label),
+                placeholder = "09:30",
+                modifier = Modifier.weight(1f),
             )
-            Spacer(Modifier.height(12.dp))
             StylishFormTextField(
-                value = state.inputTitle,
-                onValueChange = { onIntent(TripRecordIntent.TitleChanged(it)) },
-                label = stringResource(R.string.title_label),
-                placeholder = stringResource(R.string.trip_title_placeholder),
-            )
-            Spacer(Modifier.height(12.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                StylishFormTextField(
-                    value = state.inputStartOdometer,
-                    onValueChange = { onIntent(TripRecordIntent.StartOdometerChanged(it)) },
-                    label = stringResource(R.string.start_odometer_label),
-                    placeholder = "42100",
-                    modifier = Modifier.weight(1f),
-                )
-                StylishFormTextField(
-                    value = state.inputEndOdometer,
-                    onValueChange = { onIntent(TripRecordIntent.EndOdometerChanged(it)) },
-                    label = stringResource(R.string.end_odometer_label),
-                    placeholder = "42186",
-                    modifier = Modifier.weight(1f),
-                )
-            }
-            Spacer(Modifier.height(20.dp))
-            StylishDialogActions(
-                confirmLabel = stringResource(R.string.save),
-                cancelLabel = stringResource(R.string.cancel),
-                onConfirm = { onIntent(TripRecordIntent.Save) },
-                onCancel = { onIntent(TripRecordIntent.DismissEdit) },
-                confirmEnabled = state.canSave,
+                value = state.inputEndTime,
+                onValueChange = { onIntent(TripRecordIntent.EndTimeChanged(it)) },
+                label = stringResource(R.string.end_time_label),
+                placeholder = "11:00",
+                modifier = Modifier.weight(1f),
             )
         }
-    }
+        Spacer(Modifier.height(12.dp))
+        StylishFormTextField(
+            value = state.inputDistanceKm,
+            onValueChange = { onIntent(TripRecordIntent.DistanceChanged(it)) },
+            label = stringResource(R.string.distance_km_label),
+            placeholder = "86.4",
+        )
+        Spacer(Modifier.height(12.dp))
+        StylishFormTextField(
+            value = state.inputTitle,
+            onValueChange = { onIntent(TripRecordIntent.TitleChanged(it)) },
+            label = stringResource(R.string.title_label),
+            placeholder = stringResource(R.string.trip_title_placeholder),
+        )
+        Spacer(Modifier.height(12.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            StylishFormTextField(
+                value = state.inputStartOdometer,
+                onValueChange = { onIntent(TripRecordIntent.StartOdometerChanged(it)) },
+                label = stringResource(R.string.start_odometer_label),
+                placeholder = "42100",
+                modifier = Modifier.weight(1f),
+            )
+            StylishFormTextField(
+                value = state.inputEndOdometer,
+                onValueChange = { onIntent(TripRecordIntent.EndOdometerChanged(it)) },
+                label = stringResource(R.string.end_odometer_label),
+                placeholder = "42186",
+                modifier = Modifier.weight(1f),
+            )
+        }
 }
 
 @Preview(showBackground = true, widthDp = 393)
